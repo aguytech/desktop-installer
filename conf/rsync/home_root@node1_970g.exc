@@ -1,0 +1,15 @@
+## rsync --exclude-from=/home/shared/dev/install-desktop/conf/rsync/home_root@node1_970g.exc root@node1:/save/sync/home/ /home/ -rlptDv --delete -n
+
+.snapshots
+.Trash-*
+.tmp*
+lost+found
+
+/manjaro*
+/juhraya*
+/ubuntu*
+/bionic*
+/xenial*
+/trusty*
+
+/shared

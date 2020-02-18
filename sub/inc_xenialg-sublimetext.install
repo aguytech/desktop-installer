@@ -1,0 +1,240 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PART}DEV"
+
+# xprop WM_CLASS
+########################################  MAIN
+
+diropt=/opt/sublime_text
+userconf=~/.config/sublime-text-3
+userproj=~/.sublime-project
+
+
+_echoT "------------------ keep oldees"
+
+_keepcpts "$userconf"
+_keepcpts "$userproj"
+
+
+if [ "${_SUBLIMETEXT}" == repos ]; then
+
+	_echoT "------------------ 'repos' install"
+
+	sudo apt-get install -y sublime-text
+
+else
+
+	_echoT "------------------ build '$_SUBLIMETEXT_VER' install"
+
+	file="sublime-text_${_SUBLIMETEXT_VER}_amd64.deb"
+	url="https://download.sublimetext.com/sublime_text_3_build_${_SUBLIMETEXT_VER}_x64.tar.bz2"
+	filedown=/tmp/$file
+
+	if [ -f "${_PATH_SOFT}/$file" ]; then
+		cp -a "${_PATH_SOFT}/$file" "$filedown"
+	else
+		! wget "$url" -O "$filedown" && _exitE "Error during downloading '$_SUBLIMETEXT' with url:\n$url"
+	fi
+
+	sudo dpkg -i $filedown
+	rm $filedown
+
+fi
+
+
+_echoT "------------------ /usr/bin/sublime-text create"
+
+#echo '#!/bin/bash
+#'"
+#$diropt/sublime_text \"\$*\"" | sudo tee /usr/bin/sublime-text
+#sudo chmod +x /usr/bin/sublime-text
+sudo ln -s ${diropt}/sublime_text /usr/bin/sublime-text
+
+
+_echoT "------------------ /etc/hosts modify"
+
+FILE="/etc/hosts"
+if grep -q sublimetext.com "$FILE"
+then sudo sed -i 's|^#\(.*sublimetext\.com.*\)$|\1|' "$FILE"
+else echo -e "\n# sublime text hack\n127.0.0.1\tsublimetext.com\n127.0.0.1\twww.sublimetext.com" | sudo tee -a "$FILE"
+fi
+
+
+_echoT "------------------ iptables add rules"
+
+IPS="45.55.255.55"
+for IP in $IPS; do sudo iptables -A OUTPUT -d $IP -j DROP; done
+
+
+_echoT "------------------ iptables-persistent install"
+
+sudo apt install iptables-persistent
+
+
+_echoT "------------------ launcher"
+
+file=~/.local/share/applications/sublime-text.desktop
+echo "[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sublime Text
+GenericName=Text Editor
+Comment=Sophisticated text editor for code, markup and prose
+Exec=sublime-text %F
+Terminal=false
+MimeType=text/plain;
+Icon=sublime-text
+Categories=TextEditor;Development;
+StartupNotify=true
+StartupWMClass=sublime_text
+Actions=Document;ProjBin;ProjNS398616Bin;Separator;Meld;GHex;Gedit;Separator;WindowRoot;MeldRoot;GHexRoot;GeditRoot;Separator;Terminal;TerminalRoot;SshcDev;Sshc;SshcLxd
+
+[Desktop Action Window]
+Name=New Window
+Exec=sublime-text -n
+
+[Desktop Action Document]
+Name=New File
+Exec=sublime-text --command new_file
+
+[Desktop Action Separator]
+Name=−−−−−−−−−−
+Exec=
+
+[Desktop Action ProjBin]
+Name=project / local bin
+Exec=sublime-text --project ~/.sublime-project/bin.sublime-project
+
+[Desktop Action ProjNS398616Bin]
+Name=project / ns398616 bin
+Exec=sublime-text --project ~/.sublime-project/ns398616-bin.sublime-project
+
+[Desktop Action Meld]
+Name=Meld
+Exec=meld
+
+[Desktop Action MeldRoot]
+Name=Meld ~root
+Exec=gksudo meld
+
+[Desktop Action Gedit]
+Name=Gedit
+Exec=gedit
+
+[Desktop Action GeditRoot]
+Name=Gedit ~root
+Exec=gksudo gedit
+
+[Desktop Action GHex]
+Name=GHex
+Exec=ghex
+
+[Desktop Action GHexRoot]
+Name=GHex ~root
+Exec=gksudo ghex
+
+[Desktop Action SnapperGui]
+Name=Snapper GUI
+Exec=gksudo snapper-gui
+
+[Desktop Action Terminal]
+Name=Terminal
+Exec=gnome-terminal
+
+[Desktop Action TerminalRoot]
+Name=Terminal ~root
+Exec=gksudo gnome-terminal
+
+[Desktop Action SshcDev]
+Name=sshc dev
+Exec=gnome-terminal --tab --tab-with-profile ns398616 --tab-with-profile ns388803
+
+[Desktop Action Sshc]
+Name=sshc
+Exec=gnome-terminal -e ssh-server
+
+[Desktop Action SshcLxd]
+Name=sshcl
+Exec=gnome-terminal -e ssh-lxd" > "$file"
+
+chmod +x $file
+
+
+_echoT "------------------ autostart"
+
+path=~/.config/autostart
+file="$path/60-sublime-text.desktop"
+
+[ ! -d "$path" ] && mkdir -p "$path"
+
+echo "[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sublime Text
+GenericName=Text Editor
+Comment=Sophisticated text editor for code, markup and prose
+Exec=sublime-text %F
+Terminal=false
+MimeType=text/plain;
+Icon=sublime-text
+Categories=TextEditor;Development;
+StartupNotify=true
+StartupWMClass=sublime_text
+X-GNOME-Autostart-Delay=6
+X-GNOME-Autostart-enabled=false" > "$file"
+
+chmod +x "$file"
+
+
+_echoT "------------------ default gedit/sublime-text"
+file=/etc/gnome/defaults.list
+! [ -f "$file.keep" ] && sudo cp -a $file $file.keep
+sudo sed -i 's/gedit.desktop/sublime-text.desktop/g' $file
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}DEV"
+_partadd "${_PART}DEV" "$_FILE_DEV_DONE"
+
+_echoT "#################### END ${_PART}DEV"
+
+
+<<keep
+
+## Sublime Text 3 Serial key build is 3143
+
+—– BEGIN LICENSE —–
+TwitterInc
+200 User License
+EA7E-890007
+1D77F72E 390CDD93 4DCBA022 FAF60790
+61AA12C0 A37081C5 D0316412 4584D136
+94D7F7D4 95BC8C1C 527DA828 560BB037
+D1EDDD8C AE7B379F 50C9D69D B35179EF
+2FE898C4 8E4277A8 555CE714 E1FB0E43
+D5D52613 C3D12E98 BC49967F 7652EED2
+9D2D2E61 67610860 6D338B72 5CF95C69
+E36B85CC 84991F19 7575D828 470A92AB
+—— END LICENSE ——
+
+
+FOR BUILD 3176
+
+----- BEGIN LICENSE -----
+sgbteam
+Single User License
+EA7E-1153259
+8891CBB9 F1513E4F 1A3405C1 A865D53F
+115F202E 7B91AB2D 0D2A40ED 352B269B
+76E84F0B CD69BFC7 59F2DFEF E267328F
+215652A3 E88F9D8F 4C38E3BA 5B2DAAE4
+969624E7 DC9CD4D5 717FB40C 1B9738CF
+20B3C4F1 E917B5B3 87C38D9C ACCE7DD8
+5F7EF854 86B9743C FADC04AA FB0DA5C0
+F913BE58 42FEA319 F954EFDD AE881E0B
+------ END LICENSE ------
+
+keep

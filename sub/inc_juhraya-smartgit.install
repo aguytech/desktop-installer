@@ -1,0 +1,129 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PART}DEV"
+
+########################################  MAIN
+
+path_opt="/opt/smartgit_$_SMARTGIT_VER"
+path_conf=.config/smartgit
+path_desk=~/.local/share/applications
+file_bin="/usr/bin/smartgit"
+
+
+_echoT "------------------ backup"
+
+#_keepmvts "$path_opt"
+#_keepmvts "$path_conf"
+if [ -d "$path_opt" ] || [ -d ~/"$path_conf" ]; then
+	tar czf "${_PATH_SOFT}/smartgit_${_SMARTGIT_VER}.keep$(date +%s).tar.gz" "$path_opt" ~/"$path_conf"
+fi
+
+
+_echoT "------------------ clean instance"
+
+# delete existing folder
+for path in opt "${path_opt#*/}" "$path_opt" ~/"$path_conf"; do [ -d "$path" ] && rm -fR "$path"; done
+
+
+####################  RESTORE
+
+if [ "$_SMARTGIT_BACK" ]; then
+
+    _echoT "------------------ get file"
+
+    _ANSWER=${_SMARTGIT_VER}
+    file="${_PATH_SOFT}/smartgit_${_ANSWER}.tar.gz"
+    while ! [ -f "${file}" ]; do
+        _echoE "Unable to find file: '$file'"
+        _ask "Please give a good build in place of '${_ANSWER}'"
+        file="${_PATH_SOFT}/smartgit_${_ANSWER}.tar.gz"
+    done
+    _SMARTGIT_VER=${_ANSWER} && _confset _SMARTGIT_VER "${_SMARTGIT_VER}"
+
+    file="${_PATH_SOFT}/smartgit_${_SMARTGIT_VER}.tar.gz"
+
+
+    _echoT "------------------ unpack build $_SMARTGIT_VER"
+
+    cd /tmp
+
+    tar xzf "${file}"
+    # soft
+    mv ${path_opt#*/} ${path_opt%/*}/
+    # conf
+    mv home/*/"$path_conf" ~/"${path_conf%/*}"/
+
+    # clean paths
+    rm -fR home opt
+
+
+####################  FRESH
+
+else
+
+    cd /tmp
+
+    _echoT "------------------ get"
+
+    file="smartgit_linux-${_SMARTGIT_VER}.tar.gz"
+    url="https://www.syntevo.com/downloads/smartgit/${file}"
+
+    if [ -f "${_PATH_SOFT}/$file" ]; then
+        cp "${_PATH_SOFT}/$file" "$file"
+    else
+        _ANSWER="$file"
+        while ! curl -o "$_ANSWER" "$url"; do
+            _ask "Unable to donwload:\n$url\nGive a good url to download $file\nConfirm"
+        done
+        cp "$file" "${_PATH_SOFT}/"
+    fi
+
+
+    _echoT "------------------ install"
+
+    path="smartgit"
+    [ -d "$path" ] && rm -fR "$path"
+    tar xzf "$file"
+    mv "$path" "${path_opt}"
+    rm "$file"
+
+fi
+
+
+####################  COMMON
+
+_echoT "------------------ $file_bin bind"
+
+[ -e "$file_bin" ] || [ -h "$file_bin" ] && sudo rm "$file_bin"
+sudo ln -s "${path_opt}/squirrel-sql.sh" "$file_bin"
+
+
+_echoT "------------------ launcher"
+
+file="${path_desk}"/smartgit.desktop
+echo "[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=SmartGit
+Keywords=git
+Comment=Git-Client
+Type=Application
+Categories=Development;RevisionControl
+Terminal=false
+StartupWMClass=SmartGit
+Exec=\"$path_opt/bin/smartgit.sh\" %u
+MimeType=x-scheme-handler/git;x-scheme-handler/smartgit;x-scheme-handler/sourcetree;
+Icon=${path_opt}/bin/smartgit_128.png
+" > "$file"
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}DEV"
+_partadd "${_PART}DEV" "$_FILE_DEV_DONE"
+
+_echoT "#################### END ${_PART}DEV"
+
+

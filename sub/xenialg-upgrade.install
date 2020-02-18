@@ -1,0 +1,32 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+########################################  MAIN
+
+_echoT "#################### START ${_PART}"
+
+
+_echoT "------------------ update"
+
+sudo apt update
+
+
+_echoT "------------------ dist-upgrade"
+
+sudo apt -y dist-upgrade
+
+
+_echoT "------------------ clean"
+
+sudo apt autoremove; sudo apt clean; sudo apt autoclean
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}"
+

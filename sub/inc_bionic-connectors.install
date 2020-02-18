@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PART}DEV"
+
+
+
+########################################  MAIN
+
+_echoT "------------------ unpack"
+
+file=/home/shared/keep/.connectors.tar.gz
+! [ -f "$file" ] && _exitE "Unable to find file: $file"
+tar xzf "$file" -C /opt
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}DEV"
+_partadd ${_PART}DEV $_FILE_DEV_DONE
+
+_echoT "#################### END ${_PART}DEV"
+
+

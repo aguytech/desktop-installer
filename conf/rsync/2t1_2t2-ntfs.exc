@@ -1,0 +1,2 @@
+# sudo rsync -avn --exclude-from=/home/shared/dev/install-desktop/conf/rsync/2t1_2t2-ntfs.exc /media/$USER/2t1-ntfs/ /media/$USER/2t2-ntfs/
+

@@ -1,0 +1,143 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "#################### START ${_PART}"
+
+file_bash_aliases="${S_PATH_SCRIPT_CONF}/.bash_aliases"
+file_bash_functions="${S_PATH_SCRIPT_CONF}/.bash_functions"
+for file in "$file_bash_aliases" "$file_bash_functions"; do
+	if ! . "$file"; then _echoE "unable to find file '$file'"; exit 1; fi
+done
+
+########################################  MAIN
+
+
+_echoT "------------------ paths rights"
+
+paths="/home /home/shared /home/shared/dev/bs /home/shared/www /opt /usr/local/bs /save/$_SYSNAME /var/log/server"
+for path in $paths; do
+        ! [ -d "$path" ] && sudo mkdir -p "$path"
+        sudo chown :1000 "$path"
+        sudo chmod g+rwx "$path"
+done
+
+
+_echoT "------------------ server conf"
+
+path_conf=/etc/server
+! [ -d $path_conf ] && sudo mkdir -p $path_conf
+
+file=${S_PATH_INSTALL_CONF}/env.conf
+sudo cp -a $file $path_conf/
+. $path_conf/env.conf
+
+file=${S_PATH_INSTALL_CONF}/server.conf
+sudo cp -a $file $path_conf/
+str=home; sudo sed -i "s/^\(S_SERVER_TYPE=\).*$/\1$str/" $path_conf/server.conf
+[ "$_LXD" ] && str=lxd && sudo sed -i "s/^\(S_HOSTING_TYPE=\).*$/\1$str/" $path_conf/server.conf
+. $path_conf/server.conf
+
+
+_echoT "------------------ conf software-sources"
+## Change the mirror of software sources
+(software-properties-gtk)
+
+
+_echoT "------------------ conf user"
+#sudo passwd root
+sudo adduser "$USER" users; sudo adduser "$USER" www-data
+sudo adduser "$USER" audio; sudo adduser "$USER" video
+
+
+_echoT "------------------ conf bash"
+color='\\e[1;34m' # home / host
+colorRoot=$color
+
+<<keep
+color='\\e[1;33m' # vz
+color='\\e[1;38;5;172m' # vm
+color='\\e[1;32m' # ovh
+colorRoot='\\e[1;91m'
+keep
+
+file=~/.bashrc
+! [ -f "$file.keep" ] && cp -a "$file" "$file.keep"
+sed -i 's|^\( *\)\(PS1.*033.*32m.*\)$|\1PS1="\${debian_chroot:+(\$debian_chroot)}\\['$colorRoot'\\]\\u\\[\\e[1;37m\\]@\\['$color'\\]\\h\\[\\e[1;37m\\]:\\w\\['$color'\\]\$\\[\\e[0;0m\\]\"|' $file
+
+! grep -q '\.bash_functions' "$file" && echo '
+# source global variables
+[ -f /etc/server/env.conf ] && . /etc/server/env.conf
+
+# functions
+[ -f ~/.bash_functions ] && . ~/.bash_functions' >> "$file"
+
+_echoT "------------------  .bash_aliases"
+
+file=~/.bash_aliases
+[ -f "$file" ] && mv "$file" "$file.$(date +%s)"
+ln -sv "$file_bash_aliases" "$file"
+
+
+_echoT "------------------  .bash_functions"
+
+file=~/.bash_functions
+[ -f "$file" ] && mv "$file" "$file.$(date +%s)"
+ln -sv "$file_bash_functions" "$file"
+
+
+
+_echoT "------------------ hosts ovh-cluster"
+
+. "$S_GLOBAL_CONF"
+
+file=/etc/hosts
+servers_list=${!S_CLUSTER[*]}
+! grep -q "# ${S_DOMAIN_NAME} cluster" "$file" && echo -e "\n# ${S_DOMAIN_NAME} cluster" | sudo tee -a "$file"
+for host in ${servers_list/$HOSTNAME/}; do
+	eval ${S_CLUSTER[$host]}
+	sudo sed -i "/${ip}/d" "$file"
+	! grep -q "$host" "$file" && echo -e "${ip}\t${host}\t${name}" | sudo tee -a "$file"
+done
+
+
+_echoT "------------------ upgrade"
+
+echo '#!/bin/bash
+#
+# Provides:				upgrade
+# Short-Description:	Upgrade & clean packages
+# Description:			Upgrade & clean packages
+
+whiteb="\e[1;1m"; redb="\e[1;31m"; greenb="\e[1;32m"; blueb="\e[1;34m"; magentab="\e[1;35m";cclear="\e[0;m"
+
+[[ $USER != root ]] && cmd="sudo " || cmd=
+
+echo -e "${whiteb}update${cclear}"
+${cmd}apt update
+
+echo -e "${whiteb}upgrade${cclear}"
+${cmd}apt -y upgrade
+
+echo -e "${whiteb}autoremove${cclear}"
+${cmd}apt-get autoremove
+
+echo -e "${whiteb}clean${cclear}"
+${cmd}apt-get clean
+
+echo -e "${whiteb}autoclean${cclear}"
+${cmd}apt-get autoclean
+' | sudo tee /usr/local/bs/upgrade
+
+sudo chmod +x /usr/local/bs/*
+
+
+########################################  END
+
+
+_echoT "------------------ write ${_PART}"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}"
+

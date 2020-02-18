@@ -1,0 +1,39 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PART}DEV"
+
+########################################  MAIN
+
+_echoT "------------------ get"
+
+file="gitkraken-amd64.deb"
+url="https://release.gitkraken.com/linux/${file}"
+filedown="/tmp/$file"
+if [ -f "${_PATH_SOFT}/$file" ]; then
+	cp -a "${_PATH_SOFT}/$file" "$filedown"
+else
+	! wget "$url" -O $filedown && _exitE "Error during downloading 'gitkraken' with url:\n$url"
+fi
+
+
+_echoT "------------------ keep oldees"
+
+_keepcpts ~/.gitkraken
+
+
+_echoT "------------------ install"
+
+sudo dpkg -i "$filedown"
+rm "$filedown"
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}DEV"
+_partadd "${_PART}DEV" "$_FILE_DEV_DONE"
+
+_echoT "#################### END ${_PART}DEV"
+
+

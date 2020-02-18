@@ -1,0 +1,4 @@
+ttf-mscorefonts-installer	msttcorefonts/present-mscorefonts-eula	note	
+ttf-mscorefonts-installer	msttcorefonts/dldir	string	/home/shared/keep/ttfs
+ttf-mscorefonts-installer	msttcorefonts/dlurl	string	
+ttf-mscorefonts-installer	msttcorefonts/accepted-mscorefonts-eula	boolean	true

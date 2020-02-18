@@ -1,0 +1,20 @@
+# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/rsync/ext_1t-2.5_2t1-btrfs.exc /media/$USER/1t-2.5/ext/ /media/$USER/2t1-btrfs/ext/
+# rsync -avn --delete /media/$USER/1t-2.5/ext/shared/Soft/linux/ /media/$USER/2t1-btrfs/ext/shared/Soft/linux/
+# rsync -avn --delete /media/$USER/1t-2.5/ext/shared/Soft/multi/ /media/$USER/2t1-btrfs/ext/shared/Soft/multi/
+# rsync -avn --delete /media/$USER/1t-2.5/ext/shared/Soft/windows/ /media/$USER/2t1-btrfs/ext/shared/Soft/windows/
+
+.snapshots
+lost+found
+.Trash-*
+.tmp*
+
+#/shared/Music
+#/shared/Videos
+
+/_new
+/shared/Podcasts
+/ovh
+/backups/fx8320e
+/backups/m4610g
+/backups/export-MacPro*
+#/shared/Soft/_new

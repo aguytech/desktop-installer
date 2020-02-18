@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PART}DEV"
+
+
+
+########################################  MAIN
+
+cmd="sudo pacman -S --noconfirm --needed"
+
+
+_echoT "------------------ install"
+
+$cmd firefox-developer-edition firefox-developer-edition-i18n-fr
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}DEV"
+_partadd ${_PART}DEV $_FILE_DEV_DONE
+
+_echoT "#################### END ${_PART}DEV"
+
+
