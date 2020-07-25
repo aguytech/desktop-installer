@@ -1,0 +1,6 @@
+# rsync -avn --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/2t2-2t1.exc /media/$USER/2t2-ext/ /mnt/
+
+/lost+found
+.Trash-*
+.tmp*
+

@@ -1,0 +1,102 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+########################################  MAIN
+
+_echoT "#################### START ${_PART}"
+
+_echoT "------------------ apt repository"
+
+file=/etc/apt/sources.list
+sudo cp -a $file $file.keep$(date +%s)
+
+sudo add-apt-repository -yn ppa:stebbins/handbrake-releases # handbrake
+sudo add-apt-repository -yn ppa:ubuntu-mozilla-security/ppa # mozilla
+sudo add-apt-repository -yn ppa:vincent-vandevyvre/vvv # qarte
+sudo add-apt-repository -yn ppa:yannubuntu/boot-repair # boot-repair
+sudo add-apt-repository -yn ppa:otto-kesselgulasch/gimp # gimp gmic
+sudo add-apt-repository -yn ppa:inkscape.dev/stable # inkscape
+sudo add-apt-repository -yn ppa:lightzone-team/lightzone # lightzone
+sudo add-apt-repository -yn ppa:yoggic/dpluzz # dpluzz
+sudo add-apt-repository -yn ppa:kdenlive/kdenlive-stable # kdenlive
+sudo add-apt-repository -yn ppa:webupd8team/y-ppa-manager # y-ppa-manager
+sudo add-apt-repository -yn ppa:clipgrab-team/ppa # clipgrab
+sudo add-apt-repository -yn ppa:daniel-marynicz/filemanager-actions # filemanager-actions nautilus
+sudo add-apt-repository -yn ppa:pedrocastro/ppa # gnome-subtitles
+sudo add-apt-repository -yn ppa:gnumdk/lollypop # lollypop
+sudo add-apt-repository -yn ppa:mc3man/mpv-tests # mpv
+#sudo add-apt-repository ppa:nilarimogard/webupd8 # youtube-dl & more
+
+if [ "$_FREECAD" ];then
+	sudo add-apt-repository -yn ppa:freecad-maintainers/freecad-stable # freecad
+	sudo add-apt-repository -yn ppa:freecad-community/ppa # freecad addons
+fi
+
+[ "$_VIDEO" ] && sudo add-apt-repository -yn ppa:cinelerra-ppa/ppa
+
+<<KEEP
+ppa:webupd8team/tor-browser # tor-browser
+ppa:webupd8team/sublime-text-3 # sublime-text-3
+ppa:nilarimogard/webupd8 # pulseaudio-equalizer
+
+[ "$_LAPTOP" ] && sudo add-apt-repository -yn ppa:linrunner/tlp
+KEEP
+
+_echoT "------------------ getdeb"
+#sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu bionic-getdeb apps" >> /etc/apt/sources.list.d/getdeb.list'
+#wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
+
+_echoT "------------------ mkv"
+echo -e "deb http://mkvtoolnix.download/ubuntu/ bionic main\ndeb-src http://mkvtoolnix.download/ubuntu/ bionic main"  | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list
+wget -q -O - https://mkvtoolnix.download/gpg-pub-moritzbunkus.txt | sudo apt-key add -
+#echo -e "deb http://www.bunkus.org/ubuntu/bionic/ ./\ndeb-src http://www.bunkus.org/ubuntu/bionic/ ./ " | sudo tee /etc/apt/sources.list.d/bunkus-mkv.list
+#wget -q -O - https://www.bunkus.org/gpg-pub-moritzbunkus.txt | sudo apt-key add -
+
+_echoT "------------------ multisystem"
+echo 'deb http://liveusb.info/multisystem/depot all main' | sudo tee /etc/apt/sources.list.d/multisystem.list
+wget -q http://liveusb.info/multisystem/depot/multisystem.asc -O- | sudo apt-key add -
+
+_echoT "------------------ mariadb"
+echo "# MariaDB 10.4 repository list - created 2019-10-28 08:34 UTC
+# http://downloads.mariadb.org/mariadb/repositories/
+deb [arch=amd64,arm64,ppc64el] http://ftp.hosteurope.de/mirror/mariadb.org/repo/10.4/ubuntu bionic main
+deb-src http://ftp.hosteurope.de/mirror/mariadb.org/repo/10.4/ubuntu bionic main" | sudo tee /etc/apt/sources.list.d/mariadb.list
+sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
+
+_echoT "------------------ postgresql"
+echo 'deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main' | sudo tee /etc/apt/sources.list.d/pgdg.list
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+if [ "$_DEV" ];then
+	_echoT "------------------ dev"
+
+	echo "# Testing & pre-release packages
+deb http://repo.percona.com/apt bionic testing
+deb-src http://repo.percona.com/apt bionic testing" | sudo tee /etc/apt/sources.list.d/percona.list
+	sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x9334A25F8507EFA5
+
+	wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
+	echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
+fi
+
+if [ "$_VIRTUALBOX" ];then
+	_echoT "------------------ virtualbox"
+
+	echo 'deb http://download.virtualbox.org/virtualbox/debian bionic contrib' | sudo tee /etc/apt/sources.list.d/virtualbox.list
+	wget --quiet -O - https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo apt-key add -
+fi
+
+# indicator
+#sudo add-apt-repository -yn ppa:indicator-brightness/ppa # indicator-brightness
+#sudo add-apt-repository -yn ppa:caffeine-developers/ppa # caffeine
+#sudo add-apt-repository -yn ppa:thebernmeister/ppa # indicator-virtual-box
+
+########################################  END
+
+_echoT "------------------ write ${_PART}"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}"
+

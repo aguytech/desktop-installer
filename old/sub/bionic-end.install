@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "#################### START ${_PART}"
+
+########################################  MAIN
+
+
+_echoT "------------------ languages"
+
+_askno "Please select 'Region & language' & 'Manage installed languages' to update required files & close windows, After you valid to continue"
+gnome-control-center
+
+
+_echoT "------------------ Upgrade"
+
+upgrade
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}"
+

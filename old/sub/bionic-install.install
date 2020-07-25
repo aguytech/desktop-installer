@@ -1,0 +1,237 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "#################### START ${_PART}"
+
+FILE_INSTALL_DONE=${_PATH_LOG}/install.done
+_FILE_INSTALL_PCK=${S_PATH_CONF}/install.pck
+
+cmd="sudo apt install -y"
+
+########################################  MAIN
+
+
+_echoT "================== ${_PART} / global install"
+
+_echoi "------------------"
+sed -n '/# install/,$ p' ${S_FILE_INSTALL_CONF}|grep -v '^# install'
+_echoi "------------------"
+_askyn "PLease confirm this installation options" && [ "$_ANSWER" == n ] && return 1
+
+
+_echoT "------------------ debconf"
+part_install=debconf
+
+file=${S_PATH_INSTALL_CONF}/debconf/msttcorefonts.dat
+dirttfs=/home/shared/keep/ttfs
+
+! [ -f $file ] && _echoE "unable to find file '$file'" &&  return 1
+! [ -d $dirttfs ] && _echoE "unable to find directory '$dirttfs'" &&  return 1
+
+sudo debconf-set-selections $file
+
+
+_echoT "------------------ system"
+part_install=system
+
+packages="debconf-utils gdebi gnupg2 gparted hfsprogs htop icedtea-8-plugin jq kpartx meld openjdk-11-jre openssh-server p7zip-full p7zip-rar pv rar sysinfo sysstat testdisk tmux tree unrar"
+# oracle-java7-installer ntfsprogs grsync gtk2-engines-pixbuf libnss-myhostname atop fslint dstat
+if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+
+_echoT "------------------ required by gnome-extensions"
+part_install=gnome-extensions
+
+packages="gir1.2-gtop-2.0 gir1.2-networkmanager-1.0 gir1.2-clutter-1.0"
+if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+
+_echoT "------------------ tools"
+part_install=tools
+
+packages="net-tools lnav gnome-tweak-tool gnome-system-monitor numlockx dconf-tools multisystem gnome-sushi gnome-system-tools font-manager y-ppa-manager baobab curl" # gnome-activity-journal boot-repair backintime-gnome
+
+packages+=" easytag-nautilus filemanager-actions-nautilus-extension nautilus-admin nautilus-compare nautilus-emblems nautilus-gtkhash nautilus-hide nautilus-ideviceinfo nautilus-image-converter nautilus-script-audio-convert nautilus-script-debug nautilus-scripts-manager nautilus-sendto nautilus-wipe seahorse-nautilus" # nautilus-actions nautilus-columns nautilus-image-manipulator
+
+packages+=" gedit-developer-plugins gedit-plugins gedit-source-code-browser-plugin" #
+
+[ "$_OWNCLOUD" ] && packages+=" owncloud-client owncloud-client-cmd nautilus-owncloud" # csync-owncloud
+
+if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+# uget-chrome-wrapper nautilus-dropbox nautilus-filename-repairer nautilus-image-converter nautilus-terminal # compiz-fusion-plugins-extra compizconfig-settings-manager exfat-utils exfat-fuse freefilesync qshutdown solaar unetbootin
+
+
+_echoT "------------------ languages"
+part_install=languages
+
+packages="language-pack-fr language-pack-fr-base language-pack-gnome-fr language-pack-gnome-fr-base hunspell-fr hunspell-fr-classical hyphen-fr mythes-fr firefox-locale-fr thunderbird-locale-fr libreoffice-help-fr libreoffice-l10n-fr tesseract-ocr-fra gimp-help-fr"
+if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+
+_echoT "------------------ libreoffice"
+part_install=libreoffice
+
+packages="libreoffice libreoffice-avmedia-backend-gstreamer libreoffice-base libreoffice-base-drivers libreoffice-calc libreoffice-draw libreoffice-gnome libreoffice-gtk3 libreoffice-impress libreoffice-math libreoffice-mysql-connector libreoffice-ogltrans libreoffice-pdfimport libreoffice-report-builder libreoffice-sdbc-postgresql libreoffice-style-galaxy libreoffice-style-human libreoffice-style-oxygen libreoffice-style-tango libreoffice-templates libreoffice-voikko libreoffice-wiki-publisher libreoffice-writer libreoffice-writer2xhtml scribus scribus-template"
+if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+# libreoffice-dmaths libreoffice-librelogo libreoffice-style-breeze libreoffice-style-elementary libreoffice-style-sifr
+
+
+_echoT "------------------ media"
+part_install=media
+
+packages="chromium-browser brasero qarte amule amule-gnome-support gnome-subtitles audacity tangerine ubuntu-restricted-extras easytag soundconverter sound-juicer gnome-xcf-thumbnailer stopwatch flashplugin-installer chrome-gnome-shell" # mozplugger isomaster mixxx tesseract-ocr-fra lightzone darktable vlc
+
+packages+=" lollypop kid3-cli gmusicbrowser gstreamer1.0-plugins-bad pulseaudio-equalizer ubuntu-restricted-extras cdrdao cue2toc bchunk ccd2iso mdf2iso nrg2iso clipgrab" # gmusicbrowser-art gstreamer1.0-plugins-bad-faad gpodder goobox
+
+packages+=" gimp gimp-gap gimp-cbmplugs gimp-gluas gimp-data gimp-gmic gimp-texturize gimp-data-extras gimp-gutenprint gimp-ufraw gimp-dds gimp-lensfun gtkam-gimp pandora create-resources inkscape ink-generator sozi xsane" # ijsgutenprint gimp-save-for-web gimp-normal-map gimp-plugin-registry gimp-dbg
+
+packages+=" mpv totem totem-plugins totem-plugins-extra kdenlive kdenlive-data gnome-video-effects-extra mkvtoolnix-gui handbrake-gtk handbrake-cli libdvdread4 libdvdnav4 dpluzz libavcodec-extra libdvd-pkg gnome-do gnome-do-plugins"
+
+#packages+=" pidgin pidgin-awayonlock pidgin-bot-sentry pidgin-encryption pidgin-gnome-keyring pidgin-hotkeys pidgin-libnotify pidgin-openpgp pidgin-plugin-pack pidgin-skype pidgin-themes" # pidgin-microblog
+
+if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+# pidgin-blinklight pidgin-extprefs pidgin-twitter # skype gtk2-engines-murrine:i386 gtk2-engines-pixbuf:i386 gimp-dcraw gimp-gluas gimp-plugin-registry gegldropbox mkv-extractor-qt5 xia
+
+# d4x easymp3gain-gtk mp3splt-gtk vlc-plugin-sdl vlc-plugin-pulse gnome-media-profiles pitivi ffmpeg gimp-dcraw gimp-plugin-registry pidgin-audacious
+
+# ogmrip
+#$cmd ogmrip ogmrip-ac3 ogmrip-plugins ogmrip-video-copy ogmtools ogmrip-dirac ogmrip-oggz
+
+
+_echoT "------------------ ttf-mscorefonts-installer"
+part_install=msttcorefonts
+
+packages="ttf-mscorefonts-installer"
+
+if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+sudo dpkg-reconfigure ttf-mscorefonts-installer
+
+
+if [ "$_FREECAD" ]; then
+	_echoT "------------------ freecad"
+	part_install=freecad
+
+	packages="freecad freecad-extras-drawing-dimensioning freecad-extras-lattice2 freecad-extras-eaglepcb2freecad freecad-extras-macroparttovrml freecad-doc freecad-extras-fasteners freecad-extras-sheetmetal freecad-extras-animation freecad-extras-idfimporter freecad-extras-timber freecad-extras-assembly2 freecad-extras-kicadstepuptools freecad-extras-workfeature freecad-extras-bolts freecad-extras-kicadstepuptools-wb freecad-extras-cadquery freecad-extras-lattice"
+
+	if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+fi
+
+
+if [ "$_LAPTOP" ]; then
+	_echoT "------------------ laptop"
+	part_install=laptop
+
+	sudo apt-get install -y tlp tlp-rdw # acpi
+
+	if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+fi
+
+
+if [ "$_VIDEO" ]; then
+	_echoT "------------------ videos"
+	part_install=videos
+
+	packages="cinelerra-cv cinelerra-cv-transitions" # cinelerra kdenlive flowblade lightworks Natron shotcut DaVinci Resolve
+	if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+fi
+
+
+if [ "$_MULTIBOOT" ]; then
+	_echoT "------------------ multiboot"
+	part_install=multiboot
+
+	# http://multibootusb.org/page_download/
+	! $cmd python3-pyudev && _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME" && return 1
+	cd /tmp && wget https://github.com/mbusb/multibootusb/releases/download/v${_MULTIBOOT}/python3-multibootusb_${_MULTIBOOT}-1_all.deb && sudo dpkg -i python3-multibootusb_${_MULTIBOOT}-1_all.deb && rm python3-multibootusb_${_MULTIBOOT}-1_all.deb
+fi
+
+
+if [ "$_DEV" ]; then
+	_echoT "------------------ dev"
+	part_install=dev
+
+	packages="ghex mariadb-client postgresql-client mytop percona-toolkit git gitk gitg" #  pgadmin4
+
+	packages+=" vim umbrello" # dia dia2code dia-shapes
+
+	packages+=" php-cli kcachegrind graphviz xdot"
+
+	if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+	# ldap
+	# $cmd jxplorer
+
+	# svn
+	#$cmd rapidsvn kdesvn
+	# SVN nautilus
+	#$cmd nautilus-script-collection-svn
+	# nautilus-script-manager enable Subversion
+	#$cmd subversion-tools
+
+fi
+
+
+if [ "$_NETWORK" ]; then
+	_echoT "------------------ network"
+	part_install=network
+
+	packages="wireshark-gtk zenmap"
+	if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+fi
+
+
+if [ "$_VIRTUALBOX" ]; then
+	_echoT "------------------ virtualbox"
+	part_install=virtualbox
+
+	packages="virtualbox-5.2"
+	if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+fi
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}"
+
+
+<<KEEP
+
+_echoT "------------------ gnome-subtitles"
+
+sudo apt update
+sudo apt --fix-broken install
+$cmd libgtkspell0 libmono-posix4.0-cil libmono-system-web4.0-cil gconf2 libmono-i18n4.0-all
+
+FILE="gnome-subtitles_1.3-2_amd64.deb"
+URL="http://archive.ubuntu.com/ubuntu/pool/universe/g/gnome-subtitles/$FILE"
+cd /tmp
+wget "$URL"
+sudo dpkg -i "$FILE"
+rm "$FILE"
+
+####################  GNOME_EXTENSIONS
+# gnome-shell-extensions
+https://www.linux.com/learn/10-gnome-shell-extensions-you-should-be-using
+# gnome-shell-integration / firefox addons
+https://addons.mozilla.org/en-US/firefox/addon/gnome-shell-integration/
+
+# dash to dock
+# User Themes
+# Removable Drive Menu
+# EasyScreenCast
+# Hide Top Bar
+# Internet Radio
+# system-monitor
+# Disk space usage
+# ShutdownTimer by neumann
+KEEP
+

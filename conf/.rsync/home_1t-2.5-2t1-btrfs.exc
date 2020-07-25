@@ -1,0 +1,21 @@
+# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_1t-2.5-2t1-btrfs.exc /media/$USER/1t-2.5/home/ /media/$USER/2t1-btrfs/home/
+
+.snapshots
+.Trash-*
+.tmp*
+lost+found
+
+/kx
+/trusty
+/xenial
+/trusty-20160408
+
+/shared/.aMule/Temp
+/shared/.grsync/*.log
+/shared/Dev
+/shared/Downloads/kinetoscope
+/shared/Downloads/La Maison Ecologique
+/shared/Downloads/tmp
+/shared/Downloads/zte*
+#/shared/Downloads/zik/released
+/shared/virtualbox/appliances

@@ -1,7 +1,0 @@
-# sudo rsync
-
-/lost+found
-/.Trash-*
-
-/rescue
-var.lib.vz

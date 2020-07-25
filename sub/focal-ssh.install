@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PART}"
+
+########################################  MAIN
+
+_echoT "------------------ ssh keep"
+
+path=~/.ssh
+[ -d "$path" ] && _keepmvts "$path"
+
+
+if [ "$_SSH_BACK" ]; then
+
+	_echoT "------------------ ssh back"
+	cd
+	tar xzf "${_PATH_SSH_KEEP}/${_SSH_BACK}"
+	sleep 0.2
+	! [ -d "$path" ] && _exite "Verify path in ~/.ssh, wrong file ${_PATH_SSH_KEEP}/${_SSH_BACK}"
+	sed -i "s|^\(.* \)[^ ]\+$|\1${USERNAME}@${HOSTNAME}|" .ssh/id_rsa.pub
+else
+	ssh-keygen -t rsa
+	#ssh-copy-id <username>@<host>
+fi
+
+
+_echoT "------------------ client conf"
+
+file='/etc/ssh/ssh_config'
+sudo [ -f "${file}" ] && sudo cp -a "${file}" "${file}.keep$(date +%s)"
+sudo sed -i "s/^\( *GSSAPIAuthentication\).*/\1 no/" $file
+sudo sed -i "/Host\s\+\*/ s|#\s\+||" "$file"
+! sudo grep -q ServerAliveInterval "$file" && echo "ServerAliveInterval 240" | sudo tee -a "$file"
+
+_echoT "------------------ server conf"
+
+file='/etc/ssh/sshd_config'
+sudo [ -f "${file}" ] && sudo cp -a "${file}" "${file}.keep$(date +%s)"
+! grep -q "UseDNS" "$file" && echo "UseDNS no" | sudo tee -a $file
+sudo systemctl restart sshd.service
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}"
+

@@ -1,0 +1,134 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PARTDEV}"
+
+########################################  MAIN
+
+path_opt=/opt/squirrel-sql_${_SQUIRREL_VER}
+path_conf=.squirrel-sql
+path_desk=~/.local/share/applications
+file_bin="/usr/bin/squirrel-sql"
+
+_echoT "------------------ backup"
+
+#_keepmvts "${path_opt}"
+#_keepmvts "${path_conf}"
+if [ -d "$path_opt" ] || [ -d ~/"$path_conf" ]; then
+	tar czf "${_PATH_SOFT}/squirrel-sql_${_SQUIRREL_VER}.keep$(date +%s).tar.gz" "$path_opt" ~/"$path_conf"
+fi
+
+
+_echoT "------------------ clean instance"
+
+# delete existing folder
+for path in opt "${path_opt#*/}" "$path_opt" ~/"$path_conf"; do [ -d "$path" ] && rm -fR "$path"; done
+
+
+####################  RESTORE
+
+if [ "$_SQUIRREL_BACK" ]; then
+
+    _echoT "------------------ get file"
+
+    anstmp=${_SQUIRREL_VER}
+	file="${_PATH_SOFT}/squirrel-sql_${anstmp}.tar.gz"
+    while ! [ -f "${file}" ]; do
+        _echoE "Unable to find file: '$file'"
+        _ask "Please give a good build in place of '${anstmp}'"
+        _SQUIRREL_VER="${_ANSWER:-$anstmp}" && _confset _SQUIRREL_VER "${_SQUIRREL_VER}"
+        file="${_PATH_SOFT}/squirrel-sql_${_SQUIRREL_VER}.tar.gz"
+    done
+
+
+    _echoT "------------------ unpack build $_SQUIRREL_VER"
+
+    cd /tmp
+
+    tar xzf "${file}"
+    # soft
+    mv ${path_opt#*/} ${path_opt%/*}/
+    # conf
+    mv home/*/"$path_conf" ~/
+
+    # clean paths
+    rm -fR home opt
+
+
+####################  FRESH
+
+else
+
+    cd /tmp
+
+    _echoT "------------------ get"
+
+    file="squirrel-sql_${_SQUIRREL_VER}-standard.jar"
+    url="https://newcontinuum.dl.sourceforge.net/project/squirrel-sql/1-stable/${_SQUIRREL_VER}/${file}"
+
+    if [ -f "${_PATH_SOFT}/$file" ]; then
+        cp "${_PATH_SOFT}/$file" "$file"
+    else
+        _ANSWER="$file"
+        while ! curl -o "$_ANSWER" "$url"; do
+            _ask "Unable to donwload:\n$url\nGive a good url to download $file\nConfirm"
+        done
+        cp "$file" "${_PATH_SOFT}/"
+    fi
+
+
+    _echoT "------------------ install"
+
+    _askno "Give this directory '$DIR_OPT' for installation\nConfirm"
+    java -jar $file
+    rm $file
+
+fi
+
+
+####################  COMMON
+
+_echoT "------------------ $file_bin bind"
+
+[ -e "$file_bin" ] || [ -h "$file_bin" ] && sudo rm "$file_bin"
+sudo ln -s "${path_opt}/squirrel-sql.sh" "$file_bin"
+
+
+_echoT "------------------ launcher"
+
+file="${path_desk}"/squirrel-sql.desktop
+echo "[Desktop Entry]
+Name=SQuirreL SQL client $_SQUIRREL_VER
+GenericName=SQuirreL SQL client $_SQUIRREL_VER
+Comment=An ISQL tool
+Exec=squirrel-sql
+Encoding=UTF-8
+Path=${path_opt}
+Terminal=false
+Type=Application
+#Icon=${path_opt}/icons/squirrel-sql.png
+Icon=${path_opt}/icons/acorn.png
+Categories=Application;GTK;Development;IDE;SQL;
+" > "$file"
+chmod +x "$file"
+
+
+########################################  END
+
+_echoT "------------------ write ${_PARTDEV}"
+_partadd "${_PARTDEV}" "$_FILE_DEV_DONE"
+
+_echoT "#################### END ${_PARTDEV}"
+
+<<KEEP
+echo '#!/bin/bash
+'"
+${DIR_OPT}/squirrel-sql.sh \$*" | sudo tee /usr/bin/squirrel-sql
+sudo chmod +x /usr/bin/squirrel-sql
+
+# -Xms (min) & -Xmx (max) allocate memory for java software
+#str='-Xms256m -Xmx2048m'; sed -i 's|^\("$JAVACMD"\)\(.*\)$|\1'$str'\2|' ${DIR_OPT}/squirrel.sh
+KEEP
+
+

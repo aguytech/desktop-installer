@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "#################### START ${_PART}"
+
+fileinstalldone=${_PATH_LOG}/install.done
+_FILE_INSTALL_PCK=${S_PATH_CONF}/install.pck
+
+cmd="sudo apt install"
+
+########################################  MAIN
+
+_echoT "------------------ install"
+
+packages="lxd lxc" # virt-manager
+
+$cmd $packages
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}"
+
+

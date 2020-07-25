@@ -1,0 +1,14 @@
+# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_fx8320e_hp17.exc xenial@fx8320e:/ext/ /ext/
+
+.snapshots
+.Trash-*
+.tmp*
+lost+found
+
+/backups/hp17
+/ovh
+
+/shared/Music
+/shared/Podcasts
+/shared/Videos
+

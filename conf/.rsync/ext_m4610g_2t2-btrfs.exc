@@ -1,0 +1,12 @@
+# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_m4610g_2t2-btrfs.exc /ext/ /media/$USER/2t2-btrfs/ext/
+
+.snapshots
+.Trash-*
+.tmp*
+lost+found
+
+/backups/fx8320e
+/shared/Videos/_new_
+
+/shared/Soft
+

@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PARTDEV}"
+
+
+
+########################################  MAIN
+
+_echoT "------------------ unpack"
+
+file=${S_PATH_INSTALL_XTRA}/.connectors.tar.gz
+! [ -f "$file" ] && _exite "Unable to find file: $file"
+sudo tar xzf "$file" -C /opt
+
+
+########################################  END
+
+_echoT "------------------ write ${_PARTDEV}"
+_partadd ${_PARTDEV} $_FILE_DEV_DONE
+
+_echoT "#################### END ${_PARTDEV}"
+

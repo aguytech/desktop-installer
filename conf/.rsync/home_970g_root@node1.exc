@@ -1,0 +1,18 @@
+## manjaro
+# rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_970g_root@node1.exc /home/ root@node1:/save/sync/home/ -rlptDv --delete -n
+
+.snapshots
+.sync*
+._sync*
+.Trash-*
+.tmp*
+lost+found
+
+/manjaro*
+/juhraya*
+/ubuntu*
+/bionic*
+/xenial*
+/trusty*
+
+/shared

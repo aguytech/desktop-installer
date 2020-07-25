@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "#################### START ${_PART}"
+
+cmd="yay -S --noconfirm --needed"
+cmd_pac="sudo pacman -S --noconfirm --needed"
+
+
+########################################  MAIN
+
+
+_echoT "------------------ common"
+$cmd gmusicbrowser-rhfork-git multisystem # tmux-bash-completion
+
+_echoT "------------------ media"
+# $cmd babl gegl gimp-plugin-registry gimp-plugin-satequalizer gimp-plugin-fblur gimp-refocus gimp-plugin-wavelet-denoise # gimp-plugin-duplicate-to-another-image gimp-plugin-saveforweb gimp-plugin-lqr
+
+
+if [ "$_DEV" ]; then
+	_echoT "------------------ dev"
+	$cmd lnav
+fi
+
+if [ "$_VMWARE" ]; then
+	_echoT "================== VmWare install"
+
+	_echoT "------------------ needed packages from regular repository install"
+	# require selection
+	yay -S linux-headers
+
+	$cmd_pac fuse2 gtkmm pcsclite libcanberra
+
+	_echoT "------------------ needed packages from aur install"
+	$cmd ncurses5-compat-libs
+
+	_echoT "------------------ vmware-workstation install"
+	$cmd  vmware-workstation
+
+	_echoT "------------------ services enable"
+	sudo systemctl enable vmware-usbarbitrator.service # vmware-networks.service vmware-hostd.service
+	sudo systemctl start vmware-usbarbitrator.service # vmware-networks.service vmware-hostd.service
+
+	_echoT "------------------ modules enable"
+	sudo modprobe -a vmw_vmci vmmon
+
+	_echoT "------------------ services status"
+	sudo systemctl status vmware-usbarbitrator.service # vmware-networks.service vmware-hostd.service
+fi
+
+
+if [ "${S_RELEASE_DESKTOP}" = "xfce" ]; then
+
+	_echoT "------------------ ${S_RELEASE_DESKTOP} install xfce"
+
+	packages="radiotray-ng" # thunar-extended thunar-thumbnailers
+elif [ "${S_RELEASE_DESKTOP}" = "gnome" ]; then
+
+	_echoT "------------------ ${S_RELEASE_DESKTOP} install"
+
+	packages="nautilus-compare"
+fi
+[ "$packages" ] && $cmd $packages
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}"
+
+

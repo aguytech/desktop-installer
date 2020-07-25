@@ -1,0 +1,8 @@
+# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_fx8320e_2t2.exc /extend/ /media/trusty/2t2-ext/extend/
+
+/lost+found
+/.Trash-*
+
+/backups/blackbox
+/backups/fx8320e
+

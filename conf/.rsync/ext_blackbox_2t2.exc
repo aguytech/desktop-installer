@@ -1,0 +1,7 @@
+# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_blackbox_2t2.exc /ext/ /media/$USER/2t2-ext/ext/
+
+.snapshots
+.Trash-*
+.tmp*
+lost+found
+

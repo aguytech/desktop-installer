@@ -1,0 +1,10 @@
+# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_2t2_blackbox.exc /media/trusty/2t2-ext/extend/ /extend/
+
+.snapshots
+.Trash-*
+.tmp*
+lost+found
+
+/hold
+/backups/blackbox
+/backups/fx8320e

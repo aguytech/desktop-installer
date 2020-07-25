@@ -94,7 +94,7 @@ _askyn() {
 _asks() {
 	_ANSWER=
 	shift
-	[ -z "$*" ] && _exitE "invalid options '$*' for _asks()"
+	[ -z "$*" ] && _exite "invalid options '$*' for _asks()"
 	options="$*"
 	while [ "${options/$_ANSWER/}" = "$options" ]; do
 		_echo- -n "$1: "
@@ -170,7 +170,7 @@ _exit() {
 	[ "$*" ] && exit $* || exit
 }
 # exit, with default error 1
-_exitE() {
+_exite() {
 	[ "$1" ] && _echoE "$1" || _echoE "error - ${_SCRIPTFILE}"
 	_echoD "exit - $*"
 	[ "$2" ] && exit $2 || exit 1
@@ -180,9 +180,9 @@ _exitE() {
 
 _source() {
 	local file
-	[ -z "$*" ] && _exitE "unable to source nothing"
+	[ -z "$*" ] && _exite "unable to source nothing"
 	for file in $*; do
-		! [ -f "$file" ]  && _exitE "unable to source '$file'"
+		! [ -f "$file" ]  && _exite "unable to source '$file'"
 		_echoD "_source '$file'"
 		. "$file"
 	done
@@ -191,9 +191,9 @@ _source() {
 }
 _require() {
 	local file
-	[ -z "$*" ] && _exitE "unable to source nothing"
+	[ -z "$*" ] && _exite "unable to source nothing"
 	for file in $*; do
-		! [ -f "$file" ] && _exitE "unable to find '$file'"
+		! [ -f "$file" ] && _exite "unable to find '$file'"
 	done
 }
 
@@ -213,7 +213,7 @@ _keepmvts() {
 _confhave() {
 	local file
 	file="${2:-$S_FILE_INSTALL_CONF}"
-	! [ -f "$file" ] && _exitE "unable to find '$file' from $FUNCNAME"
+	! [ -f "$file" ] && _exite "unable to find '$file' from $FUNCNAME"
 	grep -q "^$1=.*" "$file"
 }
 # 1 array name
@@ -222,7 +222,7 @@ _confhave() {
 _confhave_array() {
 	local file
 	file="${3:-$S_FILE_INSTALL_CONF}"
-	! [ -f "$file" ] && _exitE "unable to find '$file' from $FUNCNAME"
+	! [ -f "$file" ] && _exite "unable to find '$file' from $FUNCNAME"
 	grep -q "^${1}\['${2}'\]=.*" "$file"
 }
 # 1 variable name
@@ -230,7 +230,7 @@ _confhave_array() {
 _confget() {
 	local file
 	file="${2:-$S_FILE_INSTALL_CONF}"file=
-	! [ -f "$file" ] && _exitE "unable to find '$file' from $FUNCNAME"
+	! [ -f "$file" ] && return 1
 
 	_confhave "$1" "$file" && sed -n "s|^${1}=||p" $file | sed 's/"//g'
 }
@@ -240,7 +240,7 @@ _confget() {
 _confset() {
 	local file
 	file="${3:-$S_FILE_INSTALL_CONF}"
-	! [ -f "$file" ] && _exitE "unable to find '$file' from $FUNCNAME"
+	! [ -f "$file" ] && touch "$file"
 
 	if _confhave "$1" "$file"; then
 		sed -i "\|^$1=| c${1}=${2:+\"$2\"}" "$file"
@@ -255,7 +255,7 @@ _confset() {
 _confset_array() {
 	local file
 	file="${4:-$S_FILE_INSTALL_CONF}"
-	! [ -f "$file" ] && _exitE "unable to find '$file' from $FUNCNAME"
+	! [ -f "$file" ] && _exite "unable to find '$file' from $FUNCNAME"
 
 	if _confhave_array "$1" "$2" "$file"; then
 		sed -i "\|^${1}\['${2}'\]=| c${1}\['${2}'\]=${3:+\"$3\"}" "$file"
@@ -269,7 +269,7 @@ _confset_array() {
 _confmulti_havevalue() {
 	local file
 	file="${3:-$S_FILE_INSTALL_CONF}"
-	! [ -f "$file" ] && _exitE "unable to find '$file' from $FUNCNAME"
+	! [ -f "$file" ] && _exite "unable to find '$file' from $FUNCNAME"
 
 	[[ " $(_confget "$1" "$file") " = *" $2 "* ]]
 }
@@ -279,7 +279,7 @@ _confmulti_havevalue() {
 _confmulti_add() {
 	local file str
 	file="${3:-$S_FILE_INSTALL_CONF}"
-	! [ -f "$file" ] && _exitE "unable to find '$file' from $FUNCNAME"
+	! [ -f "$file" ] && _exite "unable to find '$file' from $FUNCNAME"
 
 	_confmulti_havevalue "$1" "$2" "$file" && return 0
 	str="$(tr ' ' '\n' <<<"$(_confget "$1" "$file") $2" | sort | xargs)"
@@ -291,7 +291,7 @@ _confmulti_add() {
 _confmulti_remove() {
 	local file str
 	file="${3:-$S_FILE_INSTALL_CONF}"
-	! [ -f "$file" ] && _exitE "unable to find '$file' from $FUNCNAME"
+	! [ -f "$file" ] && _exite "unable to find '$file' from $FUNCNAME"
 
 	_confmulti_havevalue "$1" "$2" "$file" || return 0
 	str=`sed "y/ /\n/;s/^${2}$//M" <<<"$(_confget "$1" "$file")" | xargs`
@@ -318,7 +318,7 @@ _pwd32() { < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32; }
 
 _get_ip() {
 	local interface
-	interface="${1:-$(ip -4 -o route show to default|cut -d' ' -f5)}"
+	interface="${1:-$(ip -4 -o route show to default|cut -d' ' -f5|head -n1)}"
 	#ifconfig $inter | sed -n 's|^\s\+inet \(addr:\)\?\([0-9\.]\+\) .*|\2|p'
 	[ "${interface}" ] && ip -4 -o address show dev ${interface}|sed 's|.*inet\s\([0-9\.]\+\)/.*|\1|'
 	# for ip version >= ss190107, with -j option
@@ -328,7 +328,7 @@ _get_ip() {
 
 _get_ipv6() {
 	local interface
-	interface="${1:-$(ip -6 -o route show to default|cut -d' ' -f5)}"
+	interface="${1:-$(ip -6 -o route show to default|cut -d' ' -f5|head -n1)}"
 	#ifconfig ${interface} | sed -n 's|^\s\+inet6 \(addr:\)\?\([0-9a-z\:]\+\) .*128.*|\2|p'
 	[ "${interface}" ] && ip -6 -o address show dev ${interface}|sed -n 's|.*inet6\s\([0-9a-z:.]\+\)/128.*|\1|p'
 	# for ip version >= ss190107, with -j option
@@ -342,14 +342,14 @@ _get_ipv6() {
 # $2 service
 _service() {
 	# wrong number of parameters
-	[ "$#" -lt 2 ] && _exitE "$FUNCNAME:$LINENO Internal error, missing parameters: '$#'"
+	[ "$#" -lt 2 ] && _exite "$FUNCNAME:$LINENO Internal error, missing parameters: '$#'"
 
     if type systemctl >/dev/null 2>&1; then
 		_evalq systemctl "${1}" "${2}.service"
     elif type service >/dev/null 2>&1; then
         _evalq service "${2%.*}" "${1}"
     else
-        _exitE "unable to load service"
+        _exite "unable to load service"
     fi
 }
 
@@ -361,7 +361,7 @@ _service() {
 _var_unset() {
 	local values value
 	# wrong parameters number
-	[ "$#" -lt 2 ] && _exitE "$FUNCNAME:$LINENO Internal error, wrong parameters numbers (2): '$#'"
+	[ "$#" -lt 2 ] && _exite "$FUNCNAME:$LINENO Internal error, wrong parameters numbers (2): '$#'"
 
 	case "$1" in
 		part)
@@ -371,7 +371,7 @@ _var_unset() {
 			[ "$*" != "*" ] && values="$(set -o posix; set|grep '^S_[a-zA-Z09_-]\+' -o)"
 			;;
 		*)
-		_exitE "Bad options: '$1' in '$*'"
+		_exite "Bad options: '$1' in '$*'"
 		;;
 	esac
 
@@ -384,7 +384,7 @@ _var_unset() {
 _var_replace_www() {
 	local strs str
 	# wrong parameters number
-	[ "$#" -lt 1 ] && _exitE "$FUNCNAME:$LINENO Internal error, wrong parameters numbers (1): '$#'"
+	[ "$#" -lt 1 ] && _exite "$FUNCNAME:$LINENO Internal error, wrong parameters numbers (1): '$#'"
 
 	strs="_MYDOMAIN _SUBDOMAIN _PATH_WWW S_LOG_IPV4 S_RSYSLOG_PTC S_RSYSLOG_PORT S_PATH_LOG S_HOSTING_PATH_LOG S_HOST_IPV6"
 	for str in $strs; do
@@ -400,7 +400,7 @@ _var_replace_www() {
 
 _var_replace() {
 	local strs str
-	[ "$#" -lt 1 ] && _exitE "$FUNCNAME:$LINENO Internal error, wrong parameters numbers (1): '$#'"
+	[ "$#" -lt 1 ] && _exite "$FUNCNAME:$LINENO Internal error, wrong parameters numbers (1): '$#'"
 
 	strs="_MYDOMAIN _SUBDOMAIN _PATH_WWW S_LOG_IPV4 S_RSYSLOG_PTC S_RSYSLOG_PORT S_PATH_LOG S_HOSTING_PATH_LOG _VM_IP_BASE S_HOST_IPV4 S_HOST_IPV6"
 	for str in $strs; do
@@ -447,7 +447,7 @@ _vz_ctids_clean()
 _vz_ctids_inter() {
 	local ctids ctid
 
-	[ $# != 2 ] && _exitE "$FUNCNAME:$LINENO missing arguments $#"
+	[ $# != 2 ] && _exite "$FUNCNAME:$LINENO missing arguments $#"
 	for ctid in $2; do
 		[[ " $1 " = *" $ctid "* ]] && ctids+="$ctid "
 	done
@@ -511,7 +511,9 @@ _redirect() {
 	if [ -z "$_PATH_LOG" ]; then
 		[ "${_PATH_BASE/$S_PATH_INSTALL}" != "${_PATH_BASE}" ] && _PATH_LOG="$S_PATH_LOG_INSTALL" || _PATH_LOG="$S_PATH_LOG_SERVER"
 	fi
-	! [ -d "$_PATH_LOG" ] && mkdir -p "$_PATH_LOG"
+	! [ -d "${_PATH_LOG}" ] && sudo mkdir -p "${_PATH_LOG}"
+	sudo chown :1000 "${_PATH_LOG}" && sudo chmod g+rw "${_PATH_LOG}"
+	sudo find "${_PATH_LOG}" -type d -exec sudo chown :1000 "{}" \; -exec sudo chmod g+rw "{}" \;
 
 	f_info="$_PATH_LOG/${_SCRIPTNAME}.info"
 	f_err="$_PATH_LOG/${_SCRIPTNAME}.err"
@@ -543,10 +545,15 @@ DDATE=`date "+%Y%m%d"` # date for log...
 SDATE=`date +%s` # date for keeping file
 
 # global configuration
-if [[ -z "$S_GLOBAL_CONF" || ! -f "$S_GLOBAL_CONF" ]]; then
+[ -z "$S_GLOBAL_CONF" ] && S_GLOBAL_CONF="/etc/server/server.conf"
+if [ ! -f "$S_GLOBAL_CONF" ]; then
 	echo -e "${red}alert - value of \$S_GLOBAL_CONF are empty from ${BASH_SOURCE[0]}${cclear}"
 	file="${_PATH_BASE}/conf-init.install"
-	if ! . "$file"; then echo -e "${redb}error - unable to find file '$file' from ${BASH_SOURCE[0]}${cclear}" && exit 1; fi
+	! [ -f "$file" ] && echo -e "${red}alert - unable to find file '$file' from ${BASH_SOURCE[0]}${cclear}"
+	path=`dirname "${BASH_SOURCE[0]}"`
+	file=`readlink -e "${path}/../install/conf-init.install"`
+	! [ -f "$file" ] && echo -e "${red}error - unable to find file '$file' from ${BASH_SOURCE[0]}${cclear}"
+	if ! . "$file"; then echo -e "${red}error - unable to source file '$file' from ${BASH_SOURCE[0]}${cclear}" && exit 1; fi
 fi
 . "$S_GLOBAL_CONF"
 

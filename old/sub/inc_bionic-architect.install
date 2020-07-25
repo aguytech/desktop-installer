@@ -1,0 +1,93 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PARTDEV}"
+
+########################################  MAIN
+
+# http://software.sqlpower.ca/page/architect_download_os
+
+DIR_OPT=/opt/architect-$_ARCHITECT_VER
+#DIR_OPTlink=/opt/architect
+
+_echoT "------------------ get"
+
+cd /opt
+FILE="SQL-Power-Architect-generic-jdbc-${_ARCHITECT_VER}.tar.gz"
+URL="https://www.sqlpower.ca/download/sql-power-architect-${_ARCHITECT_VER}-generic/?wpdmdl=2254"
+FILEDOWN=/opt/architect.tar.gz
+if [ -f ${_PATH_SOFT}/$FILE ]; then
+	cp -a ${_PATH_SOFT}/$FILE $FILEDOWN
+else
+	! wget "$URL" -O $FILEDOWN && _exite "Error during downloading 'Firefox developer' version '${_ARCHITECT_VER}' with url:\n${URL}\nPlease download it manually & place it to ${_PATH_SOFT} & restart"
+fi
+
+_echoT "------------------ conf & keep user"
+
+if ! [ -d ~/.architect ]; then
+	mkdir ~/.architect
+
+	FILE=${S_PATH_INSTALL_CONF}/soft/pl.ini
+	! [ -f ~/.architect/pl.ini ] && [ -f $FILE ] && cp -a $FILE ~/.architect
+else
+	_keepcpts ~/.architect
+fi
+
+
+_echoT "------------------ keep oldees"
+
+	_keepmvts ${DIR_OPT}
+
+
+_echoT "------------------ install"
+
+tar xzf $FILEDOWN -C /opt
+[ "/opt/architect-${_ARCHITECT_VER}" != "$DIR_OPT" ] && mv /opt/architect-${_ARCHITECT_VER} $DIR_OPT
+rm $FILEDOWN
+
+#cd /opt && ln -sv ${DIR_OPT##*/} architect
+
+
+_echoT "------------------ /usr/bin/architect create"
+
+# -Xms (min) & -Xmx (max) allocate memory for java software
+echo '#!/bin/bash
+'"
+export ARCHITECT_HOME=${DIR_OPT}
+java -jar \$ARCHITECT_HOME/architect.jar \$*" | sudo tee /usr/bin/architect
+sudo chmod +x /usr/bin/architect
+
+
+_echoT "------------------ logo"
+
+FILE=/home/shared/keep/.icons/architect.png
+[ -f $FILE ] && cp -a $FILE $DIR_OPT || _echoE "logo skipped, unable to copy file '$FILE'"
+
+
+_echoT "------------------ launcher"
+
+FILE=~/.local/share/applications/architect.desktop
+
+echo "[Desktop Entry]
+Name=SQLPower Architect $_ARCHITECT_VER
+GenericName=SQLPower Architect $_ARCHITECT_VER
+Comment=An Modeling tools for SGBD
+Exec=architect
+Encoding=UTF-8
+Path=${DIR_OPT}
+Terminal=false
+Type=Application
+Icon=${DIR_OPT}/architect.png
+Categories=Application;GTK;Development;IDE;SQL;" > "$FILE"
+chmod +x "$FILE"
+
+
+########################################  END
+
+_echoT "------------------ write ${_PARTDEV}"
+_partadd ${_PARTDEV} $_FILE_DEV_DONE
+
+_echoT "#################### END ${_PARTDEV}"
+
+

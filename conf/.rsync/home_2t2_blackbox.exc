@@ -1,0 +1,18 @@
+# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_2t2_blackbox.exc /media/trusty/2t2-ext/home/ /home/
+
+.snapshots
+.cache
+.Trash-*
+.tmp*
+lost+found
+
+/tmp
+/var
+/trusty
+/trusty.new
+trusty-20160408
+/opt
+
+/shared/.aMule/Temp
+/shared/.grsync/*.log
+

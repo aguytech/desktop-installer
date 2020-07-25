@@ -1,0 +1,20 @@
+## ubuntu
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_hp17_2t1-btrfs.exc /home/ /media/$USER/2t1-btrfs/home/ -av --delete -n
+
+## manjaro
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_hp17_2t1-btrfs.exc /home/ /run/media/$USER/2t1-btrfs/home/ -av --delete -n
+
+.Trash-*
+.tmp*
+lost+found
+._sync_*
+.sync-*
+
+/nikita
+
+/shared/dev/eclipse-workspaces
+/shared/torrent
+/shared/.aMule/Temp
+/shared/virtualbox
+/shared/vmware
+/shared/.config/mpv/watch_later

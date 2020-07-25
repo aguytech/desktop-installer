@@ -1,0 +1,103 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PARTDEV}"
+
+########################################  MAIN
+
+firefoxdevdir=/opt/firefox-dev-$_FIREFOX_DEV_VER
+firefoxprofile=${USER}-dev
+#firefoxdevdirlink=/opt/firefox-dev
+
+_echoT "------------------ get"
+
+cd /opt
+file="firefox-${_FIREFOX_DEV_VER}.tar.bz2"
+url="https://download-installer.cdn.mozilla.net/pub/devedition/releases/${_FIREFOX_DEV_VER}/linux-x86_64/en-US/${file}"
+filedown=/opt/firefox.tar.bz2
+if [ -f ${_PATH_SOFT}/$file ]; then
+	cp -a ${_PATH_SOFT}/$file $filedown
+else
+	! wget "$url" -O $filedown && _exite "Error during downloading 'Firefox developer' version '${_FIREFOX_DEV_VER}' with url:\n$url"
+fi
+
+_echoT "------------------ keep oldees"
+
+_echoi "$HOME/.mozilla/firefox/$firefoxprofile"
+_keepcpts "$HOME/.mozilla/firefox/$firefoxprofile"
+_echoi "_keepmvts ${firefoxdevdir}"
+_keepmvts ${firefoxdevdir}
+
+
+_echoT "------------------ install"
+
+tar xjf $filedown -C /opt
+mv /opt/firefox $firefoxdevdir
+rm $filedown
+
+#cd /opt && ln -sv ${firefoxdevdir##*/} firefox-dev
+
+_echoT "------------------ /usr/bin/firefox-dev create"
+
+echo '#!/bin/bash
+'"
+${firefoxdevdir}/firefox \$*" | sudo tee /usr/bin/firefox-dev
+sudo chmod +x /usr/bin/firefox-dev
+
+
+_echoT "------------------ launcher"
+
+echo "[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Firefox Developer Edition
+Icon=${firefoxdevdir}/browser/chrome/icons/default/default128.png
+Exec=/usr/bin/firefox-dev -P ${firefoxprofile}
+Comment=Firefox Aurora with Developer tools
+GenericName=Web & developer Browser
+Keywords=Internet;WWW;Browser;Web;Explorer;Development
+Categories=GNOME;GTK;Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;x-scheme-handler/chrome;video/webm;application/x-xpinstall;
+StartupNotify=true
+Terminal=false
+
+Actions=NewWindow;NewPrivateWindow;Separator;ProfileXenialg;ProfileManager;Separator;SafeMode
+
+[Desktop Action NewWindow]
+Name=Open a New Window
+Exec=firefox -new-window
+
+[Desktop Action NewPrivateWindow]
+Name=Open a New Private Window
+Exec=/usr/bin/firefox-dev -private-window
+
+[Desktop Action ProfileXenialg]
+Name=Profile xenialg
+Exec=/usr/bin/firefox-dev -P ${firefoxprofile}
+
+[Desktop Action ProfileManager]
+Name=Profile Manager
+Exec=/usr/bin/firefox-dev -ProfileManager
+
+[Desktop Action SafeMode]
+Name=Safe Mode
+Exec=/usr/bin/firefox-dev -safe-mode" > ~/.local/share/applications/firefox-dev.desktop
+chmod +x ~/.local/share/applications/firefox-dev.desktop
+
+
+_echoT "------------------ profile"
+
+_askyn "the profile '${firefoxprofile}' are used, if you want to create or modify firefox profiles, _ANSWER 'y'\n& use firefox interface to create it\nTo do it, valid to continue"
+[ "$_ANSWER" == y ] && /usr/bin/firefox-dev -ProfileManager
+
+
+
+########################################  END
+
+_echoT "------------------ write ${_PARTDEV}"
+_partadd ${_PARTDEV} $_FILE_DEV_DONE
+
+_echoT "#################### END ${_PARTDEV}"
+
+

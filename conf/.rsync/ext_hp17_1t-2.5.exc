@@ -1,0 +1,34 @@
+## ubuntu
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_hp17_1t-2.5.exc /ext/ /media/$USER/1t-2.5/ext/ -av --delete -n
+# rsync /ext/shared/Soft/diag_repport/ /media/$USER/1t-2.5/ext/shared/Soft/diag_repport/ -av -n
+
+## manjaro
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_hp17_1t-2.5.exc /ext/ /run/media/$USER/1t-2.5/ext/ -av --delete -n
+
+.snapshots
+._sync*
+.sync*
+.Trash-*
+.tmp*
+lost+found
+
+/backups
+/ovh
+/shared/android
+/shared/Music
+/shared/Podcasts
+/shared/Soft/diag
+/shared/Soft/diag_tools
+/shared/Soft/windows
+/shared/Videos
+
+/shared/_new
+/shared/_back
+/shared/_watched
+#/shared/tmp
+
+#/shared/Soft/diag
+#/shared/Soft/diag tools
+#/shared/Soft/windows/driver
+#/shared/Soft/windows/Sid Meiers Civilization IV.iso
+#/shared/Soft/windows/Windows*
