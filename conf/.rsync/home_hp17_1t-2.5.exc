@@ -10,22 +10,17 @@
 .Trash-*
 .tmp*
 lost+found
+.cache
 
-/manjaro*
-/juhraya*
-/ubuntu*
-/bionic*
-/xenial*
-/trusty*
-/kx
+/nikita
 
+/shared/torrent
 /shared/.aMule/Temp
-/shared/.grsync/*.log
-/shared/Dev
-/shared/Downloads/La Maison Ecologique
-/shared/Downloads/zik/released
-/shared/Downloads/tmp
-/shared/Downloads/zte*
 /shared/virtualbox
 /shared/vmware
+/shared/.config/mpv/watch_later
+/shared/dev
+/shared/.mozilla*
+/shared/.thunderbird*
 
+#/shared/.tmux

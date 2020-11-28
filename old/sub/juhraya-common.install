@@ -58,7 +58,7 @@ ln -s "$file_bash_functions" "$file"
 
 _echoT "------------------  bash completion"
 
-_evalq cp -a "${S_PATH_INSTALL_CONF}/bash_completion"/* "/usr/share/bash-completion/"
+_evalq cp -a "${S_PATH_INSTALL_CONF}/bash_completion"/* "/usr/share/bash-completion/completions/"
 
 
 _echoT "------------------ hosts ovh-cluster"

@@ -20,8 +20,9 @@ lost+found
 # /shared/Videos
 
 /shared/Podcasts
+/shared/_new
+/shared//_back
+#/shared/Soft/_new
+
 /ovh
 /backups
-/_new
-/_back
-#/shared/Soft/_new

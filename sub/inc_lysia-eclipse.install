@@ -102,13 +102,6 @@ _echoT "------------------ $file_bin bind"
 sudo ln -s "${path_opt}/eclipse" "$file_bin"
 
 
-_echoT "------------------ icon add"
-
-file_icon="${path_opt}/icon.svg"
-[ -f "$file_icon" ] && rm [ -f "$file_icon" ]
-cp "${S_PATH_INSTALL_XTRA}/icons/eclipse.svg" "$file_icon"
-
-
 _echoT "------------------ launcher"
 
 file="${path_desk}"/eclipse.desktop
@@ -120,7 +113,7 @@ Keywords=development;IDE;
 Exec=eclipse
 Terminal=false
 Type=Application
-Icon=${file_icon}
+Icon=${path_opt}/icon.xpm
 Categories=Application;GTK;Development;IDE;
 StartupNotify=true
 Actions=EclipseClean;Separator;Dbeaver;Ghex;FirefoxDev;GitG;Meld;Smartgit;SquirrelSql;SublimeText;MousePad;Separator;SshDev;SshS;SshNode1;SshLxd;

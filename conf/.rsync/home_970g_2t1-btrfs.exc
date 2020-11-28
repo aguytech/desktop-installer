@@ -9,6 +9,7 @@
 lost+found
 ._sync_*
 .sync-*
+.cache
 
 /nikita
 
@@ -18,3 +19,6 @@ lost+found
 /shared/virtualbox
 /shared/vmware
 /shared/.config/mpv/watch_later
+#/shared/.tmux
+/shared/.mozilla*
+/shared/.thunderbird*

@@ -64,7 +64,7 @@ ln -s "$file_bash_functions" "$file"
 
 _echoT "------------------  bash completion"
 
-sudo cp -a "${S_PATH_INSTALL_CONF}/bash_completion"/* "/usr/share/bash-completion/"
+sudo cp -a "${S_PATH_INSTALL_CONF}/bash_completion"/* "/usr/share/bash-completion/completions/"
 
 
 _echoT "------------------ hosts ovh-cluster"

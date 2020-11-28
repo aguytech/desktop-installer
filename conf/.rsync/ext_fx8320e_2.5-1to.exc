@@ -1,9 +1,0 @@
-# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_fx8320e_2.5-1to.exc /ext/ /media/$USER/2.5-1to/ext/
-
-.snapshots
-lost+found
-.Trash-*
-.tmp*
-
-/shared/Videos/_new_
-/ovh

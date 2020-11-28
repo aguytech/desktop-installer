@@ -68,7 +68,7 @@ if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$
 	_echoT "------------------ libreoffice"
 	part_install=libreoffice
 
-	packages="libreoffice-still libreoffice-still-fr libreoffice-extension-writer2latex" # libreoffice-extension-texmaths
+	packages="libreoffice-fresh libreoffice-fresh-fr libreoffice-extension-writer2latex" # libreoffice-extension-texmaths
 	if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
 	# libreoffice-dmaths libreoffice-librelogo libreoffice-style-breeze libreoffice-style-elementary libreoffice-style-sifr
 #fi

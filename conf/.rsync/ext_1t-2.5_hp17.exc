@@ -1,9 +1,8 @@
 ## ubuntu
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_hp17_1t-2.5.exc /ext/ /media/$USER/1t-2.5/ext/ -av --delete -n
-# rsync /ext/shared/Soft/diag_repport/ /media/$USER/1t-2.5/ext/shared/Soft/diag_repport/ -av -n
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_1t-2.5_hp17.exc /media/$USER/1t-2.5/ext/ /ext/ -av --delete -n
 
 ## manjaro
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_hp17_1t-2.5.exc /ext/ /run/media/$USER/1t-2.5/ext/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_1t-2.5_hp17.exc /run/media/$USER/1t-2.5/ext/ /ext/ -av --delete -n
 
 .snapshots
 ._sync*
@@ -24,7 +23,7 @@ lost+found
 
 /shared/_watched
 #/shared/_new
-#/shared/_back
+#shared/_back
 #/shared/tmp
 
 #/shared/Soft/diag
