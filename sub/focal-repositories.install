@@ -47,8 +47,13 @@ _echoT "------------------ getdeb"
 #wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
 
 _echoT "------------------ mkv"
-#echo -e "deb http://mkvtoolnix.download/ubuntu/ bionic main\ndeb-src http://mkvtoolnix.download/ubuntu/ bionic main"  | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list
+#echo -e "deb http://mkvtoolnix.download/ubuntu/ bionic main\ndeb-src http://mkvtoolnix.download/ubuntu/ bionic main"  | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list/etc/apt/sources.list.d/multisystem.list
 #wget -q -O - https://mkvtoolnix.download/gpg-pub-moritzbunkus.txt | sudo apt-key add -
+
+_echoT "------------------ gmusibrowser"
+echo 'deb http://gmusicbrowser.org/deb ./' | sudo tee /etc/apt/sources.list.d/gmusicbrowser.list
+wget http://gmusicbrowser.org/squentin.key.asc -O - | sudo apt-key add -
+
 
 _echoT "------------------ multisystem"
 echo 'deb http://liveusb.info/multisystem/depot all main' | sudo tee /etc/apt/sources.list.d/multisystem.list
@@ -62,8 +67,9 @@ deb-src http://ftp.hosteurope.de/mirror/mariadb.org/repo/10.4/ubuntu bionic main
 sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
 
 _echoT "------------------ postgresql"
-echo 'deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main' | sudo tee /etc/apt/sources.list.d/pgdg.list
+echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
 
 if [ "$_DEV" ];then
 	_echoT "------------------ dev"

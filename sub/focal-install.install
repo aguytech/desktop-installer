@@ -36,7 +36,7 @@ sudo debconf-set-selections $file
 _echoT "------------------ system"
 part_install=system
 
-packages="debconf-utils gdebi gnupg2 gparted hfsprogs htop jq kpartx meld openjdk-11-jre openssh-server p7zip-full p7zip-rar pv rar xsysinfo sysstat testdisk tmux tree unrar" # oracle-java7-installer ntfsprogs grsync gtk2-engines-pixbuf libnss-myhostname atop fslint dstat icedtea-8-plugin
+packages="debconf-utils gdebi gnupg2 gparted hfsprogs htop jq kpartx meld openjdk-14-jre openssh-server p7zip-full p7zip-rar pv rar xsysinfo sysstat testdisk tmux tree unrar" # oracle-java7-installer ntfsprogs grsync gtk2-engines-pixbuf libnss-myhostname atop fslint dstat icedtea-8-plugin
 if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
 
 
