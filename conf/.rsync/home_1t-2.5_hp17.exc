@@ -24,4 +24,4 @@ lost+found
 /shared/.thunderbird*
 
 #/shared/.tmux
-#/shared/.tmux/resurrect/
+/shared/.tmux/resurrect
