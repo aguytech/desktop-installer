@@ -14,7 +14,7 @@ cmd="yay -S --noconfirm --needed"
 
 _echoT "------------------ install"
 
-packages="lxd" # virt-manager lxc
+packages="lxd jq yq2-bin" # virt-manager lxc
 
 $cmd $packages
 

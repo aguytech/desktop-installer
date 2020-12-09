@@ -14,7 +14,7 @@ cmd="sudo apt install"
 
 _echoT "------------------ install"
 
-packages="lxd" # virt-manager
+packages="lxd jq" # virt-manager
 
 $cmd $packages
 

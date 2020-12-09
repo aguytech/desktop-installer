@@ -71,14 +71,14 @@ _ask() {
 	_ANSWER=
 	while [ -z "$_ANSWER" ]; do
 		_echo- -n "$*: "
-		read _ANSWER >&4
+		read _ANSWER
 	done
 }
 # ask one time & accept no _ANSWER
 _askno() {
 	_ANSWER=
 	_echo- -n "$*: "
-	read _ANSWER >&4
+	read _ANSWER
 }
 # ask until y or n is given
 _askyn() {
@@ -87,7 +87,7 @@ _askyn() {
 	while [ "${options/ $_ANSWER }" = "$options" ]; do
 		#_echo- -n "${yellowb}$* y/n ${cclear}"
 		_echo- -n "$* y/n: "
-		read _ANSWER >&4
+		read _ANSWER
 	done
 }
 # ask $1 until a valid options $* is given
@@ -98,7 +98,7 @@ _asks() {
 	options="$*"
 	while [ "${options/$_ANSWER/}" = "$options" ]; do
 		_echo- -n "$1: "
-		read _ANSWER >&4
+		read _ANSWER
 	done
 }
 
@@ -147,19 +147,12 @@ _menur() {
 ##############  EVAL
 
 _eval() {
-	_echoD "_eval $*"
-	echo "$*" >&5
-	eval $* >&4
-}
-_evalc() {
-	_echoD "_evalc $*"
-	echo "$*" >&5
+	_echoD "eval $*"
 	eval $* >&1
 }
 _evalq() {
-	_echoD "_evalq $*"
-	echo "$*" >&5
-	eval $* >&5
+	_echoD "evalq $*"
+	eval $* >&4
 }
 
 ##############  EXIT
@@ -321,6 +314,7 @@ _get_ip() {
 	interface="${1:-$(ip -4 -o route show to default|cut -d' ' -f5|head -n1)}"
 	#ifconfig $inter | sed -n 's|^\s\+inet \(addr:\)\?\([0-9\.]\+\) .*|\2|p'
 	[ "${interface}" ] && ip -4 -o address show dev ${interface}|sed 's|.*inet\s\([0-9\.]\+\)/.*|\1|'
+	#[ "${interface}" ] && ip -br -4 -o address show dev ${interface}|sed 's|.*\s\+\([0-9\.]\+\)/.*|\1|'
 	# for ip version >= ss190107, with -j option
 	#interface=`ip -4 -j route show to default|jq -r '.[0].dev'`
 	#ip -4 -j address show dev ${interface}|jq -r '.[].addr_info[0].local|select(.!=null)'
@@ -331,6 +325,7 @@ _get_ipv6() {
 	interface="${1:-$(ip -6 -o route show to default|cut -d' ' -f5|head -n1)}"
 	#ifconfig ${interface} | sed -n 's|^\s\+inet6 \(addr:\)\?\([0-9a-z\:]\+\) .*128.*|\2|p'
 	[ "${interface}" ] && ip -6 -o address show dev ${interface}|sed -n 's|.*inet6\s\([0-9a-z:.]\+\)/128.*|\1|p'
+	#[ "${interface}" ] && ip -br -6 -o address show dev ${interface}|sed 's|.*\s\+\([0-9a-z:]\+\)/128.*|\1|'
 	# for ip version >= ss190107, with -j option
 	#ip -6 -j address show dev ${interface}|jq -r '.[].addr_info[0].local|select(.!=null)'
 }
@@ -523,12 +518,12 @@ _redirect() {
 	opt=${opt:-$S_TRACEOPT}
 
 	case "$opt" in
-		#			stderror								sdtout					info					command			debug
-		#			2										1						4						5				6
-		quiet)		exec 2> >(tee -a "$f_err" "$f_info")	1>&						4>>"$f_info"			5>>"$f_info"	6>/dev/null				;;
-		info)		exec 2> >(tee -a "$f_err" "$f_info")	1> >(tee -a "$f_info")	4> >(tee -a "$f_debug")	5>>"$f_info"	6>/dev/null				;;
-		verbose)	exec 2> >(tee -a "$f_err" "$f_info")	1> >(tee -a "$f_info")	4>&1					5>&1			6>/dev/null				;;
-		debug)		exec 2> >(tee -a "$f_err" "$f_info")	1> >(tee -a "$f_info")	4>&1					5>&1			6> >(tee -a "$f_debug")	;;
+		#				stderror												sdtout							info									debug
+		#				2															1									4										6
+		quiet)		exec 2> >(tee -a "$f_err" "$f_info")		1>&								4>>"$f_info"					6>/dev/null;;
+		info)			exec 2> >(tee -a "$f_err" "$f_info")		1> >(tee -a "$f_info")	4> >(tee -a "$f_info")		6>/dev/null;;
+		verbose)	exec 2> >(tee -a "$f_err" "$f_info")		1> >(tee -a "$f_info")	4> >(tee -a "$f_info")		6>>"$f_debug";;
+		debug)	exec 2> >(tee -a "$f_err" "$f_info")		1> >(tee -a "$f_info")	4> >(tee -a "$f_info")		6> >(tee -a "$f_debug");;
 	esac
 }
 
@@ -545,15 +540,11 @@ DDATE=`date "+%Y%m%d"` # date for log...
 SDATE=`date +%s` # date for keeping file
 
 # global configuration
-[ -z "$S_GLOBAL_CONF" ] && S_GLOBAL_CONF="/etc/server/server.conf"
+S_GLOBAL_CONF="${S_GLOBAL_CONF:-/etc/server/server.conf}"
 if [ ! -f "$S_GLOBAL_CONF" ]; then
 	echo -e "${red}alert - value of \$S_GLOBAL_CONF are empty from ${BASH_SOURCE[0]}${cclear}"
 	file="${_PATH_BASE}/conf-init.install"
-	! [ -f "$file" ] && echo -e "${red}alert - unable to find file '$file' from ${BASH_SOURCE[0]}${cclear}"
-	path=`dirname "${BASH_SOURCE[0]}"`
-	file=`readlink -e "${path}/../install/conf-init.install"`
-	! [ -f "$file" ] && echo -e "${red}error - unable to find file '$file' from ${BASH_SOURCE[0]}${cclear}"
-	if ! . "$file"; then echo -e "${red}error - unable to source file '$file' from ${BASH_SOURCE[0]}${cclear}" && exit 1; fi
+	if ! . "$file"; then echo -e "${redb}error - unable to find file '$file' from ${BASH_SOURCE[0]}${cclear}" && exit 1; fi
 fi
 . "$S_GLOBAL_CONF"
 
@@ -565,8 +556,8 @@ S_FILE_INSTALL_CONF="${S_PATH_CONF}/install.conf"
 
 _CLUSTER_IPS=`sed 'y/ /\n/' <<<${S_CLUSTER[*]} | sed -n 's/^ip=\([^ ]\?\)/\1/p' | xargs`
 _IPS_AUTH=`printf "%q\n" ${S_IPS_ADMIN} ${S_IPS_DEV} | sort -u | xargs`
-[ ${S_SERVER_TYPE} = 'vz' ] && _IPTHIS=`_get_ip ${S_ETH}` || _IPTHIS=`_get_ip`
-[ ${S_SERVER_TYPE} = 'vz' ] || _IPTHISV6=`_get_ipv6`
+[ ${S_SERVER_TYPE} != 'vz' ] && _IPTHIS=`_get_ip` || _IPTHIS=`_get_ip ${S_ETH}`
+[ ${S_SERVER_TYPE} != 'vz' ] && _IPTHISV6=`_get_ipv6`
 if [[ " lxc vz docker " = *" $S_SERVER_TYPE "* ]]; then
 	_VM_IP_BASE="${_IPTHIS%.*}}"
 else
