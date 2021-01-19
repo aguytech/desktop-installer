@@ -9,12 +9,12 @@ _echoT "#################### START ${_PART}"
 
 _echoT "------------------ nautilus"
 
-File="org.gnome.Nautilus"; Path=~/.local/share/applications; if ! [ -d $Path ]; then mkdir $Path; fi
-cp /usr/share/applications/$File.desktop $Path
-if ! grep -q '\[Desktop Action Separator\]' "$Path/$File.desktop"
+file="org.gnome.Nautilus"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
 then
 	menuadd="NautilusNode1;NautilusComputer;NautilusNetwork;Separator;Terminal;SshcDev;Sshc;SshcLxd"
-	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$Path/"$File".desktop"
+	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$path/"$file".desktop"
 	echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
@@ -47,20 +47,20 @@ Exec=gnome-terminal -e ssh-server
 [Desktop Action SshcLxd]
 Name=sshca
 Exec=gnome-terminal -e /home/shared/dev/bs/ssh-lxd
-" >> "$Path/$File.desktop"
-sed -i 's|^\(DBusActivatable.*\)|#\1|' "$Path/$File.desktop"
-chmod +x "$Path/$File.desktop"
+" >> "$path/$file.desktop"
+sed -i 's|^\(DBusActivatable.*\)|#\1|' "$path/$file.desktop"
+chmod +x "$path/$file.desktop"
 fi
 
 
 _echoT "------------------ gedit"
 
-File="org.gnome.gedit"; Path=~/.local/share/applications; if ! [ -d $Path ]; then mkdir $Path; fi
-cp /usr/share/applications/$File.desktop $Path
-if ! grep -q '\[Desktop Action Separator\]' "$Path/$File.desktop"
+file="org.gnome.gedit"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
 then
 	menuadd="Meld;GHex;Separator;Terminal;SshcDev;Sshc;SshcLxd"
-	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$Path/"$File".desktop"
+	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$path/"$file".desktop"
 	echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
@@ -93,19 +93,19 @@ Exec=gnome-terminal -e ssh-server
 [Desktop Action SshcLxd]
 Name=sshcl
 Exec=gnome-terminal -e ssh-lxd
-" >> "$Path/$File.desktop"
-sed -i 's|^\(DBusActivatable.*\)|#\1|' "$Path/$File.desktop"
-chmod +x "$Path/$File.desktop"
+" >> "$path/$file.desktop"
+sed -i 's|^\(DBusActivatable.*\)|#\1|' "$path/$file.desktop"
+chmod +x "$path/$file.desktop"
 fi
 
 _echoT "------------------ org.gnome.Terminal"
 
-File="org.gnome.Terminal"; Path=~/.local/share/applications; if ! [ -d $Path ]; then mkdir $Path; fi
-cp /usr/share/applications/$File.desktop $Path
-if ! grep -q '\[Desktop Action Separator\]' "$Path/$File.desktop"
+file="org.gnome.Terminal"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
 then
 	menuadd=";Separator;SshcDev;Sshc;SshcLxd;Separator;Nautilus;NautilusComputer;NautilusNetwork;"
-	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$Path/"$File".desktop"
+	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$path/"$file".desktop"
 	echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
@@ -134,19 +134,19 @@ Exec=nautilus --new-window computer:///
 [Desktop Action NautilusNetwork]
 Name=Nautilus Network
 Exec=nautilus --new-window network:///
-" >> "$Path/$File.desktop"
-chmod +x "$Path/$File.desktop"
+" >> "$path/$file.desktop"
+chmod +x "$path/$file.desktop"
 fi
 
 _echoT "------------------ firefox"
 
-File="firefox"; Path=~/.local/share/applications; if ! [ -d $Path ]; then mkdir $Path; fi
-cp /usr/share/applications/$File.desktop $Path
-#sed -i "s|^\(Exec=\).*|\1firefox -P $USER|" $Path/$File.desktop
-if ! grep -q '\[Desktop Action Separator\]' "$Path/$File.desktop"
+file="firefox"; path=~/.local/share/applications; if ! [ -d "$path" ]; then mkdir "$path"; fi
+cp /usr/share/applications/$file.desktop $path
+#sed -i "s|^\(Exec=\).*|\1firefox -P $USER|" $path/$file.desktop
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
 then
 	menuadd="Separator;ProfileUser;ProfileManager;SafeMode;Separator;FirefoxDev;Chromium;Separator;Qarte;aMule;"
-	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$Path/"$File".desktop"
+	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$path/"$file".desktop"
 	echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
@@ -191,18 +191,18 @@ Exec=skype %U
 [Desktop Action Pidgin]
 Name=Pidgin
 Exec=pidgin
-" >> "$Path/$File.desktop"
-chmod +x "$Path/$File.desktop"
+" >> "$path/$file.desktop"
+chmod +x "$path/$file.desktop"
 fi
 
 _echoT "------------------ thunderbird"
 
-File="thunderbird"; Path=~/.local/share/applications; if ! [ -d $Path ]; then mkdir $Path; fi
-cp /usr/share/applications/$File.desktop $Path
-if ! grep -q '\[Desktop Action Separator\]' "$Path/$File.desktop"
+file="thunderbird"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
 then
 	menuadd="Separator;Addressbook;ProfileManager;ProfileExtend;"
-	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$Path/"$File".desktop"
+	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$path/"$file".desktop"
 	echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
@@ -223,18 +223,18 @@ Exec=thunderbird -P extend
 [Desktop Action Compose]
 Name=Compose
 Exec=thunderbird -compose
-" >> "$Path/$File.desktop"
-chmod +x "$Path/$File.desktop"
+" >> "$path/$file.desktop"
+chmod +x "$path/$file.desktop"
 fi
 
 _echoT "------------------ org.gnome.Lollypop.desktop"
 
-File="org.gnome.Lollypop"; Path=~/.local/share/applications; if ! [ -d $Path ]; then mkdir $Path; fi
-cp /usr/share/applications/$File.desktop $Path
-if ! grep -q '\[Desktop Action Separator\]' "$Path/$File.desktop"
+file="org.gnome.Lollypop"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
 then
 	menuadd="Separator;GMusicBrowser;PulseaudioEqualizer;Separator;Audacity;Easytag;SoundJuicer;SoundConverter"
-	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$Path/"$File".desktop"
+	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$path/"$file".desktop"
 	echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
@@ -280,18 +280,18 @@ OnlyShowIn=GNOME;Unity
 [Desktop Action PulseaudioEqualizer]
 Name=Pulseaudio Equalizer
 Exec=pulseaudio-equalizer-gtk
-" >> "$Path/$File.desktop"
-chmod +x "$Path/$File.desktop"
+" >> "$path/$file.desktop"
+chmod +x "$path/$file.desktop"
 fi
 
 _echoT "------------------ org.gnome.Totem"
 
-File="org.gnome.Totem"; Path=~/.local/share/applications; if ! [ -d $Path ]; then mkdir $Path; fi
-cp /usr/share/applications/$File.desktop $Path
-if ! grep -q '\[Desktop Action Separator\]' "$Path/$File.desktop"
+file="org.gnome.Totem"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
 then
 	menuadd="Separator;HandBrake;Brasero;MKVtoolnix;GnomeSubtitles;KDEnlive;Separator;Mpv;"
-	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$Path/"$File".desktop"
+	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$path/"$file".desktop"
 	echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
@@ -320,15 +320,15 @@ Exec=ghb
 [Desktop Action Mpv]
 Name=Mpv media player
 Exec=mpv --player-operation-mode=pseudo-gui
-" >> "$Path/$File.desktop"
-chmod +x "$Path/$File.desktop"
+" >> "$path/$file.desktop"
+chmod +x "$path/$file.desktop"
 fi
 
 _echoT "------------------ mpv"
 
-File="mpv"; Path=~/.local/share/applications; if ! [ -d $Path ]; then mkdir $Path; fi
-cp /usr/share/applications/$File.desktop $Path
-if ! grep -q '\[Desktop Action Separator\]' "$Path/$File.desktop"
+file="mpv"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
 then
 	echo "Actions=Separator;HandBrake;Brasero;MKVtoolnix;GnomeSubtitles;KDEnlive;Separator;Totem;
 
@@ -359,15 +359,15 @@ Exec=ghb
 [Desktop Action Totem]
 Name=Totem media player
 Exec=totem
-" >> "$Path/$File.desktop"
-chmod +x "$Path/$File.desktop"
+" >> "$path/$file.desktop"
+chmod +x "$path/$file.desktop"
 fi
 
 _echoT "------------------ gimp"
 
-File="gimp"; Path=~/.local/share/applications; if ! [ -d $Path ]; then mkdir $Path; fi
-cp /usr/share/applications/$File.desktop $Path
-if ! grep -q '\[Desktop Action Separator\]' "$Path/$File.desktop"
+file="gimp"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
 then
 	echo "Actions=gThumb;Inkscape;Separator;SimpleScan;XSane;
 
@@ -390,18 +390,18 @@ Exec=simple-scan
 [Desktop Action XSane]
 Name=XSane Image scanning program
 Exec=xsane
-" >> "$Path/$File.desktop"
-chmod +x "$Path/$File.desktop"
+" >> "$path/$file.desktop"
+chmod +x "$path/$file.desktop"
 fi
 
 _echoT "------------------ libreoffice-startcenter"
 
-File="libreoffice-startcenter"; Path=~/.local/share/applications; if ! [ -d $Path ]; then mkdir $Path; fi
-cp /usr/share/applications/$File.desktop $Path
-if ! grep -q '\[Desktop Action Separator\]' "$Path/$File.desktop"
+file="libreoffice-startcenter"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
 then
 	menuadd="Separator;Gcolor3;Calculator;Stopwatch;Activity;"
-	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$Path/"$File".desktop"
+	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$path/"$file".desktop"
 	echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
@@ -422,15 +422,15 @@ Exec=/usr/bin/stopwatch
 [Desktop Action Gcolor3]
 Name=Color Picker
 Exec=gcolor3
-" >> $Path/$File.desktop
-chmod +x $Path/$File.desktop
+" >> $path/$file.desktop
+chmod +x $path/$file.desktop
 fi
 
 _echoT "------------------ gnome-tweak-tool"
 
-File="org.gnome.tweaks"; Path=~/.local/share/applications; if ! [ -d $Path ]; then mkdir $Path; fi
-cp /usr/share/applications/$File.desktop $Path
-if ! grep -q '\[Desktop Action Separator\]' "$Path/$File.desktop"
+file="org.gnome.tweaks"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
 then
 	echo "Actions=Separator;SoftwareUpdates;SoftwareSources;Separator;Gparted;DiskUtility;DiskUsage;Sysinfo;Separator;
 
@@ -465,8 +465,8 @@ Exec=gksudo gparted
 [Desktop Action Sysinfo]
 Name=Sysinfo
 Exec=sysinfo
-" >> "$Path/$File.desktop"
-chmod +x "$Path/$File.desktop"
+" >> "$path/$file.desktop"
+chmod +x "$path/$file.desktop"
 fi
 
 

@@ -11,6 +11,7 @@ lost+found
 .sync-*
 
 /nikita
+/cluster
 
 /shared/dev/eclipse-workspaces
 /shared/torrent

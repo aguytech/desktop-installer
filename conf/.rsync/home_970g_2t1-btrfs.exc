@@ -12,6 +12,7 @@ lost+found
 .cache
 
 /nikita
+/cluster
 
 /shared/dev/eclipse-workspaces
 /shared/torrent

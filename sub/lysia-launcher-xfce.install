@@ -7,12 +7,14 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 # xprop WM_CLASS
 ########################################  MAIN
 
+path=~/.local/share/applications; if ! [ -d "$path" ]; then mkdir "$path"; fi
+
 _echoT "------------------ xfce-settings-manager"
 
-file="xfce-settings-manager"; path=/usr/share/applications
+file="xfce-settings-manager"
 menuadd="Separator;ManjaroSettings;XfceSettings;LightdmGtk;Qt5ct;DconfSet;PlankSet;Separator;PamacManager;TaskManager;Gparted;DiskUsage;"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
     grep -q '^Actions=' "$path/$file.desktop" \
         && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
         || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
@@ -56,20 +58,20 @@ Exec=dconf-editor
 [Desktop Action ManjaroSettings]
 Name=Manjaro settings
 Exec=manjaro-settings-manager
-" | sudo tee -a "$path/$file.desktop"
+" >> "$path/$file.desktop"
 fi
-sudo sed -i 's|^OnlyShowIn=XFCE;|#OnlyShowIn=XFCE;|' "$path/$file.desktop"
+sed -i 's|^OnlyShowIn=XFCE;|#OnlyShowIn=XFCE;|' "$path/$file.desktop"
 
 _echoT "------------------ thunar"
 
-file="thunar"; path=/usr/share/applications
+file="thunar"
 menuadd="ThunarNode1;Separator;Terminal;SshDev;SshS;SshNode1;SshLxd;"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
-	grep -q '^Actions=' "$path/$file.desktop" \
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
+    grep -q '^Actions=' "$path/$file.desktop" \
         && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
         || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
-	echo "
+    echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
 Exec=
@@ -97,19 +99,19 @@ Exec=xfce4-terminal --tab --title=node1 -x ssh-server node1
 [Desktop Action SshLxd]
 Name=ssh LXD
 Exec=xfce4-terminal --tab --title=LXD -x ssh-lxd
-" | sudo tee -a "$path/$file.desktop"
+" >> "$path/$file.desktop"
 fi
 
 _echoT "------------------ mousepad"
 
-file="mousepad"; path=/usr/share/applications
+file="mousepad"
 menuadd="Meld;GHex;Separator;Terminal;SshDev;SshS;SshNode1;SshLxd;"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
-	grep -q '^Actions=' "$path/$file.desktop" \
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
+    grep -q '^Actions=' "$path/$file.desktop" \
         && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
         || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
-	echo "
+    echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
 Exec=
@@ -137,19 +139,19 @@ Exec=xfce4-terminal --tab --title=node1 -x ssh-server node1
 [Desktop Action SshLxd]
 Name=ssh lxd
 Exec=xfce4-terminal --tab --title=LXD -x ssh-server ssh-lxd
-" | sudo tee -a "$path/$file.desktop"
+" >> "$path/$file.desktop"
 fi
 
 _echoT "------------------ xfce4-terminal"
 
-file="xfce4-terminal"; path=/usr/share/applications
+file="xfce4-terminal"
 menuadd="Separator;SshDev;SshS;SshNode1;SshLxd;Separator;Thunar;ThunarNode1;"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
-	grep -q '^Actions=' "$path/$file.desktop" \
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
+    grep -q '^Actions=' "$path/$file.desktop" \
         && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
         || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
-	echo "
+    echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
 Exec=
@@ -177,19 +179,19 @@ Exec=thunar
 [Desktop Action ThunarNode1]
 Name=Thunar node1
 Exec=thunar_newtabs /usr/local/bs sftp://root@node1/
-" | sudo tee -a "$path/$file.desktop"
+" >> "$path/$file.desktop"
 fi
 
 _echoT "------------------ firefox"
 
-file="firefox"; path=/usr/share/applications
+file="firefox"
 menuadd="Separator;ProfileUser;ProfileManager;SafeMode;Separator;FirefoxDev;Chromium;Separator;Qarte;aMule;"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
-	grep -q '^Actions=' "$path/$file.desktop" \
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
+    grep -q '^Actions=' "$path/$file.desktop" \
         && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
         || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
-	echo "
+    echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
 Exec=
@@ -233,19 +235,19 @@ Exec=skype %U
 [Desktop Action Pidgin]
 Name=Pidgin
 Exec=pidgin
-" | sudo tee -a "$path/$file.desktop"
+" >> "$path/$file.desktop"
 fi
 
 _echoT "------------------ thunderbird"
 
-file="thunderbird"; path=/usr/share/applications
+file="thunderbird"
 menuadd="Separator;Addressbook;ProfileManager;ProfileExtend;"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
-	grep -q '^Actions=' "$path/$file.desktop" \
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
+    grep -q '^Actions=' "$path/$file.desktop" \
         && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
         || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
-	echo "
+    echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
 Exec=
@@ -261,19 +263,19 @@ Exec=thunderbird --ProfileManager
 [Desktop Action ProfileExtend]
 Name=Profile  Extend
 Exec=thunderbird -P extend
-" | sudo tee -a "$path/$file.desktop"
+" >> "$path/$file.desktop"
 fi
 
 _echoT "------------------ gmusicbrowser"
 
-file="gmusicbrowser"; path=/usr/share/applications
+file="gmusicbrowser"
 menuadd="Separator;Lollypop;PulseaudioEqualizer;Separator;Audacity;Easytag;SoundJuicer;SoundConverter;"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
-	grep -q '^Actions=' "$path/$file.desktop" \
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
+    grep -q '^Actions=' "$path/$file.desktop" \
         && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
         || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
-	echo "
+    echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
 Exec=
@@ -305,65 +307,15 @@ Exec=soundconverter %U
 [Desktop Action PulseaudioEqualizer]
 Name=Pulseaudio Equalizer
 Exec=qpaeq
-" | sudo tee -a "$path/$file.desktop"
-fi
-
-_echoT "------------------ org.gnome.Lollypop"
-
-file="org.gnome.Lollypop"; path=/usr/share/applications
-menuadd="Separator;GMusicBrowser;PulseaudioEqualizer;Separator;Audacity;Easytag;SoundJuicer;SoundConverter;"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
-	grep -q '^Actions=' "$path/$file.desktop" \
-        && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
-        || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
-	echo "
-[Desktop Action Separator]
-Name=−−−−−−−−−−
-Exec=
-
-[Desktop Action GMusicBrowser]
-Name=gmusicbrowser
-Exec=gmusicbrowser %F
-
-[Desktop Action GPodder]
-Name=GPodder
-Exec=gpodder
-
-[Desktop Action Audacity]
-Name=Audacity
-Exec=audacity
-
-[Desktop Action Easytag]
-Name=Easytag
-Exec=easytag %F
-
-[Desktop Action Mixxx]
-Name=Mixxx
-Exec=mixxx
-
-[Desktop Action SoundJuicer]
-Name=SoundJuicer
-Exec=sound-juicer
-
-[Desktop Action SoundConverter]
-Name=Sound Converter
-Exec=soundconverter %U
-
-[Desktop Action PulseaudioEqualizer]
-Name=Pulseaudio Equalizer
-Exec=qpaeq
-" | sudo tee -a "$path/$file.desktop"
+" >> "$path/$file.desktop"
 fi
 
 _echoT "------------------ celluloid"
 
-file="celluloid"; path=/usr/share/applications
+file="celluloid"
 menuadd="Separator;Mpv;HandBrake;SubtitleEditor;MKVtoolnix;"
-[ -f "$path/io.github.celluloid_player.Celluloid.desktop" ] && sudo mv "$path/io.github.celluloid_player.Celluloid.desktop" "$path/$file.desktop"
-sed -i '|^\(StartupWMClass.*\)|#\1|' "$path/$file.desktop"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
     grep -q '^Actions=' "$path/$file.desktop" \
         && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
         || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
@@ -387,17 +339,15 @@ Exec=subtitleeditor
 [Desktop Action HandBrake]
 Name=HandBrake
 Exec=ghb
-" | sudo tee -a "$path/$file.desktop"
+" >> "$path/$file.desktop"
 fi
 
 _echoT "------------------ mpv"
 
-file="mpv"; path=/usr/share/applications
+file="mpv"
 menuadd="Separator;Celluloid;HandBrake;SubtitleEditor;MKVtoolnix;"
-[ -f "$path/io.github.celluloid_player.Celluloid.desktop" ] && sudo mv "$path/io.github.celluloid_player.Celluloid.desktop" "$path/$file.desktop"
-sed -i '|^\(StartupWMClass.*\)|#\1|' "$path/$file.desktop"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
     grep -q '^Actions=' "$path/$file.desktop" \
         && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
         || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
@@ -421,19 +371,19 @@ Exec=subtitleeditor
 [Desktop Action HandBrake]
 Name=HandBrake
 Exec=ghb
-" | sudo tee -a "$path/$file.desktop"
+" >> "$path/$file.desktop"
 fi
 
 _echoT "------------------ gimp"
 
-file="gimp"; path=/usr/share/applications
+file="gimp"
 menuadd="gThumb;Inkscape;Separator;XSane;"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
-	grep -q '^Actions=' "$path/$file.desktop" \
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
+    grep -q '^Actions=' "$path/$file.desktop" \
         && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
         || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
-	echo "
+    echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
 Exec=
@@ -449,19 +399,19 @@ Exec=inkscape %F
 [Desktop Action XSane]
 Name=XSane
 Exec=xsane
-" | sudo tee -a "$path/$file.desktop"
+" >> "$path/$file.desktop"
 fi
 
 _echoT "------------------ libreoffice-startcenter"
 
-file="libreoffice-startcenter"; path=/usr/share/applications
+file="libreoffice-startcenter"
 menuadd="Separator;Galculator;Gcolor3;FontViewer;XfBurn;Brasero;"
-if [ -f "$path/$file.desktop" ] && ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
-    sudo cp -a "$path/$file.desktop" "$path/$file.desktop.keep$(date +%s)"
-	grep -q '^Actions=' "$path/$file.desktop" \
+cp /usr/share/applications/$file.desktop $path
+if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
+    grep -q '^Actions=' "$path/$file.desktop" \
         && sudo sed -i "s|^\(Actions=.*\)$|\1${menuadd}|" "$path/$file.desktop" \
         || echo "Actions=${menuadd}" | sudo tee -a "$path/$file.desktop"
-	echo "
+    echo "
 [Desktop Action Separator]
 Name=−−−−−−−−−−
 Exec=
@@ -485,7 +435,7 @@ Exec=brasero
 [Desktop Action XfBurn]
 Name=Xfce Burn
 Exec=xfburn
-" | sudo tee -a "$path/$file.desktop"
+" >> "$path/$file.desktop"
 fi
 
 

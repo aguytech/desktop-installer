@@ -12,6 +12,7 @@ lost+found
 .cache
 
 /nikita
+/cluster
 
 /shared/torrent
 /shared/.aMule/Temp
