@@ -227,63 +227,6 @@ Exec=thunderbird -compose
 chmod +x "$path/$file.desktop"
 fi
 
-_echoT "------------------ org.gnome.Lollypop.desktop"
-
-file="org.gnome.Lollypop"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi
-cp /usr/share/applications/$file.desktop $path
-if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"
-then
-	menuadd="Separator;GMusicBrowser;PulseaudioEqualizer;Separator;Audacity;Easytag;SoundJuicer;SoundConverter"
-	sed -i "s/^\(Actions=.*\)$/\1$menuadd/" "$path/"$file".desktop"
-	echo "
-[Desktop Action Separator]
-Name=−−−−−−−−−−
-Exec=
-
-[Desktop Action GMusicBrowser]
-Name=gmusicbrowser
-Exec=gmusicbrowser %F
-
-[Desktop Action GPodder]
-Name=GPodder
-Exec=gpodder
-
-[Desktop Action Audacity]
-Name=Audacity
-Exec=audacity
-
-[Desktop Action EasyMP3Gain]
-Name=EasyMP3Gain
-Exec=easymp3gain %U
-
-[Desktop Action Easytag]
-Name=Easytag
-Exec=easytag %F
-
-[Desktop Action Mixxx]
-Name=Mixxx
-Exec=mixxx
-
-[Desktop Action MP3Split]
-Name=MP3Split
-Exec=mp3splt-gtk
-
-[Desktop Action SoundJuicer]
-Name=SoundJuicer
-Exec=sound-juicer
-
-[Desktop Action SoundConverter]
-Name=Sound Converter
-Exec=soundconverter %U
-OnlyShowIn=GNOME;Unity
-
-[Desktop Action PulseaudioEqualizer]
-Name=Pulseaudio Equalizer
-Exec=pulseaudio-equalizer-gtk
-" >> "$path/$file.desktop"
-chmod +x "$path/$file.desktop"
-fi
-
 _echoT "------------------ org.gnome.Totem"
 
 file="org.gnome.Totem"; path=~/.local/share/applications; if ! [ -d $path ]; then mkdir $path; fi

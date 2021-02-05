@@ -280,10 +280,6 @@ if ! grep -q '\[Desktop Action Separator\]' "$path/$file.desktop"; then
 Name=−−−−−−−−−−
 Exec=
 
-[Desktop Action Lollypop]
-Name=Lollypop
-Exec=lollypop %U
-
 [Desktop Action Audacity]
 Name=Audacity
 Exec=audacity

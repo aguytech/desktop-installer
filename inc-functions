@@ -202,6 +202,13 @@ __function_common() {
 		[[ -e "${1}" || -h "${1}" ]] && _evalq mv "${1}" "${1}.keep$(date +%s)"
 	}
 
+	_keepcpts_rt() {
+		[[ -e "${1}" || -h "${1}" ]] && _evalq sudo cp -a "${1}" "${1}.keep$(date +%s)"
+	}
+	_keepmvts_rt() {
+		[[ -e "${1}" || -h "${1}" ]] && _evalq sudo mv "${1}" "${1}.keep$(date +%s)"
+	}
+
 	##############  PWD
 
 	_pwd() { < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c14; }
@@ -573,8 +580,8 @@ __data() {
 	_IPS_AUTH=`printf "%q\n" ${S_IPS_ADMIN} ${S_IPS_DEV} | sort -u | xargs`
 
 	# server type
-	[ ${S_SERVER_TYPE} != 'vz' ] && _IPTHIS=`_get_ip` || _IPTHIS=`_get_ip ${S_ETH}`
-	[ ${S_SERVER_TYPE} != 'vz' ] && _IPTHISV6=`_get_ipv6`
+	[ "${S_SERVER_TYPE}" != 'vz' ] && _IPTHIS=`_get_ip` || _IPTHIS=`_get_ip ${S_ETH}`
+	[ "${S_SERVER_TYPE}" != 'vz' ] && _IPTHISV6=`_get_ipv6`
 
 	# IPs
 	if [[ " lxc vz docker " = *" $S_SERVER_TYPE "* ]]; then
@@ -595,6 +602,12 @@ if [ -z $S_INC_FUNCTIONS ]; then
 	# global configuration
 	S_GLOBAL_CONF="${S_GLOBAL_CONF:-/etc/server/server.conf}"
 	! . "$S_GLOBAL_CONF" && echo -e "[error] - Unable to source file '$S_GLOBAL_CONF' from '${BASH_SOURCE[0]}'" && echo 1
+
+	# initialize configuration
+	#file="${_PATH_BASE}/conf-init.install"
+	#if ! . "$file"; then
+	#	echo -e "[error] - unable to find file '$file' from ${BASH_SOURCE[0]}" && exit 1
+	#fi
 
 	# init functions
 	__function_common

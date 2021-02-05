@@ -47,7 +47,7 @@ part_install=media
 
 packages="chromium amule" # tesseract tesseract-ocr-fra gnome-music isomaster mixxx lightzone darktable tangerine gnome-clocks
 
-packages+=" audacity easytag soundconverter sound-juicer lollypop pulseaudio-equalizer" # easymp3gain-gtk2 mp3splt-gtk
+packages+=" audacity easytag soundconverter sound-juicer pulseaudio-equalizer" # easymp3gain-gtk2 mp3splt-gtk lollypop
 
 packages+=" gimp gimp-nufraw gimp-plugin-gmic inkscape xsane" # gimp-plugin-registry gimp-plugin-satequalizer gimp-plugin-duplicate-to-another-image gimp-plugin-saveforweb gimp-plugin-fblur gimp-plugin-lqr gimp-refocus gimp-plugin-wavelet-denoise
 

@@ -79,7 +79,7 @@ part_install=media
 
 packages="chromium-browser brasero qarte gnome-subtitles audacity ubuntu-restricted-extras easytag soundconverter sound-juicer stopwatch flashplugin-installer chrome-gnome-shell" # mozplugger isomaster mixxx tesseract-ocr-fra lightzone darktable vlc tangerine amule amule-gnome-support gnome-xcf-thumbnailer
 
-packages+=" lollypop gstreamer1.0-plugins-bad pulseaudio-equalizer ubuntu-restricted-extras" # gmusicbrowser gmusicbrowser-art gstreamer1.0-plugins-bad-faad gpodder goobox kid3-cli cdrdao cue2toc bchunk ccd2iso mdf2iso nrg2iso clipgrab
+packages+=" gstreamer1.0-plugins-bad pulseaudio-equalizer ubuntu-restricted-extras" # gmusicbrowser gmusicbrowser-art gstreamer1.0-plugins-bad-faad gpodder goobox kid3-cli cdrdao cue2toc bchunk ccd2iso mdf2iso nrg2iso clipgrab lollypop
 
 packages+=" gimp gimp-gap gimp-cbmplugs gimp-gluas gimp-data gimp-gmic gimp-texturize gimp-data-extras gimp-gutenprint gimp-dds gimp-lensfun gtkam-gimp create-resources inkscape ink-generator xsane" # ijsgutenprint gimp-save-for-web gimp-normal-map gimp-plugin-registry gimp-dbg gimp-ufraw sozi pandora
 

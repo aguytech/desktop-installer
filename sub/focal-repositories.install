@@ -18,7 +18,6 @@ sudo add-apt-repository -yn ppa:vincent-vandevyvre/vvv # qarte
 sudo add-apt-repository -yn ppa:inkscape.dev/stable # inkscape
 sudo add-apt-repository -yn ppa:lightzone-team/lightzone # lightzone
 sudo add-apt-repository -yn ppa:kdenlive/kdenlive-stable # kdenlive
-sudo add-apt-repository -yn ppa:gnumdk/lollypop # lollypop
 sudo add-apt-repository -yn ppa:boamaod/nautilus-compare # nautilus_compare
 #sudo add-apt-repository -yn ppa:yannubuntu/boot-repair # boot-repair
 #sudo add-apt-repository -yn ppa:nilarimogard/webupd8 # youtube-dl, pulseaudio-equalizer & more
@@ -26,6 +25,7 @@ sudo add-apt-repository -yn ppa:boamaod/nautilus-compare # nautilus_compare
 #sudo add-apt-repository -yn ppa:daniel-marynicz/filemanager-actions # filemanager-actions nautilus
 #sudo add-apt-repository -yn ppa:mc3man/mpv-tests # mpv
 #sudo add-apt-repository -yn ppa:otto-kesselgulasch/gimp # gimp gmic
+#sudo add-apt-repository -yn ppa:gnumdk/lollypop # lollypop
 
 if [ "$_FREECAD" ];then
 	sudo add-apt-repository -yn ppa:freecad-maintainers/freecad-stable # freecad

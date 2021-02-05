@@ -89,7 +89,7 @@ _confset _USERNAME "$_USERNAME"
 [ -z ${_DEVICE_SYS+x} ] && _menu "Select a device for system installation" $(blkid -o device|grep -v '/loop'|xargs) && _DEVICE_SYS=$_ANSWER
 _confset _DEVICE_SYS "${_DEVICE_SYS}"
 
-[ -z ${_SYSNAME+x} ] && anstmp=focal && _askno "Give a prefix/sufix btrfs volume name for system device '${_DEVICE_SYS}' ($anstmp)" && _SYSNAME=${_ANSWER:-$anstmp}
+[ -z ${_SYSNAME+x} ] && anstmp=nibia && _askno "Give a prefix/sufix btrfs volume name for system device '${_DEVICE_SYS}' ($anstmp)" && _SYSNAME=${_ANSWER:-$anstmp}
 _confset _SYSNAME "${_SYSNAME}"
 
 [ -z ${_DEVICE_EXT+x} ] && anstmp="" && _askno "Give a device for 'extend' device if exists ($anstmp)" && _DEVICE_EXT=${_ANSWER:-$anstmp}

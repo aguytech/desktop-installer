@@ -12,7 +12,7 @@ _echoT "================== ${_PART} / global configuration"
 _echoT "------------------ grub"
 
 file=/etc/default/grub
-sudo _keepcpts "$file"
+_keepcpts_rt "$file"
 sudo sed -i "/^GRUB_TIMEOUT=/ s|=.*|=2|" "$file"
 sudo sed -i "/^GRUB_HIDDEN_TIMEOUT_QUIET=/ s|=.*|=false|" "$file"
 sudo sed -i "/^GRUB_HIDDEN_TIMEOUT_QUIET=/ s/^/#/" "$file"
@@ -118,7 +118,7 @@ quality=0.9
 managed=false" > "$file"
 
 file="/usr/share/sound-juicer/rhythmbox.gep"
-_keepmvts "$file"
+_keepmvts_rt "$file"
 sch="\[streamprofile-oggvorbis-1\]"
 str="preset = ogg_very_high"
 sudo sed -i "/$sch/ a $sch" "$file"

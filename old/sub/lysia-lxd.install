@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "#################### START ${_PART}"
+
+fileinstalldone=${_PATH_LOG}/install.done
+_FILE_INSTALL_PCK=${S_PATH_CONF}/install.pck
+
+cmd="yay -S --noconfirm --needed"
+
+########################################  MAIN
+
+_echoT "------------------ install"
+
+packages="lxd jq yq2-bin" # virt-manager lxc
+
+$cmd $packages
+
+
+_echoT "------------------ service conf"
+
+<<KEEP
+path=/etc/netctl
+! [ -d "$path" ] && sudo mkdir -p "$path"
+
+sudo cp -a /usr/share/lxd/dnsmasq-lxd.conf /etc/dnsmasq-lxd.conf
+sudo cp -a /usr/share/lxd/netctl/lxd /etc/netctl/lxd
+# if use NetworkManager
+sudo cp -a /usr/share/lxd/NetworkManager/dnsmasq.d/lxd.conf /etc/NetworkManager/dnsmasq.d/lxd.conf
+
+for file in /etc/dnsmasq-lxd.conf /etc/netctl/lxd /etc/NetworkManager/dnsmasq.d/lxd.conf; do
+	sudo sed -i 's|10.0.40|10.0.0|g' "$file"
+done
+
+ln -s /usr/share/lxd/systemd/system/dnsmasq@lxd.service /etc/systemd/system/dnsmasq@lxd.service
+ln -s /usr/share/lxd/dbus-1/system.d/dnsmasq-lxd.conf /etc/dbus-1/system.d/dnsmasq-lxd.conf
+KEEP
+
+_echoT "------------------ service enable"
+
+sudo systemctl enable lxd.service lxc.service lxc-net.service lxd.socket
+sudo systemctl start lxd.service lxc.service
+
+
+_echoT "------------------ user add"
+
+sudo usermod -a -G lxd $USER
+
+
+_echoT "------------------ subuid & subgid"
+
+file="/etc/subuid"
+echo -e "lxd:100000:65536\nroot:100000:65536" | sudo tee "$file"
+file="/etc/subgid"
+echo -e "lxd:100000:65536\nroot:100000:65536" | sudo tee "$file"
+
+
+_echoT "------------------ lxd init"
+
+sudo lxd init
+
+
+########################################  END
+
+_echoT "------------------ write ${_PART}"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}"

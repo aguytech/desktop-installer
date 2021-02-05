@@ -279,10 +279,6 @@ echo "
 Name=−−−−−−−−−−
 Exec=
 
-[Desktop Action Lollypop]
-Name=Lollypop
-Exec=lollypop %U
-
 [Desktop Action Audacity]
 Name=Audacity
 Exec=audacity
