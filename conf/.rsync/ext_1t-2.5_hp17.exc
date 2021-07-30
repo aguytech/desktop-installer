@@ -13,12 +13,12 @@ lost+found
 
 /backups
 /ovh
-/shared/android
+#/shared/android
 /shared/Music
 /shared/Podcasts
 /shared/Soft/diag
 /shared/Soft/diag_tools
-/shared/Soft/windows
+#/shared/Soft/windows
 /shared/Videos
 
 /shared/_watched

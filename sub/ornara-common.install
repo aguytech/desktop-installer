@@ -30,13 +30,8 @@ _echoT "------------------ bs link"
 
 _echoT "------------------ conf mirror sources"
 # Change the mirror of software sources
-(software-properties-gtk)
-
-
-_echoT "------------------ conf user"
-#sudo passwd root
-sudo adduser "$USER" users; sudo adduser "$USER" www-data
-sudo adduser "$USER" audio; sudo adduser "$USER" video
+sudo pacman-mirrors --country-list
+sudo pacman-mirrors -c France
 
 
 _echoT "------------------ conf bash"
@@ -51,16 +46,10 @@ colorRoot='\\e[1;31m'
 KEEP
 
 file=~/.bashrc
-_keepcpts "$file"
-sed -i 's|^\( *\)\(PS1.*033.*32m.*\)$|\1PS1="\${debian_chroot:+(\$debian_chroot)}\\['$colorRoot'\\]\\u\\[\\e[1;37m\\]@\\['$color'\\]\\h\\[\\e[1;37m\\]:\\W\\['$colorRoot'\\]\$\\[\\e[0;0m\\]\"|' "$file"
+file_conf=${S_PATH_SCRIPT_CONF}/.bashrc-manjaro
+_keepmvts "$file"
+ln -s $file_conf $file
 
-! grep -q '/etc/server/env.conf' "$file" && echo '
-# source global variables
-[ -f /etc/server/env.conf ] && . /etc/server/env.conf
-
-# functions
-[ -f ~/.bash_functions ] && . ~/.bash_functions
-' >> "$file"
 
 _echoT "------------------  .bash_aliases"
 
@@ -78,7 +67,7 @@ ln -s "$file_bash_functions" "$file"
 
 _echoT "------------------  bash completion"
 
-_evalq sudo cp -a "${S_PATH_INSTALL_CONF}/bash_completion"/* "/usr/share/bash-completion/completions/"
+sudo cp -a "${S_PATH_INSTALL_CONF}/bash_completion"/* "/usr/share/bash-completion/completions/"
 
 
 _echoT "------------------ hosts ovh-cluster"

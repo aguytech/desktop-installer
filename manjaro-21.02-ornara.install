@@ -8,7 +8,7 @@ echo "####################  ${BASH_SOURCE[0]}  ####################"
 #S_TRACE=debug
 
 #allow conf-init
-_INSTALL=ubuntu
+_INSTALL=manjaro
 
 path=`dirname "${BASH_SOURCE[0]}"`
 if [[ -z "$S_GLOBAL_FUNCTIONS" || -f $S_GLOBAL_FUNCTIONS ]]; then
@@ -21,7 +21,7 @@ fi
 
 S_FILE_INSTALL_CONF="${S_PATH_CONF}/install.conf"
 S_FILE_INSTALL_DONE="${S_PATH_CONF}/install.done"
-_PATH_SSH_KEEP="/home/shared/.perso/.ssh"
+_PATH_SSH_KEEP="/home/shared/dev/install-desktop/xtra/.ssh"
 _PATH_SOFT=/ext/shared/Soft/multi
 
 # path
@@ -29,7 +29,7 @@ _PATH_SOFT=/ext/shared/Soft/multi
 
 # after btrfs1
 if ! grep -q '^S_RELEASE_NAME=' "$S_FILE_INSTALL_CONF"; then
-	sed -i "1i _SCRIPT=\"${_INSTALL/%.install}\"\nS_RELEASE_NAME=\"$S_RELEASE_NAME\"\n" "${S_FILE_INSTALL_CONF}"
+	sed -i "1i _SCRIPT=\"${_SCRIPT/%.install}\"\nS_RELEASE_NAME=\"$S_RELEASE_NAME\"\n" "${S_FILE_INSTALL_CONF}"
 fi
 
 # require
@@ -62,10 +62,15 @@ str="# install"; ! grep -q "^$str" "${S_FILE_INSTALL_CONF}" && echo -e "\n$str" 
 
 #[ -z ${S_RELEASE_NAME+x} ] && anstmp="${S_RELEASE_NAME}" && _askno "Give the name of release ($_ANSWER)"  && S_RELEASE_NAME=${_ANSWER} && _confset S_RELEASE_NAME "${S_RELEASE_NAME}"
 
-[ -d "/etc/xdg/xfce4" ] && S_RELEASE_DESKTOP="xfce"
-[ -d "/etc/gdm" ] && S_RELEASE_DESKTOP="gnome"
-[ "${S_RELEASE_DESKTOP}" ] && _echoi "Dekstop environement are ${S_RELEASE_DESKTOP}"
-[ -z ${S_RELEASE_DESKTOP+x} ] && _menu "Select a desktop environement for manjaro" xfce gnome && S_RELEASE_DESKTOP=$_ANSWER && _confset S_RELEASE_DESKTOP "${S_RELEASE_DESKTOP}"
+if [ -z ${S_RELEASE_DESKTOP+x} ]; then
+	[ -d "/etc/xdg/xfce4" ] && S_RELEASE_DESKTOP="xfce"
+	[ -d "/etc/gdm" ] && S_RELEASE_DESKTOP="gnome"
+	if [ "${S_RELEASE_DESKTOP}" ]; then
+		_echoi "Dekstop environement are ${S_RELEASE_DESKTOP}"
+	else
+		_menu "Select a desktop environement for manjaro" xfce gnome && S_RELEASE_DESKTOP=$_ANSWER
+	_confset S_RELEASE_DESKTOP "${S_RELEASE_DESKTOP}"
+fi
 
 # if not btrfs
 [ -z ${_LXD+x} ] && anstmp=y && _askno "Do you want to configure computer for lxd ($anstmp)" && _LXD=${_ANSWER:-$anstmp} && _LXD=${_LXD/n/} && _confset _LXD "$_LXD"
@@ -99,18 +104,11 @@ fi
 
 [ -z ${_FREECAD+x} ] && anstmp=n && _askno "Do you want install 'freecad' software? ($anstmp)" && _FREECAD=${_ANSWER:-$anstmp} && _FREECAD=${_FREECAD/n/} && _confset _FREECAD "$_FREECAD"
 
-[ -z ${_MULTIBOOT+x} ] && anstmp="9.2.0" && _askno "Give the version of multiboot to install 9.2.0 ($anstmp)" && _MULTIBOOT=${_ANSWER:-$anstmp} && _MULTIBOOT=${_MULTIBOOT/n/} && _confset _MULTIBOOT "$_MULTIBOOT"
-
 
 
 ################################  COMMON-
 
 _PART=common
-if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoi "performed *** ${_PART}"; fi
-
-################################  REPOSITORIES-
-
-_PART=repositories
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoi "performed *** ${_PART}"; fi
 
 ################################  UPGRADE-
@@ -150,6 +148,16 @@ if [ "$_LXD" ]; then
     else
 		_echoi "performed *** ${_PART}"
 	fi
+fi
+
+################################  AUR-
+
+_PART=aur
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	[ "$_STEP" ] && _askno "Valid to continue"
+else
+	_echoi "performed *** ${_PART}"
 fi
 
 ################################  CONFIGURATION-
@@ -217,74 +225,3 @@ _echoT "####################  end  ####################"
 
 _echoi "\n!!!!! This installation are complety DONE ;o) !!!!!"
 
-<<KEEP
-
-######################################## m_audio_delta_66
-
-# driver mudita24 replace Envy24
-sudo apt install -y mudita24
-
-
-########################################  FIREFOX
-
-about:config
-browser.search.openintab;true
-browser.tabs.loadBookmarksInTabs;true
-browser.tabs.insertRelatedAfterCurrent;true
-
-
-########################################  FLASH
-
-sudo apt install --reinstall flashplugin-installer ttf-mscorefonts-installer
-
-
-########################################  SHUT_DOWN
-
-#sudo systemctl disable NetworkManager-wait-online.service
-#sudo systemctl disable plymouth-quit-wait.service
-
-
-########################################  USB_SYSTEM
-
-sudo cp -p /etc/fstab /etc/fstab.keep; echo "tmpfs   /tmp		tmpfs   defaults,noatime,mode=1777	0 0
-tmpfs   /var/tmp	tmpfs   defaults,noatime,mode=1777	0 0
-tmpfs   /var/lock	tmpfs   defaults,noatime,mode=1777	0 0
-tmpfs   /var/log	tmpfs   defaults,noatime		0 0
-tmpfs   /var/run	tmpfs   defaults,noatime,mode=0755	0 0
-tmpfs   /var/cache/apt	tmpfs   defaults			0 0
-#tmpfs   /var/cache	tmpfs   defaults,noatime,mode=0755	0 0" | sudo tee -a /etc/fstab
-
-
-########################################  USB_LIVE
-
-# update_kernel
-sudo mv /usr/sbin/update-initramfs /usr/sbin/update-initramfs.keep; sudo ln -s /rofs/usr/sbin/update-initramfs /usr/sbin/update-initramfs; sudo dpkg --configure -a # copy initrd & vmlinuz to /casper
-
-keep
-
-<<global
-
-sudo apt install -y fslint acpi gnupg2 dstat htop sysstat pv tree openssh-server sysinfo testdisk gparted kpartx meld synaptic openjdk-8-jre icedtea-8-plugin gdebi p7zip-rar p7zip-full rar unrar jq hfsprogs \
-gir1.2-gtop-2.0 gir1.2-networkmanager-1.0 gir1.2-clutter-1.0 \
-gnome-tweak-tool numlockx dconf-tools multisystem boot-repair gnome-activity-journal gnome-sushi gnome-system-tools font-manager y-ppa-manager redshift backintime-gnome \
-nautilus-sendto easytag-nautilus nautilus-actions nautilus-admin nautilus-compare nautilus-columns nautilus-emblems nautilus-gtkhash nautilus-hide nautilus-ideviceinfo nautilus-image-manipulator nautilus-script-audio-convert nautilus-script-debug nautilus-scripts-manager nautilus-wipe seahorse-nautilus \
-gedit-developer-plugins gedit-plugins gedit-source-code-browser-plugin \
-owncloud-client owncloud-client-cmd csync-owncloud nautilus-owncloud \
-language-pack-fr language-pack-fr-base language-pack-gnome-fr language-pack-gnome-fr-base hunspell-fr hunspell-fr-classical hyphen-fr mythes-fr firefox-locale-fr thunderbird-locale-fr libreoffice-help-fr libreoffice-l10n-fr tesseract-ocr-fra gimp-help-fr \
-libreoffice libreoffice-avmedia-backend-gstreamer libreoffice-base libreoffice-base-drivers libreoffice-calc libreoffice-draw libreoffice-gnome libreoffice-gtk3 libreoffice-impress libreoffice-math libreoffice-mysql-connector libreoffice-ogltrans libreoffice-pdfimport libreoffice-report-builder libreoffice-sdbc-postgresql libreoffice-style-galaxy libreoffice-style-human libreoffice-style-oxygen libreoffice-style-tango libreoffice-templates libreoffice-voikko libreoffice-wiki-publisher libreoffice-writer libreoffice-writer2xhtml scribus scribus-template \
-isomaster brasero qarte amule amule-gnome-support gnome-subtitles audacity mixxx tangerine tesseract-ocr-fra ubuntu-restricted-extras mozplugger easytag soundconverter sound-juicer vlc gnome-xcf-thumbnailer stopwatch lightzone darktable youtube-dl \
-gmusicbrowser gmusicbrowser-art unity-scope-gmusicbrowser gpodder goobox gstreamer1.0-plugins-bad gstreamer1.0-plugins-bad-faad pulseaudio-equalizer ubuntu-restricted-extras cdrdao cue2toc bchunk ccd2iso mdf2iso nrg2iso \
-gimp-data gimp-data-extras gimp-dds gimp-gap gimp-gmic gimp-gutenprint gimp-lensfun gimp-normalmap 'gimp-save-for-web' gimp-texturize gimp-ufraw gtkam-gimp pandora create-resources inkscape ijsgutenprint ink-generator sozi xsane \
-totem totem-plugins totem-plugins-extra kdenlive kdenlive-data gnome-video-effects-extra mkvtoolnix-gui handbrake-gtk handbrake-cli libdvdread4 libdvdnav4 dpluzz libavcodec-extra libdvd-pkg gnome-do gnome-do-plugins \
-pidgin pidgin-awayonlock pidgin-bot-sentry pidgin-encryption pidgin-gnome-keyring pidgin-hotkeys pidgin-libnotify pidgin-microblog pidgin-openpgp pidgin-plugin-pack pidgin-skype pidgin-themes \
-freecad freecad-extras-drawing-dimensioning freecad-extras-lattice2 freecad-extras-eaglepcb2freecad freecad-extras-macroparttovrml freecad-doc freecad-extras-fasteners freecad-extras-sheetmetal freecad-extras-animation freecad-extras-idfimporter freecad-extras-timber freecad-extras-assembly2 freecad-extras-kicadstepuptools freecad-extras-workfeature freecad-extras-bolts freecad-extras-kicadstepuptools-wb freecad-extras-cadquery freecad-extras-lattice \
-chromium-browser \
-ghex mariadb-client postgresql-client git \
-pgadmin4 mytop dia-gnome dia2code dia-shapes postgresql-autodoc umbrello kcachegrind graphviz xdot gitk gitg wireshark zenmap
-
-# skype
-https://www.skype.com/fr/get-skype/
-
-global
-
-KEEP

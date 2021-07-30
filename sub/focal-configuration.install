@@ -17,6 +17,9 @@ sudo sed -i "/^GRUB_TIMEOUT=/ s|=.*|=2|" "$file"
 sudo sed -i "/^GRUB_HIDDEN_TIMEOUT_QUIET=/ s|=.*|=false|" "$file"
 sudo sed -i "/^GRUB_HIDDEN_TIMEOUT_QUIET=/ s/^/#/" "$file"
 
+file=/etc/grub.d/00_header
+sudo sed -i "s|30|2|g" "$file"
+
 sudo update-grub
 
 <<KEEP
