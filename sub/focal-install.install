@@ -15,9 +15,9 @@ cmd="sudo apt install -y"
 
 _echoT "================== ${_PART} / global install"
 
-_echoi "------------------"
+_echoI "------------------"
 sed -n '/# install/,$ p' ${S_FILE_INSTALL_CONF}|grep -v '^# install'
-_echoi "------------------"
+_echoI "------------------"
 _askyn "PLease confirm this installation options" && [ "$_ANSWER" == n ] && return 1
 
 
@@ -54,11 +54,11 @@ part_install=tools
 
 packages="qt5ct net-tools lnav gnome-tweak-tool gnome-system-monitor dconf-editor multisystem gnome-sushi gnome-system-tools font-manager baobab curl" # gnome-activity-journal boot-repair backintime-gnome y-ppa-manager numlockx
 
-packages+=" easytag-nautilus nautilus-actions nautilus-compare nautilus-extension-fma nautilus-admin nautilus-gtkhash nautilus-hide nautilus-ideviceinfo nautilus-image-converter nautilus-script-audio-convert nautilus-script-debug nautilus-scripts-manager nautilus-sendto nautilus-wipe seahorse-nautilus" # nautilus-columns nautilus-image-manipulator filemanager-actions nautilus-emblems
+packages+="easytag-nautilus nautilus-actions nautilus-compare nautilus-extension-fma nautilus-admin nautilus-gtkhash nautilus-hide nautilus-ideviceinfo nautilus-image-converter nautilus-script-audio-convert nautilus-script-debug nautilus-scripts-manager nautilus-sendto nautilus-wipe seahorse-nautilus" # nautilus-columns nautilus-image-manipulator filemanager-actions nautilus-emblems
 
-packages+=" gedit-plugins gedit-source-code-browser-plugin" # gedit-developer-plugins
+packages+="gedit-plugins gedit-source-code-browser-plugin" # gedit-developer-plugins
 
-[ "$_OWNCLOUD" ] && packages+=" owncloud-client owncloud-client-cmd nautilus-owncloud" # csync-owncloud
+[ "$_OWNCLOUD" ] && packages+="owncloud-client owncloud-client-cmd nautilus-owncloud" # csync-owncloud
 
 if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
 
@@ -79,13 +79,13 @@ part_install=media
 
 packages="gmusicbrowser chromium-browser brasero qarte gnome-subtitles audacity ubuntu-restricted-extras easytag soundconverter sound-juicer stopwatch flashplugin-installer chrome-gnome-shell" # mozplugger isomaster mixxx tesseract-ocr-fra lightzone darktable vlc tangerine amule amule-gnome-support gnome-xcf-thumbnailer
 
-packages+=" gstreamer1.0-plugins-bad pulseaudio-equalizer ubuntu-restricted-extras" # gmusicbrowser gmusicbrowser-art gstreamer1.0-plugins-bad-faad gpodder goobox kid3-cli cdrdao cue2toc bchunk ccd2iso mdf2iso nrg2iso clipgrab lollypop
+packages+="gstreamer1.0-plugins-bad pulseaudio-equalizer ubuntu-restricted-extras" # gmusicbrowser gmusicbrowser-art gstreamer1.0-plugins-bad-faad gpodder goobox kid3-cli cdrdao cue2toc bchunk ccd2iso mdf2iso nrg2iso clipgrab lollypop
 
-packages+=" gimp gimp-gap gimp-cbmplugs gimp-gluas gimp-data gimp-gmic gimp-texturize gimp-data-extras gimp-gutenprint gimp-dds gimp-lensfun gtkam-gimp create-resources inkscape ink-generator xsane" # ijsgutenprint gimp-save-for-web gimp-normal-map gimp-plugin-registry gimp-dbg gimp-ufraw sozi pandora
+packages+="gimp gimp-gap gimp-cbmplugs gimp-gluas gimp-data gimp-gmic gimp-texturize gimp-data-extras gimp-gutenprint gimp-dds gimp-lensfun gtkam-gimp create-resources inkscape ink-generator xsane" # ijsgutenprint gimp-save-for-web gimp-normal-map gimp-plugin-registry gimp-dbg gimp-ufraw sozi pandora
 
-packages+=" mpv totem totem-plugins gnome-video-effects-extra mkvtoolnix-gui handbrake libdvdread7 libdvdnav4 libavcodec-extra libdvd-pkg" # kdenlive kdenlive-data gnome-do gnome-do-plugins totem-plugins-extra dpluzz
+packages+="mpv totem totem-plugins gnome-video-effects-extra mkvtoolnix-gui handbrake libdvdread7 libdvdnav4 libavcodec-extra libdvd-pkg" # kdenlive kdenlive-data gnome-do gnome-do-plugins totem-plugins-extra dpluzz
 
-#packages+=" pidgin pidgin-awayonlock pidgin-bot-sentry pidgin-encryption pidgin-gnome-keyring pidgin-hotkeys pidgin-libnotify pidgin-openpgp pidgin-plugin-pack pidgin-skype pidgin-themes" # pidgin-microblog
+#packages+="pidgin pidgin-awayonlock pidgin-bot-sentry pidgin-encryption pidgin-gnome-keyring pidgin-hotkeys pidgin-libnotify pidgin-openpgp pidgin-plugin-pack pidgin-skype pidgin-themes" # pidgin-microblog
 
 if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
 
@@ -159,9 +159,9 @@ if [ "$_DEV" ]; then
 
 	packages="ghex mariadb-client postgresql-client mytop git gitk gitg" #  pgadmin4 percona-toolkit
 
-	packages+=" vim" # dia dia2code dia-shapes umbrello
+	packages+="vim" # dia dia2code dia-shapes umbrello
 
-	#packages+=" php-cli kcachegrind graphviz xdot"
+	#packages+="php-cli kcachegrind graphviz xdot"
 
 	if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
 

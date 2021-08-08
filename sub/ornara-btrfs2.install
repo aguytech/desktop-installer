@@ -38,7 +38,7 @@ cd /mnt
 #mv ${_SYSNAME}/var/log ${_SYSNAME}/var/log.keep
 
 _echoT "btrfs subvolume list $PWD"
-_echoi "$(sudo btrfs subvolume list .)"
+_echoI "$(sudo btrfs subvolume list .)"
 
 
 _echoT "------------------ create btrfs subvolumes"
@@ -54,7 +54,7 @@ done
 sudo btrfs subvolume create lxd-${_SYSNAME}
 
 _echoT "btrfs subvolume list $PWD"
-_echoi "$(sudo btrfs subvolume list .)"
+_echoI "$(sudo btrfs subvolume list .)"
 
 #chmod o-rwx ${_SYSNAME}/.snapshots
 #rsync -av ${_SYSNAME}/var/log.keep/ ${_SYSNAME}/var/log/
@@ -74,7 +74,7 @@ sudo mount $device /mnt
 cd /mnt
 
 _echoT "btrfs subvolume list $PWD"
-_echoi "$(sudo btrfs subvolume list .)"
+_echoI "$(sudo btrfs subvolume list .)"
 
 
 _echoT "------------------ create btrfs subvolumes"
@@ -88,7 +88,7 @@ for subv in $subvs; do
 done
 
 _echoT "btrfs subvolume list $PWD"
-_echoi "$(sudo btrfs subvolume list .)"
+_echoI "$(sudo btrfs subvolume list .)"
 
 cd /
 sudo umount /mnt
@@ -97,7 +97,7 @@ sudo umount /mnt
 _echoT "------------------ create dirs & rights"
 
 dirs="/btrfs/sys /btrfs/ext /ext ext/backups ext/ovh ext/shared /home /home/shared /home/shared/dev/bs /home/shared/www /opt /usr/local/bs /save/${_USERNAME}"
-[ "$_LXD" ] && dirs+=" /var/lib/lxd"
+[ "$_LXD" ] && dirs+="/var/lib/lxd"
 
 for dir in $dirs; do
 	! [ -d $dir ] && sudo mkdir -p $dir
@@ -115,11 +115,11 @@ _echoT "------------------ /etc/fstab modify"
 uuidsys=$(sudo blkid |grep $_DEVICE_SYS |sed 's|.* UUID="\([^"]\+\)" .*|\1|')
 uuidext=$(sudo blkid |grep ${_DEVICE_EXT} |sed 's|.* UUID="\([^"]\+\)" .*|\1|')
 ! [ "${_DEVICE_EXT}" ] && uuidext=$uuidsys
-_echoi "uuidsys=$uuidsys\nuuidext=$uuidext"
+_echoI "uuidsys=$uuidsys\nuuidext=$uuidext"
 
 ! [ "${uuidsys}" ] && _ask "Please give th UUID for sys" && uuidsys=$_ANSWER
 ! [ "${uuidext}" ] && _ask "Please give th UUID for ext" && uuidext=$_ANSWER
-_echoi "uuidsys=$uuidsys\nuuidext=$uuidext"
+_echoI "uuidsys=$uuidsys\nuuidext=$uuidext"
 
 file="/etc/fstab"
 ! sudo [ -f ${file}.keep ] && sudo cp -a ${file} ${file}.keep
@@ -152,7 +152,7 @@ echo "
 # bind
 /home/shared/dev/bs   /usr/local/bs    none    bind                    0    0" | sudo tee -a "$file"
 
-_echoi "$(cat "$file")"
+_echoI "$(cat "$file")"
 
 _echoT "------------------ grub"
 
@@ -169,8 +169,8 @@ _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
 
 _echoT "#################### END ${_PART}"
 
-_echoi "You have to restart the computer for system file modifications"
-_echoi "After restarting you can follow installation"
+_echoI "You have to restart the computer for system file modifications"
+_echoI "After restarting you can follow installation"
 _askyn "The computer now will reboot, please confirm" && [ "$_ANSWER" == n ] && exit 1
 
 reboot

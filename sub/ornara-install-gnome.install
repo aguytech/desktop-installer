@@ -34,7 +34,7 @@ part_install=${S_RELEASE_DESKTOP}-tools
 
 packages="gedit-plugins gcolor3"
 
-packages+=" nautilus-sendto seahorse-nautilus gtkhash-nautilus nautilus-admin nautilus-empty-file nautilus-image-converter python-nautilus gnome-calculator"
+packages+="nautilus-sendto seahorse-nautilus gtkhash-nautilus nautilus-admin nautilus-empty-file nautilus-image-converter python-nautilus gnome-calculator"
 
 if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
 

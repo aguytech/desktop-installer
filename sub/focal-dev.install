@@ -71,7 +71,7 @@ fi
 _PARTDEV=CONNECTORS
 if ! _parthave "${_PARTDEV}" "$_FILE_DEV_DONE"; then
 	. "${_PATH_BASE_SUB}/${_RELEASE_NAME_DEV}-${_PARTDEV,,}.install" && [ "$_STEP" ] && _askno "Valid to continue"
-else _echoi "performed **** ${_PARTDEV}"; fi
+else _echoI "performed **** ${_PARTDEV}"; fi
 
 ####################  PYTHON-
 
@@ -79,7 +79,7 @@ _PARTDEV=PYTHON
 _PARTTEST="_${_PARTDEV}"
 if [ "${!_PARTTEST}" ] && ! _parthave "${_PARTDEV}" "$_FILE_DEV_DONE"; then
 	. "${_PATH_BASE_SUB}/${_RELEASE_NAME_DEV}-${_PARTDEV,,}.install" && [ "$_STEP" ] && _askno "Valid to continue"
-else _echoi "performed **** ${_PARTDEV}"; fi
+else _echoI "performed **** ${_PARTDEV}"; fi
 
 ####################  SUBLIMETEXT-
 
@@ -87,7 +87,7 @@ _PARTDEV=SUBLIMETEXT
 _PARTTEST="_${_PARTDEV}"
 if [ "${!_PARTTEST}" ] && ! _parthave "${_PARTDEV}" "$_FILE_DEV_DONE"; then
 	. "${_PATH_BASE_SUB}/${_RELEASE_NAME_DEV}-${_PARTDEV,,}.install" && [ "$_STEP" ] && _askno "Valid to continue"
-else _echoi "performed **** ${_PARTDEV}"; fi
+else _echoI "performed **** ${_PARTDEV}"; fi
 
 ####################  SMARTGIT-
 
@@ -95,7 +95,7 @@ _PARTDEV=SMARTGIT
 _PARTTEST="_${_PARTDEV}"
 if [ "${!_PARTTEST}" ] && ! _parthave "${_PARTDEV}" "$_FILE_DEV_DONE"; then
 	. "${_PATH_BASE_SUB}/${_RELEASE_NAME_DEV}-${_PARTDEV,,}.install" && [ "$_STEP" ] && _askno "Valid to continue"
-else _echoi "performed **** ${_PARTDEV}"; fi
+else _echoI "performed **** ${_PARTDEV}"; fi
 
 ####################  GITKRAKEN-
 
@@ -103,7 +103,7 @@ _PARTDEV=GITKRAKEN
 _PARTTEST="_${_PARTDEV}"
 if [ "${!_PARTTEST}" ] && ! _parthave "${_PARTDEV}" "$_FILE_DEV_DONE"; then
 	. "${_PATH_BASE_SUB}/${_RELEASE_NAME_DEV}-${_PARTDEV,,}.install" && [ "$_STEP" ] && _askno "Valid to continue"
-else _echoi "performed **** ${_PARTDEV}"; fi
+else _echoI "performed **** ${_PARTDEV}"; fi
 
 ####################  FIREFOXDEV-
 
@@ -111,7 +111,7 @@ _PARTDEV=FIREFOXDEV
 _PARTTEST="_${_PARTDEV}"
 if [ "${!_PARTTEST}" ] && ! _parthave "${_PARTDEV}" "$_FILE_DEV_DONE"; then
 	. "${_PATH_BASE_SUB}/${_RELEASE_NAME_DEV}-${_PARTDEV,,}.install" && [ "$_STEP" ] && _askno "Valid to continue"
-else _echoi "performed **** ${_PARTDEV}"; fi
+else _echoI "performed **** ${_PARTDEV}"; fi
 
 ####################  ECLIPSE-
 
@@ -119,7 +119,7 @@ _PARTDEV=ECLIPSE
 _PARTTEST="_${_PARTDEV}"
 if [ "${!_PARTTEST}" ] && ! _parthave "${_PARTDEV}" "$_FILE_DEV_DONE"; then
 	. "${_PATH_BASE_SUB}/${_RELEASE_NAME_DEV}-${_PARTDEV,,}.install" && [ "$_STEP" ] && _askno "Valid to continue"
-else _echoi "performed **** ${_PARTDEV}"; fi
+else _echoI "performed **** ${_PARTDEV}"; fi
 
 ####################  SQUIRREL-
 
@@ -127,7 +127,7 @@ _PARTDEV=SQUIRREL
 _PARTTEST="_${_PARTDEV}"
 if [ "${!_PARTTEST}" ] && ! _parthave "${_PARTDEV}" "$_FILE_DEV_DONE"; then
 	. "${_PATH_BASE_SUB}/${_RELEASE_NAME_DEV}-${_PARTDEV,,}.install" && [ "$_STEP" ] && _askno "Valid to continue"
-else _echoi "performed **** ${_PARTDEV}"; fi
+else _echoI "performed **** ${_PARTDEV}"; fi
 
 ####################  DBEAVER-
 
@@ -135,7 +135,7 @@ _PARTDEV=DBEAVER
 _PARTTEST="_${_PARTDEV}"
 if [ "${!_PARTTEST}" ] && ! _parthave "${_PARTDEV}" "$_FILE_DEV_DONE"; then
 	. "${_PATH_BASE_SUB}/${_RELEASE_NAME_DEV}-${_PARTDEV,,}.install" && [ "$_STEP" ] && _askno "Valid to continue"
-else _echoi "performed **** ${_PARTDEV}"; fi
+else _echoI "performed **** ${_PARTDEV}"; fi
 
 ########################################  END
 

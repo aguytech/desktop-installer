@@ -54,7 +54,7 @@ file="/etc/profile.d/bs_path.sh"
 ################################ btrfs2-
 
 _PART=btrfs2
-if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoi "performed *** ${_PART}"; fi
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoI "performed *** ${_PART}"; fi
 
 
 ################################  CONF
@@ -66,7 +66,7 @@ if [ -z ${S_RELEASE_DESKTOP+x} ]; then
 	[ -d "/etc/xdg/xfce4" ] && S_RELEASE_DESKTOP="xfce"
 	[ -d "/etc/gdm" ] && S_RELEASE_DESKTOP="gnome"
 	if [ "${S_RELEASE_DESKTOP}" ]; then
-		_echoi "Dekstop environement are ${S_RELEASE_DESKTOP}"
+		_echoI "Dekstop environement are ${S_RELEASE_DESKTOP}"
 	else
 		_menu "Select a desktop environement for manjaro" xfce gnome && S_RELEASE_DESKTOP=$_ANSWER
 	_confset S_RELEASE_DESKTOP "${S_RELEASE_DESKTOP}"
@@ -109,12 +109,12 @@ fi
 ################################  COMMON-
 
 _PART=common
-if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoi "performed *** ${_PART}"; fi
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoI "performed *** ${_PART}"; fi
 
 ################################  UPGRADE-
 
 _PART=upgrade
-if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoi "performed *** ${_PART}"; fi
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoI "performed *** ${_PART}"; fi
 
 ################################  INSTALL-
 
@@ -123,7 +123,7 @@ if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
 	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "$_STEP" ] && _askno "Valid to continue"
 else
-	_echoi "performed *** ${_PART}"
+	_echoI "performed *** ${_PART}"
 fi
 
 ################################  DEV-
@@ -134,7 +134,7 @@ if [ "$_DEV" ]; then
 		! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
 		[ "$_STEP" ] && _askno "Valid to continue"
 	else
-		_echoi "performed *** ${_PART}"
+		_echoI "performed *** ${_PART}"
 	fi
 fi
 
@@ -146,7 +146,7 @@ if [ "$_LXD" ]; then
 		! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
 		[ "$_STEP" ] && _askno "Valid to continue"
     else
-		_echoi "performed *** ${_PART}"
+		_echoI "performed *** ${_PART}"
 	fi
 fi
 
@@ -157,7 +157,7 @@ if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
 	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "$_STEP" ] && _askno "Valid to continue"
 else
-	_echoi "performed *** ${_PART}"
+	_echoI "performed *** ${_PART}"
 fi
 
 ################################  CONFIGURATION-
@@ -167,7 +167,7 @@ if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
 	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "$_STEP" ] && _askno "Valid to continue"
 else
-	_echoi "performed *** ${_PART}"
+	_echoI "performed *** ${_PART}"
 fi
 
 ################################  LAUNCHER-
@@ -177,7 +177,7 @@ if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
 	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "$_STEP" ] && _askno "Valid to continue"
 else
-	_echoi "performed *** ${_PART}"
+	_echoI "performed *** ${_PART}"
 fi
 
 ################################  AUTOSTART-
@@ -187,7 +187,7 @@ if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
 	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "$_STEP" ] && _askno "Valid to continue"
 else
-	_echoi "performed *** ${_PART}"
+	_echoI "performed *** ${_PART}"
 fi
 
 ################################  SSH-
@@ -197,7 +197,7 @@ if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
 	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "$_STEP" ] && _askno "Valid to continue"
 else
-	_echoi "performed *** ${_PART}"
+	_echoI "performed *** ${_PART}"
 fi
 
 
@@ -208,7 +208,7 @@ if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
 	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "$_STEP" ] && _askno "Valid to continue"
 else
-	_echoi "performed *** ${_PART}"
+	_echoI "performed *** ${_PART}"
 fi
 
 ################################  END-
@@ -218,10 +218,10 @@ if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
 	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "$_STEP" ] && _askno "Valid to continue"
 else
-	_echoi "performed *** ${_PART}"
+	_echoI "performed *** ${_PART}"
 fi
 
 _echoT "####################  end  ####################"
 
-_echoi "\n!!!!! This installation are complety DONE ;o) !!!!!"
+_echoI "\n!!!!! This installation are complety DONE ;o) !!!!!"
 

@@ -15,9 +15,9 @@ cmd="sudo pacman -S --noconfirm --needed"
 
 _echoT "================== ${_PART} / global install"
 
-_echoi "------------------"
+_echoI "------------------"
 sed -n '/# install/,$ p' ${S_FILE_INSTALL_CONF}|grep -v '^# install'
-_echoi "------------------"
+_echoI "------------------"
 _askyn "PLease confirm this installation options" && [ "$_ANSWER" == n ] && return 1
 
 
@@ -47,11 +47,11 @@ part_install=media
 
 packages="chromium amule" # tesseract tesseract-ocr-fra gnome-music isomaster mixxx lightzone darktable tangerine gnome-clocks
 
-packages+=" audacity-wxgtk2 easytag soundconverter sound-juicer pulseaudio-equalizer" # easymp3gain-gtk2 mp3splt-gtk lollypop
+packages+="audacity-wxgtk2 easytag soundconverter sound-juicer pulseaudio-equalizer" # easymp3gain-gtk2 mp3splt-gtk lollypop
 
-packages+=" gimp gimp-nufraw gimp-plugin-gmic inkscape xsane" # gimp-plugin-registry gimp-plugin-satequalizer gimp-plugin-duplicate-to-another-image gimp-plugin-saveforweb gimp-plugin-fblur gimp-plugin-lqr gimp-refocus gimp-plugin-wavelet-denoise
+packages+="gimp gimp-nufraw gimp-plugin-gmic inkscape xsane" # gimp-plugin-registry gimp-plugin-satequalizer gimp-plugin-duplicate-to-another-image gimp-plugin-saveforweb gimp-plugin-fblur gimp-plugin-lqr gimp-refocus gimp-plugin-wavelet-denoise
 
-packages+=" mpv mkvtoolnix-gui handbrake libdvdcss libdvdnav libdvdread"
+packages+="mpv mkvtoolnix-gui handbrake libdvdcss libdvdnav libdvdread"
 
 if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
 
@@ -100,9 +100,9 @@ if [ "$_DEV" ]; then
 
 	packages="dstat sysstat tree jq atop ghex mariadb-clients postgresql-libs percona-toolkit gitg vim"
 
-	#packages+=" pgadmin4 dbeaver dia dia2code dia-shapes postgresql-autodoc mytop percona-server-clients umbrello jxplorer gitkraken"
+	#packages+="pgadmin4 dbeaver dia dia2code dia-shapes postgresql-autodoc mytop percona-server-clients umbrello jxplorer gitkraken"
 
-	#packages+=" kcachegrind pyprof2calltree graphviz xdot python-pydot"
+	#packages+="kcachegrind pyprof2calltree graphviz xdot python-pydot"
 
 	if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
 

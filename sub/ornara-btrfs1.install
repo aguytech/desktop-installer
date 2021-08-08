@@ -21,7 +21,7 @@ _PART="btrfs1"
 white='\e[0;0m'; red='\e[0;31m'; green='\e[0;32m'; blue='\e[0;34m'; magenta='\e[0;35m'; yellow='\e[0;33m'
 whiteb='\e[1;1m'; redb='\e[1;31m'; greenb='\e[1;32m'; blueb='\e[1;34m'; magentab='\e[1;35m'; yellowb='\e[1;33m'; cclear='\e[0;0m'
 
-_echoi() { echo -e "${yellow}${*}${cclear}"; }
+_echoI() { echo -e "${yellow}${*}${cclear}"; }
 _echoI() { echo -e "${yellowb}${*}${cclear}"; }
 _echoT() { echo -e "${blueb}${*}${cclear}"; }
 _askno() { _ANSWER=; echo -en "$*: "; read _ANSWER; }
@@ -64,7 +64,7 @@ _confset() {
 
 # exit
 [ "$USER" != root ] && _echoE "You have to run this script under root privileges" && exit 1
-[ -f "${_FILE_INSTALL_DONE}" ] && _parthave "${_PART}" "${_FILE_INSTALL_DONE}" && _echoi "performed *** ${_PART}" && exit 0
+[ -f "${_FILE_INSTALL_DONE}" ] && _parthave "${_PART}" "${_FILE_INSTALL_DONE}" && _echoI "performed *** ${_PART}" && exit 0
 
 [ ! -d ${_PATH_LOG} ] && mkdir -p ${_PATH_LOG}
 
@@ -98,9 +98,9 @@ _confset _DEVICE_EXT "$_DEVICE_EXT"
 [ -z ${_DEVICE_GRUB+x} ] && anstmp='/dev/sda' && _askno "Give a device for grub installation" "$(blkid -o device|grep -v '/loop'|xargs) ($anstmp)" && _DEVICE_GRUB=${_ANSWER:-$anstmp}
 _confset _DEVICE_GRUB "$_DEVICE_GRUB"
 
-_echoi "--------------------------"
+_echoI "--------------------------"
 cat "${_FILE_INSTALL_CONF}"
-_echoi "--------------------------"
+_echoI "--------------------------"
 _askyn "PLease confirm installation" && [ "$_ANSWER" == n ] && exit 1
 
 
@@ -139,7 +139,7 @@ paths="create ubiquity-apt-clone var"
 for parh in $paths; do rm -fR "$path"; done
 
 _echoT "btrfs subvolume list $PWD"
-_echoi "$(btrfs subvolume list .)"
+_echoI "$(btrfs subvolume list .)"
 
 # fstab
 file="${_SYSNAME}/etc/fstab"
@@ -152,7 +152,7 @@ str=${str/subvol=home/subvol=user-${_SYSNAME}}
 sed -i "/subvol=home/ a${str}" "${file}"
 
 _echoT "cat ${file}"
-_echoi "$(cat "${file}")"
+_echoI "$(cat "${file}")"
 
 cd /
 umount /mnt
@@ -176,7 +176,7 @@ sed -i "s|^\(GRUB_SAVEDEFAULT=\).*|\1false|" /mnt/etc/default/grub
 [ "$_UEFI" ] && mount "$_UEFI" /mnt/boot/efi
 
 _echoT "Grub install"
-_echoi "after you are 'chrooted' please enter this line :"
+_echoI "after you are 'chrooted' please enter this line :"
 _echoI "grub-install --recheck $_DEVICE_GRUB"
 _echoI "update-grub"
 _echoI "exit"
@@ -225,7 +225,7 @@ _echoT "------------------ umount $_DEVICE_SYS"
 
 umount /mnt
 
-_echoi "You have to start the global installation script after the reboot"
+_echoI "You have to start the global installation script after the reboot"
 _askyn "The computer now will reboot, please confirm"
 
 [ "$_ANSWER" == y ] && reboot
