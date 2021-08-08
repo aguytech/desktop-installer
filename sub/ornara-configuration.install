@@ -56,6 +56,18 @@ WantedBy=multi-user.target" | sudo tee "$file_service"
 sudo systemctl enable numlock.service
 
 
+if type vim 2>/dev/null 1>&2 ; then
+
+    _echoT "------------------  /usr/bin/edit links"
+
+    files="/usr/bin/edit /usr/bin/editor"
+    for file in $files; do
+        [ -e ${file} ] && sudo rm ${file}
+        sudo ln -sv /usr/bin/vim ${file}
+    done
+fi
+
+
 _echoT "------------------  /usr/local/bs/conf links"
 
 for file in .nanorc .tmux.conf .vimrc; do
@@ -124,7 +136,7 @@ sudo sed -i '/^# *include/ s/^# //' "$file"
 # various
 opts="constantshow historylog matchbrackets multibuffer nohelp softwrap "
 # color
-opts+=" errorcolor functioncolor keycolor numbercolor selectedcolor statuscolor stripecolor titlecolor"
+opts+="errorcolor functioncolor keycolor numbercolor selectedcolor statuscolor stripecolor titlecolor"
 # uncomment
 for opt in $opts; do
     sudo sed -i "s|^.*\(set $opt .*\)$|\1|"  $file
@@ -159,7 +171,7 @@ if [ -d "$path" ]; then
 	ln -sv "${S_PATH_SCRIPT_CONF}/user.js" "$path"
 	chown 1000:1000 "$path"
 else
-	_echoi "copy file '${S_PATH_INSTALL_CONF}/firefox/user.js'\nto your firefox path of profile"
+	_echoI "copy file '${S_PATH_INSTALL_CONF}/firefox/user.js'\nto your firefox path of profile"
 	_askno "Confirm"
 fi
 
