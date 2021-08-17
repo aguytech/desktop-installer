@@ -12,12 +12,14 @@ lost+found
 
 /nikita
 /cluster
+/cd
 
 /shared/dev/eclipse-workspaces
 /shared/torrent
 /shared/.aMule/Temp
 /shared/virtualbox
 /shared/vmware
+/shared/virt
 /shared/.config/mpv/watch_later
 #/shared/.tmux
 /shared/.tmux/resurrect

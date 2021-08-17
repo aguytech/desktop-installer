@@ -4,5 +4,4 @@
 
 /lost+found
 .Trash-*
-.tmp*
-
+#.tmp*

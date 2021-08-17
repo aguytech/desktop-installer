@@ -1,9 +1,15 @@
 ## ubuntu
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_hp17_1t-2.5.exc /ext/ /media/$USER/1t-2.5/ext/ -av --delete -n
 # rsync /ext/shared/Soft/diag_repport/ /media/$USER/1t-2.5/ext/shared/Soft/diag_repport/ -av -n
+#
+# sudo rsync /ext/backups/$HOSTNAME/ /media/$USER/1t-2.5/ext/backups/$HOSTNAME/ -av -n
+# sudo rsync /ext/backups/debian8/ /media/$USER/1t-2.5/ext/backups/debian8/ -av -n
 
 ## manjaro
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_hp17_1t-2.5.exc /ext/ /run/media/$USER/1t-2.5/ext/ -av --delete -n
+#
+# sudo rsync /ext/backups/$HOSTNAME/ /run/media/$USER/1t-2.5/ext/backups/$HOSTNAME/ -av -n
+# sudo rsync /ext/backups/debian8/ /run/media/$USER/1t-2.5/ext/backups/debian8/ -av -n
 
 .snapshots
 ._sync*

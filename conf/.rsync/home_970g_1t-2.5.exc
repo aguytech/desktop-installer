@@ -13,11 +13,13 @@ lost+found
 
 /nikita
 /cluster
+/cd
 
 /shared/torrent
 /shared/.aMule/Temp
 /shared/virtualbox
 /shared/vmware
+/shared/virt
 /shared/.config/mpv/watch_later
 /shared/.mozilla*
 /shared/.thunderbird*

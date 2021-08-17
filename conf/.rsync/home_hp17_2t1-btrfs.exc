@@ -3,6 +3,10 @@
 
 ## manjaro
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_hp17_2t1-btrfs.exc /home/ /run/media/$USER/2t1-btrfs/home/ -av --delete -n
+#
+#  sudo rsync /home/shared/virtualbox /run/media/$USER/2t1-btrfs/home/shared/virtualbox -av -n
+#  sudo rsync /home/shared/vmware /run/media/$USER/2t1-btrfs/home/shared/vmware -av -n
+#  sudo rsync /home/shared/virt /run/media/$USER/2t1-btrfs/home/shared/virt -av -n
 
 .Trash-*
 .tmp*
@@ -12,12 +16,14 @@ lost+found
 
 /nikita
 /cluster
+/cd
 
 /shared/dev/eclipse-workspaces
 /shared/torrent
 /shared/.aMule/Temp
 /shared/virtualbox
 /shared/vmware
+/shared/virt
 /shared/.config/mpv/watch_later
 #/shared/.tmux
 /shared/.tmux/resurrect
