@@ -29,7 +29,7 @@ fi
 _echoT "------------------ client conf"
 
 file='/etc/ssh/ssh_config'
-sudo [ -f "${1}" ] && sudo cp -a "${file}" "${file}.keep$(date +%s)"
+sudo [ -f "${file}" ] && sudo cp -a "${file}" "${file}.keep$(date +%s)"
 sudo sed -i "s/^\( *GSSAPIAuthentication\).*/\1 no/" $file
 sudo sed -i "/Host\s\+\*/ s|#\s\+||" "$file"
 ! sudo grep -q ServerAliveInterval "$file" && echo "ServerAliveInterval 240" | sudo tee -a "$file"
@@ -37,7 +37,7 @@ sudo sed -i "/Host\s\+\*/ s|#\s\+||" "$file"
 _echoT "------------------ server conf"
 
 file='/etc/ssh/sshd_config'
-sudo [ -f "${1}" ] && sudo cp -a "${file}" "${file}.keep$(date +%s)"
+sudo [ -f "${file}" ] && sudo cp -a "${file}" "${file}.keep$(date +%s)"
 ! grep -q "UseDNS" "$file" && echo "UseDNS no" | sudo tee -a $file
 sudo systemctl restart sshd.service
 

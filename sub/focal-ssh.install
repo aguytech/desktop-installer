@@ -30,9 +30,9 @@ _echoT "------------------ client conf"
 
 file='/etc/ssh/ssh_config'
 sudo [ -f "${file}" ] && sudo cp -a "${file}" "${file}.keep$(date +%s)"
-sudo sed -i "s/^\( *GSSAPIAuthentication\).*/\1 no/" $file
+sudo sed -i "s/^#\(\s*GSSAPIAuthentication\).*/ \1 no/" $file
 sudo sed -i "/Host\s\+\*/ s|#\s\+||" "$file"
-! sudo grep -q ServerAliveInterval "$file" && echo "ServerAliveInterval 240" | sudo tee -a "$file"
+! sudo grep -q ServerAliveInterval "$file" && echo "    ServerAliveInterval 240" | sudo tee -a "$file"
 
 _echoT "------------------ server conf"
 
