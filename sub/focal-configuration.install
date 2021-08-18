@@ -35,69 +35,6 @@ if type vim 2>/dev/null 1>&2 ; then
 fi
 
 
-<<KEEP
-_echoT "------------------ numlock-state conf"
-
-sudo gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
-
-
-sudo gsettings set org.gnome.settings-daemon.peripherals.keyboard numlock-state on
-
-_echoI "sudo -i
-su gdm -s /bin/bash
-gsettings set org.gnome.settings-daemon.peripherals.keyboard numlock-state on
-exit
-exit
-"
-_askno "Please write this lines in an another terminal & valid to continue"
-
-_echoT "------------------ rsyslog conf"
-
-sudo sed -i 's|^\(\$KLogPermitNonKernelFacility.*\)|#\1|' /etc/rsyslog.conf
-
-sudo systemctl restart rsyslog.service
-
-_echoT "------------------ tracker autostart disable"
-grep -lr 'X-GNOME-Autostart-enabled=true' /etc/xdg/autostart/tracker-*|xargs sudo sed -i 's|^\(X-GNOME-Autostart-enabled=\).*|\1false|'
-
-_echoT "------------------ pulseaudio"
-file=/etc/pulse/default.pa
-sudo sed -i 's|\(load-module module-switch-on-port-available\)|#\1|' $file
-
-_echoT "------------------ tap-to-click"
-gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
-
-_echoT "------------------ gstreamer1.0-vaapi remove"
-sudo apt-get remove -y gstreamer1.0-vaapi
-
-_echoT "------------------ gnome-shell-extension-ubuntu-dock remove"
-sudo apt-get remove -y gnome-shell-extension-ubuntu-dock
-
-_echoT "------------------ numlock tty service"
-
-file_exec="/usr/local/bin/numlock"
-echo '#!/bin/bash
-for tty in /dev/tty{1..6}
-do
-    /usr/bin/setleds -D +num < "$tty";
-done' | sudo tee "$file_exec"
-sudo chmod +x "$file_exec"
-
-file_service="/etc/systemd/system/numlock.service"
-echo "[Unit]
-Description=numlock
-
-[Service]
-ExecStart=$file_exec
-StandardInput=tty
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target" | sudo tee "$file_service"
-
-sudo systemctl enable numlock.service
-KEEP
-
 _echoT "------------------  /usr/local/bs/conf links"
 
 for file in .nanorc .tmux.conf .vimrc; do
@@ -302,7 +239,6 @@ tmux source-file "$file" 2>/dev/null
 # bash completion
 sudo cp "${S_PATH_INSTALL_CONF}/bash_completion/tmux" /usr/share/bash-completion/completions/
 
-
 _echoT "------------------  logrotate server"
 
 # logrotate
@@ -340,4 +276,67 @@ _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
 
 _echoT "#################### END ${_PART}"
 
+
+<<KEEP
+_echoT "------------------ numlock-state conf"
+
+sudo gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
+
+
+sudo gsettings set org.gnome.settings-daemon.peripherals.keyboard numlock-state on
+
+_echoI "sudo -i
+su gdm -s /bin/bash
+gsettings set org.gnome.settings-daemon.peripherals.keyboard numlock-state on
+exit
+exit
+"
+_askno "Please write this lines in an another terminal & valid to continue"
+
+_echoT "------------------ rsyslog conf"
+
+sudo sed -i 's|^\(\$KLogPermitNonKernelFacility.*\)|#\1|' /etc/rsyslog.conf
+
+sudo systemctl restart rsyslog.service
+
+_echoT "------------------ tracker autostart disable"
+grep -lr 'X-GNOME-Autostart-enabled=true' /etc/xdg/autostart/tracker-*|xargs sudo sed -i 's|^\(X-GNOME-Autostart-enabled=\).*|\1false|'
+
+_echoT "------------------ pulseaudio"
+file=/etc/pulse/default.pa
+sudo sed -i 's|\(load-module module-switch-on-port-available\)|#\1|' $file
+
+_echoT "------------------ tap-to-click"
+gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
+
+_echoT "------------------ gstreamer1.0-vaapi remove"
+sudo apt-get remove -y gstreamer1.0-vaapi
+
+_echoT "------------------ gnome-shell-extension-ubuntu-dock remove"
+sudo apt-get remove -y gnome-shell-extension-ubuntu-dock
+
+_echoT "------------------ numlock tty service"
+
+file_exec="/usr/local/bin/numlock"
+echo '#!/bin/bash
+for tty in /dev/tty{1..6}
+do
+    /usr/bin/setleds -D +num < "$tty";
+done' | sudo tee "$file_exec"
+sudo chmod +x "$file_exec"
+
+file_service="/etc/systemd/system/numlock.service"
+echo "[Unit]
+Description=numlock
+
+[Service]
+ExecStart=$file_exec
+StandardInput=tty
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target" | sudo tee "$file_service"
+
+sudo systemctl enable numlock.service
+KEEP
 

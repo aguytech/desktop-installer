@@ -9,7 +9,7 @@ _echoT "#################### START ${_PART}"
 
 
 _echoT "Part 2 of btrfs configuration"
-_askyn "This part have to be launched after installation and AfTER reboot\nConfirm" && [ "$_ANSWER" == "n" ] && exit 0
+_askyn "This part have to be launched after installation and AfTER reboot\nConfirm" && [ "${_ANSWER}" == "n" ] && exit 0
 
 
 #_echoT "------------------ root user"
@@ -19,20 +19,20 @@ _askyn "This part have to be launched after installation and AfTER reboot\nConfi
 
 _echoT "------------------ Data"
 
-! [ "$_LXD" ] && _askyn "Do you want to configure computer for lxd ? " && _LXD=${_ANSWER/n/}
-_confset _LXD "$_LXD"
+[ -z "${_LXD}" ] && _askyn "Do you want to configure computer for lxd ? " && _LXD=${_ANSWER/n/}
+_confset _LXD "${_LXD}"
 
-! [ "$_SSD" ] && _askyn "the device '$_DEVICE_SYS' named '${_SYSNAME}' are they a ssd disk ? " && _SSD=${_ANSWER/n/}
-_confset _SSD "$_SSD"
+[ -z "${_SSD}" ] && _askyn "the device '${_DEVICE_SYS}' named '${_SYSNAME}' are they a ssd disk ? " && _SSD=${_ANSWER/n/}
+_confset _SSD "${_SSD}"
 
-! [ "$_MEM" ] && anstmp=2G && _askno "Give the size of memory used for /tmp dir ($anstmp)" && _MEM=${_ANSWER:-$anstmp}
-_confset _MEM "$_MEM"
+[ -z "${_MEM}" ] && anstmp=2G && _askno "Give the size of memory used for /tmp dir ($anstmp)" && _MEM=${_ANSWER:-$anstmp}
+_confset _MEM "${_MEM}"
 
 
-_echoT "------------------ mount $_DEVICE_SYS"
+_echoT "------------------ mount ${_DEVICE_SYS}"
 
 # sys
-sudo mount $_DEVICE_SYS /mnt
+sudo mount ${_DEVICE_SYS} /mnt
 cd /mnt
 
 #mv ${_SYSNAME}/var/log ${_SYSNAME}/var/log.keep
@@ -60,13 +60,13 @@ _echoI "$(sudo btrfs subvolume list .)"
 #rsync -av ${_SYSNAME}/var/log.keep/ ${_SYSNAME}/var/log/
 #rm -fR ${_SYSNAME}/var/log.keep
 
-_echoT "------------------ umount $_DEVICE_SYS"
+_echoT "------------------ umount ${_DEVICE_SYS}"
 
 cd /
 sudo umount /mnt
 
 
-[ "${_DEVICE_EXT}" ] && device=${_DEVICE_EXT} || device=$_DEVICE_SYS
+[ "${_DEVICE_EXT}" ] && device=${_DEVICE_EXT} || device=${_DEVICE_SYS}
 
 _echoT "------------------ mount $device"
 
@@ -97,7 +97,7 @@ sudo umount /mnt
 _echoT "------------------ create dirs & rights"
 
 dirs="/btrfs/sys /btrfs/ext /ext ext/backups ext/ovh ext/shared /home /home/shared /home/shared/dev/bs /home/shared/www /opt /usr/local/bs /save/${_USERNAME}"
-[ "$_LXD" ] && dirs+="/var/lib/lxd"
+[ "${_LXD}" ] && dirs+="/var/lib/lxd"
 
 for dir in $dirs; do
 	! [ -d $dir ] && sudo mkdir -p $dir
@@ -105,20 +105,20 @@ for dir in $dirs; do
 	sudo chmod g+rwx $dir
 done
 
-sudo chown .1000 "$S_PATH_LOG_SERVER"
-sudo chmod g+w "$S_PATH_LOG_SERVER"
+sudo chown .1000 "${S_PATH_LOG_SERVER}"
+sudo chmod g+w "${S_PATH_LOG_SERVER}"
 
 
 _echoT "------------------ /etc/fstab modify"
 
 # fstab
-uuidsys=$(sudo blkid |grep $_DEVICE_SYS |sed 's|.* UUID="\([^"]\+\)" .*|\1|')
+uuidsys=$(sudo blkid |grep ${_DEVICE_SYS} |sed 's|.* UUID="\([^"]\+\)" .*|\1|')
 uuidext=$(sudo blkid |grep ${_DEVICE_EXT} |sed 's|.* UUID="\([^"]\+\)" .*|\1|')
 ! [ "${_DEVICE_EXT}" ] && uuidext=$uuidsys
 _echoI "uuidsys=$uuidsys\nuuidext=$uuidext"
 
-! [ "${uuidsys}" ] && _ask "Please give th UUID for sys" && uuidsys=$_ANSWER
-! [ "${uuidext}" ] && _ask "Please give th UUID for ext" && uuidext=$_ANSWER
+! [ "${uuidsys}" ] && _ask "Please give th UUID for sys" && uuidsys=${_ANSWER}
+! [ "${uuidext}" ] && _ask "Please give th UUID for ext" && uuidext=${_ANSWER}
 _echoI "uuidsys=$uuidsys\nuuidext=$uuidext"
 
 file="/etc/fstab"
@@ -135,7 +135,7 @@ UUID=$uuidsys      /save             btrfs   defaults,noatime,space_cache,compre
 ! [ "${_DEVICE_EXT}" ] && echo "UUID=$uuidsys      /ext           btrfs   defaults,noatime,space_cache,compress=zstd,subvol=ext           0    2" | sudo tee -a "$file"
 echo "UUID=$uuidsys      /btrfs/sys        btrfs   defaults,noauto,noatime,space_cache,compress=zstd               0    2" | sudo tee -a "$file"
 
-[ "$_SSD" ] && sudo sed -i '/btrfs/ s|noatime,|noatime,ssd,|' "$file"
+[ "${_SSD}" ] && sudo sed -i '/btrfs/ s|noatime,|noatime,ssd,|' "$file"
 
 if grep -q '^tmp.*\/tmp' /etc/fstab; then
 	[ "${_MEM:0:1}" != 0 ] && sudo sed -i "/tmpfs/ s|mode=1777|mode=1777,size=${_MEM}|" "$file"
@@ -171,7 +171,7 @@ _echoT "#################### END ${_PART}"
 
 _echoI "You have to restart the computer for system file modifications"
 _echoI "After restarting you can follow installation"
-_askyn "The computer now will reboot, please confirm" && [ "$_ANSWER" == n ] && exit 1
+_askyn "The computer now will reboot, please confirm" && [ "${_ANSWER}" == n ] && exit 1
 
 reboot
 
