@@ -21,6 +21,7 @@ lost+found
 /shared/virtualbox
 /shared/vmware
 #/shared/virt
+#/shared/vm
 /shared/.config/mpv/watch_later
 /shared/dev
 /shared/.mozilla*

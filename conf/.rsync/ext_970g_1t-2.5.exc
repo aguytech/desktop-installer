@@ -1,8 +1,14 @@
 ## ubuntu
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_970g_1t-2.5.exc /ext/ /media/$USER/1t-2.5/ext/ -av --delete -n
+#
+# sudo rsync /ext/backups/debian8/ /media/$USER/1t-2.5/ext/backups/debian8/ -av -n
+# sudo rsync /home/shared/virt/ /media/$USER/1t-2.5/home/shared/virt/ -av -n
 
 ## manjaro
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_970g_1t-2.5.exc /ext/ /run/media/$USER/1t-2.5/ext/ -av --delete -n
+#
+# sudo rsync /ext/backups/debian8/ /run/media/$USER/1t-2.5/ext/backups/debian8/ -av -n
+# sudo rsync /home/virt/ /run/media/$USER/1t-2.5/home/virt/ -av -n
 
 .Trash-*
 .tmp*
