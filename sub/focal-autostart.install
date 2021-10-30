@@ -3,10 +3,10 @@
 # write by Aguy
 
 
-_echoT "#################### START ${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
 # xprop WM_CLASS
-########################################  MAIN
+########################  MAIN
 
 dir=~/.config/autostart
 ! [ -d $dir ] && mkdir $dir
@@ -96,11 +96,10 @@ X-GNOME-Autostart-enabled=false" > $file
 chmod +x "$file"
 
 
-########################################  END
+########################  END
 
-_echoT "------------------ write ${_PART}"
+_echoT "===================== ${_PART} end"
 _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
 
 
-_echoT "#################### END ${_PART}"
 

@@ -1,0 +1,224 @@
+#!/bin/bash
+#
+# write by Aguy
+
+sysname=pahvo
+_PART=btrfs1
+_PATH_LOG=/var/log/server/install
+_PATH_CONF=/etc/server
+_FILE_INSTALL_CONF=${_PATH_CONF}/install.conf
+_FILE_INSTALL_DONE=${_PATH_CONF}/install.done
+
+[ -d "${_PATH_CONF}" ] || mkdir -p ${_PATH_CONF}/ssl
+[ -d "${_PATH_LOG}" ] || mkdir -p ${_PATH_LOG}
+[ -f "${_FILE_INSTALL_CONF}" ] && . _FILE_INSTALL_CONF
+
+########################  FUNCTIONS
+
+# colors
+white='\e[0;0m'; red='\e[0;31m'; green='\e[0;32m'; blue='\e[0;34m'; magenta='\e[0;35m'; yellow='\e[0;33m'
+whiteb='\e[1;1m'; redb='\e[1;31m'; greenb='\e[1;32m'; blueb='\e[1;34m'; magentab='\e[1;35m'; yellowb='\e[1;33m'; cclear='\e[0;0m'
+sdate=$(date +%s)
+
+_echoI() { echo -e "${yellow}${*}${cclear}"; }
+_echoI() { echo -e "${yellowb}${*}${cclear}"; }
+_echoT() { echo -e "${blueb}${*}${cclear}"; }
+_askno() { _ANSWER=; echo -en "$*: "; read _ANSWER; }
+_askyn() {
+	_ANSWER=
+	options=" y n "
+	while [ "${options/ $_ANSWER }" = "$options" ]; do
+		echo -e -n "$* y/n: "
+		read _ANSWER
+	done
+}
+_menu() {
+	PS3="$1: "
+	shift
+	select _ANSWER in $*
+		do [ "$_ANSWER" ] && break || echo -e "\nTry again"
+	done
+}
+_parthave() { [ -f "$2" ] && grep -q "^$1$" "$2" || (touch "$2"; return 1); }
+_partadd() { ! _parthave "$1" "$2" && echo "$1" >> "$2" || return 0; }
+_confhave() {
+	local file
+	file="${2:-$_FILE_INSTALL_CONF}"
+	! [ -f "$file" ] && return 1
+	grep -q "^$1=.*" "$file"
+}
+_confset() {
+	local file
+	file="${3:-$_FILE_INSTALL_CONF}"
+	! [ -f "$file" ] && touch "$file"
+
+	if _confhave "$1" "$file"; then
+		sed -i "\|^$1=| c${1}=${2:+\"$2\"}" "$file"
+	else
+		echo "${1}=${2:+\"$2\"}" >> "$file"
+	fi
+}
+
+########################  MAIN
+
+# exit
+[ "$USER" != root ] && _echoE "You have to run this script under root privileges" && exit 1
+_parthave ${_PART} ${_FILE_INSTALL_DONE} && _echoI "performed *** ${_PART}" && exit 0
+
+_echoT "btrfs configuration: AFTER installation & BEFORE reboot"
+_askyn "This part have to be launched after installation and BEFORE reboot\nConfirm" && [ "$_ANSWER" == "n" ] && exit 0
+
+#_echoT "------------------ root user"
+#echo -e "ct\nct" | sudo passwd root
+#echo "give 'ct' for password :" && su -
+
+_echoT "------------------ Data"
+
+lsblk -e 11,7 -o name,size,mountpoint
+blkid|grep -v /loop
+
+[ -z ${_UEFI+x} ] && anstmp=`blkid|grep -i vfat.*EFI|cut -d: -f1` && _askno "If UEFI are enabled, give partition name for UEFI (${anstmp})" && _UEFI=${_ANSWER:-${anstmp}} && _confset _UEFI "$_UEFI"
+
+[ -z ${_USERNAME+x} ] && anstmp="nikita" && _askno "Select a user name (${anstmp})" && _USERNAME=${_ANSWER:-${anstmp}} && _confset _USERNAME "$_USERNAME"
+
+[ -z ${_DEVICE_SYS+x} ] && _menu "Select a device for system installation" $(blkid -o device|grep -v '/loop'|xargs) && _DEVICE_SYS=$_ANSWER && _confset _DEVICE_SYS "${_DEVICE_SYS}"
+
+[ -z ${_SYSNAME+x} ] && anstmp=${sysname} && _askno "Give a prefix/sufix btrfs volume name for system device '${_DEVICE_SYS}' (${anstmp})" && _SYSNAME=${_ANSWER:-${anstmp}} && _confset _SYSNAME "${_SYSNAME}"
+
+[ -z ${_DEVICE_EXT+x} ] && anstmp="" && _askno "Give a device for 'extend' device if exists (${anstmp})" && _DEVICE_EXT=${_ANSWER:-${anstmp}} && _confset _DEVICE_EXT "$_DEVICE_EXT"
+
+[ -z ${_DEVICE_GRUB+x} ] && _askno "Give a device for grub installation": "$(blkid -o device|grep -v '/loop'|xargs) (${anstmp})" && _DEVICE_GRUB=${_ANSWER:-${anstmp}} && _confset _DEVICE_GRUB "$_DEVICE_GRUB"
+
+_echoI "--------------------------"
+cat "${_FILE_INSTALL_CONF}"
+_echoI "--------------------------"
+_askyn "PLease confirm installation" && [ "$_ANSWER" == n ] && exit 1
+
+
+############ btrfs volumes & dirs
+
+_echoT "------------------ btrfs volumes && dirs"
+
+mount "${_DEVICE_SYS}" /mnt
+cd /mnt
+btrfs subvolume list .
+
+# mv system
+if [ -d @ ]; then
+    [ -d "${_SYSNAME}" ] && mv "${_SYSNAME}" "${_SYSNAME}.${sdate}"
+    mv @ "${_SYSNAME}"
+fi
+# create home
+! [ -d home ] && btrfs subvolume create home
+# backup & create volume for user-$user
+[ -d user-${_SYSNAME} ] && mv user-${_SYSNAME} user-${_SYSNAME}.${sdate}
+btrfs subvolume create user-${_SYSNAME}
+# move data user to user-$user
+[ -d @home/${_USERNAME} ] && mv @home/${_USERNAME}/{.??,}* user-${_SYSNAME}/ 2>/dev/null
+# create path for binding user-$user
+[ -d home/${_USERNAME} ] || mkdir home/${_USERNAME}
+chown 1000.1000 -R home/${_USERNAME} user-${_SYSNAME}
+
+_echoT "------------------ btrfs & path delete"
+
+for sub in @home @cache @log; do
+	[ "$(btrfs subvolume show ${sub} 2>/dev/null)" ] && btrfs subvolume delete ${sub}
+done
+
+paths="create ubiquity-apt-clone var"
+for path in ${paths}; do rm -fR "${path}"; done
+
+_echoT "------------------ btrfs subvolume list ${PWD}"
+
+btrfs subvolume list .
+
+# fstab
+file="${_SYSNAME}/etc/fstab"
+[ -f ${file} ] && cp -a ${file} ${file}.${sdate}
+sed -i "/\/ / s|/\?@|/${_SYSNAME}|" ${file}
+sed -i "/\/home / s|/\?@home|/home|" ${file}
+line=`sed -n "/UUID.*\/home /p" ${file}|sed "s|/home       |/home/${_USERNAME}|"|sed "s|subvol=/\?home|subvol=/user-${_SYSNAME}|"`
+sed -i "/UUID.*\/home / a${line}" ${file}
+
+sed -i "/\/var\/cache /d" ${file}
+sed -i "/\/var\/log /d" ${file}
+
+# S_PATH_SCRIPT
+path=/usr/local/bs
+! [ -d "${path}" ] && mkdir "${path}"
+echo "
+# bind
+/home/shared/dev/bs   /usr/local/bs    none    bind                    0    0" >> ${file}
+
+_echoT "------------------ ${file}"
+_echoI "$(cat ${file})"
+
+_askyn "Check above file '/etc/fstab' & confirm to continue" && [ "$_ANSWER" == n ] && exit 1
+
+_echoT "------------------ umount /mnt"
+cd
+umount /mnt
+
+
+############  GRUB
+
+_echoT "------------------ chroot && prepare grub"
+
+# grub
+_echoT "Mount devices"
+cd /
+mount -o subvol="${_SYSNAME}" "${_DEVICE_SYS}" /mnt
+for i in dev dev/pts sys proc run; do mount --bind /$i mnt/$i; done
+
+# uefi
+[ "${_UEFI}" ] && mount "${_UEFI}" /mnt/boot/efi
+
+_echoT "Grub install"
+_echoI "after you are 'chrooted' please enter this line :"
+echo "grub-install --recheck ${_DEVICE_GRUB}"
+echo "update-grub"
+echo "exit"
+chroot mnt
+
+# uefi
+[ "$_UEFI" ] && umount mnt/boot/efi
+
+_echoT "umount devices"
+for i in run proc sys dev/pts dev; do umount mnt/${i}; done
+umount /mnt
+
+
+########################  END
+
+_echoT "===================== ${_PART} end"
+_partadd ${_PART} ${_FILE_INSTALL_DONE}
+
+
+########################  EXPORT
+
+_echoT "------------------ mount $_DEVICE_SYS"
+
+mount "${_DEVICE_SYS}" /mnt
+
+_echoT "------------------ copy conf & done"
+
+path="/mnt/${_SYSNAME}/etc/server"
+[ -d "${path}" ] && mv ${path} ${path}.${sdate}
+
+cp -a "/etc/server" "${path}"
+chown 0.1000 -R "${path}"
+chmod g+rw "${path}"
+chown 0.0 "${path}/ssl"
+chmod 750 "${path}/ssl"
+
+
+_echoT "------------------ umount $_DEVICE_SYS"
+
+umount /mnt
+
+_echoI "You have to start the global installation script after the reboot"
+_askyn "The computer now will reboot, please confirm"
+
+[ "$_ANSWER" == y ] && reboot
+
+exit

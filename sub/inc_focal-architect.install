@@ -4,7 +4,7 @@
 
 _echoT "#################### START ${_PARTDEV}"
 
-########################################  MAIN
+########################  MAIN
 
 # http://software.sqlpower.ca/page/architect_download_os
 
@@ -83,7 +83,7 @@ Categories=Application;GTK;Development;IDE;SQL;" > "$FILE"
 chmod +x "$FILE"
 
 
-########################################  END
+########################  END
 
 _echoT "------------------ write ${_PARTDEV}"
 _partadd ${_PARTDEV} $_FILE_DEV_DONE

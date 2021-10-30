@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PARTDEV}"
+
+########################  DATA
+
+path_opt=/opt/smartgit_${_SMARTGIT_VER}
+path_conf=.config/smartgit
+path_desk=~/.local/share/applications
+file_desk=${path_desk}/smartgit.desktop
+file_bin="/usr/bin/smartgit"
+
+
+########################  MAIN
+
+_echoT "------------------ backup"
+
+if [ -d ${path_opt} ] || [ -d ~/${path_conf} ]; then
+	tar czf ${_PATH_SOFT_BACKUP}/smartgit_backup_${_DATE}-$(date +%s).tar.gz ${path_opt} ~/${path_conf} ${file_desk} ${file_bin}
+fi
+
+
+_echoT "------------------ clean instance"
+
+# delete existing folder
+for path in ${path_opt} ~/${path_conf} ${file_desk} ${file_bin}; do
+	[ -e ${path} ] && rm -fR ${path}
+done
+
+
+####################  RESTORE
+
+if [ "$_SMARTGIT_DATE" ]; then
+
+	[ -h ~/dev ] || ln -s /home/shared/dev ~/dev
+	${S_PATH_SCRIPT}/backup-soft --restore ${_SMARTGIT_DATE} smartgit
+
+
+####################  FRESH INSTALL
+
+elif [ "${_SMARTGIT_VER}" ]; then
+
+	_echoT "------------------ install"
+
+	sudo pacman -S --noconfirm --needed dbeaver
+
+fi
+
+
+########################  END
+
+_echoT "------------------ write ${_PARTDEV}"
+_partadd "${_PARTDEV}" "$_FILE_DEV_DONE"
+
+_echoT "#################### END ${_PARTDEV}"

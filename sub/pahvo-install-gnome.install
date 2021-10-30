@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
+
+########################  MAIN
+
+
+_echoT "------------------ remove ${S_RELEASE_DESKTOP} pre-installed"
+sudo pacman -Rs --noconfirm evolution caffeine-ng manjaro-gnome-assets gnome-shell-extension-arc-menu gnome-shell-extension-appfolders-manager gnome-shell-extension-appindicator gnome-shell-extension-dash-to-panel gnome-shell-extension-desktop-icons gnome-shell-extension-openweather
+
+packages="apps-menu@gnome-shell-extensions.gcampax.github.com
+auto-move-windows@gnome-shell-extensions.gcampax.github.com
+places-menu@gnome-shell-extensions.gcampax.github.com
+dash-to-dock@micxgx.gmail.com
+screenshot-window-sizer@gnome-shell-extensions.gcampax.github.com
+drive-menu@gnome-shell-extensions.gcampax.github.com
+user-theme@gnome-shell-extensions.gcampax.github.com
+gsconnect@andyholmes.github.io
+window-list@gnome-shell-extensions.gcampax.github.com
+horizontal-workspaces@gnome-shell-extensions.gcampax.github.com
+windowsNavigator@gnome-shell-extensions.gcampax.github.com
+launch-new-instance@gnome-shell-extensions.gcampax.github.com
+workspace-indicator@gnome-shell-extensions.gcampax.github.com
+native-window-placement@gnome-shell-extensions.gcampax.github.com
+"
+for PCK in $(echo $packages); do sudo rm -fR "/usr/share/gnome-shell/extensions/${PCK}"; done
+
+
+_echoT "------------------ tools"
+part_install=${S_RELEASE_DESKTOP}-tools
+
+packages="gedit-plugins gcolor3"
+
+packages+="nautilus-sendto seahorse-nautilus gtkhash-nautilus nautilus-admin nautilus-empty-file nautilus-image-converter python-nautilus gnome-calculator"
+
+if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+
+_echoT "------------------ media"
+part_install=${S_RELEASE_DESKTOP}-media
+
+packages="brasero gnome-subtitles"
+
+if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+
+########################  END
+
+_echoT "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
+_partadd "${_PART}/${S_RELEASE_DESKTOP}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}/${S_RELEASE_DESKTOP}"
+
+
+<<KEEP
+####################  GNOME_EXTENSIONS
+# gnome-shell-extensions
+https://www.linux.com/learn/10-gnome-shell-extensions-you-should-be-using
+# gnome-shell-integration / firefox addons
+https://addons.mozilla.org/en-US/firefox/addon/gnome-shell-integration/
+
+# dash to dock
+# User Themes
+# Removable Drive Menu
+# EasyScreenCast
+# Hide Top Bar
+# Internet Radio
+# system-monitor
+# Disk space usage
+# ShutdownTimer by neumann
+KEEP
+

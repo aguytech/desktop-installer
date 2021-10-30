@@ -3,15 +3,16 @@
 # write by Aguy
 
 
-_echoT "#################### START ${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
 file_bash_aliases="${S_PATH_SCRIPT_CONF}/.bash_aliases"
 file_bash_functions="${S_PATH_SCRIPT_CONF}/.bash_functions"
 file_vimrc="${S_PATH_SCRIPT_CONF}/.vimrc"
-for file in "$file_bash_aliases" "$file_bash_functions"; do
-	if ! . "$file"; then _echoE "unable to find file '$file'"; exit 1; fi
-done
-########################################  MAIN
+
+_require ${file_bash_aliases} ${file_bash_functions} ${file_vimrc}
+
+
+########################  MAIN
 
 _echoT "------------------ .bashrc"
 
@@ -32,40 +33,40 @@ esac
 ps1='${debian_chroot:+($debian_chroot)}'${color}'\\h\\[\\033[00m\\]\\w\\[\\033[01;31m\\]\\$\\[\\033[00m\\]'
 # no root
 #ps1='${debian_chroot:+($debian_chroot)}\\[\\033[01;31m\\]\\u\\[\\033[00m\\]@\\[\\033[01;32m\\]\\h\\[\\033[00m\\]:\\w\\[\\033[01;31m\\]\\$\\[\\033[00m\\]'
-sudo sed -i "\|if \[ \"\$color_prompt\" = yes \]|{n;s|=.*|='$ps1'|}" "$file"
+sudo sed -i "\|if \[ \"\$color_prompt\" = yes \]|{n;s|=.*|='$ps1'|}" ${file}
 
-! sudo grep -q '/etc/server/env.conf' "$file" && echo '
+! sudo grep -q "${S_PATH_SCRIPT_CONF}/env" ${file} && sudo sh -c "echo '
 
 # source global variables
-[ -f /etc/server/env.conf ] && . /etc/server/env.conf
+[ -f ${S_PATH_SCRIPT_CONF}/env ] && . ${S_PATH_SCRIPT_CONF}/env
 
 # aliases
 [ -f ~/.bash_aliases ] && . ~/.bash_aliases
 
 # functions
 [ -f ~/.bash_functions ] && . ~/.bash_functions
-' | sudo tee "$file"
+' >> ${file}"
 
 
 _echoT "------------------  .bash_aliases"
 
 file=/root/.bash_aliases
-sudo [ -f "$file" ] && sudo rm "$file"
-sudo ln -s "$file_bash_aliases" "$file"
+sudo [ -f ${file} ] && sudo rm ${file}
+sudo ln -s "$file_bash_aliases" ${file}
 
 
 _echoT "------------------  .bash_functions"
 
 file=/root/.bash_functions
-sudo [ -f "$file" ] && sudo rm "$file"
-sudo ln -s "$file_bash_functions" "$file"
+sudo [ -f ${file} ] && sudo rm ${file}
+sudo ln -s "$file_bash_functions" ${file}
 
 
 _echoT "------------------  .vimrc"
 
 file=/root/.vimrc
-sudo [ -f "$file" ] && sudo rm "$file"
-sudo ln -s "$file_vimrc" "$file"
+sudo [ -f ${file} ] && sudo rm ${file}
+sudo ln -s "$file_vimrc" ${file}
 
 
 if [ "$_SSH_BACK_ROOT" ]; then
@@ -82,12 +83,11 @@ else
 fi
 
 
-########################################  END
+########################  END
 
-_echoT "------------------ write ${_PART}"
+_echoT "===================== ${_PART} end"
 _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
 
-_echoT "#################### END ${_PART}"
 
 
 <<KEEP

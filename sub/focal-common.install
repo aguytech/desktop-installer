@@ -3,24 +3,16 @@
 # write by Aguy
 
 
-_echoT "#################### START ${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
-file_env="${S_PATH_SCRIPT_CONF}/env.conf"
-file_bash_aliases="${S_PATH_SCRIPT_CONF}/.bash_aliases"
-file_bash_functions="${S_PATH_SCRIPT_CONF}/.bash_functions"
+file_env=${S_PATH_SCRIPT_CONF}/env
+file_bash_aliases=${S_PATH_SCRIPT_CONF}/.bash_aliases
+file_bash_functions=${S_PATH_SCRIPT_CONF}/.bash_functions
 
 _echoT "------------------ file required"
-files="${file_env} ${file_bash_aliases} ${file_bash_functions}"
-for file in ${files}; do ! [ -e "${file}" ] && _exite "Unable to find file: '${file}'"; done
+_require ${file_env} ${file_bash_aliases} ${file_bash_functions}
 
-########################################  MAIN
-
-
-_echoT "------------------ server.conf"
-
-file="${S_PATH_CONF}/server.conf"
-sudo sed -i '/^S_PATH_INSTALL=/ s|=.*$|="/home/shared/dev/install-desktop"|' "$file"
-. "$file"
+########################  MAIN
 
 
 _echoT "------------------ bs link"
@@ -30,13 +22,12 @@ _echoT "------------------ bs link"
 
 _echoT "------------------ conf mirror sources"
 # Change the mirror of software sources
-(software-properties-gtk)
+sudo software-properties-gtk
 
 
 _echoT "------------------ conf user"
-#sudo passwd root
-sudo adduser "$USER" users; sudo adduser "$USER" www-data
-sudo adduser "$USER" audio; sudo adduser "$USER" video
+sudo adduser ${USER} users; sudo adduser ${USER} www-data
+sudo adduser ${USER} audio; sudo adduser ${USER} video
 
 
 _echoT "------------------ conf bash"
@@ -51,52 +42,52 @@ colorRoot='\\e[1;31m'
 KEEP
 
 file=~/.bashrc
-_keepcpts "$file"
-sed -i 's|^\( *\)\(PS1.*033.*32m.*\)$|\1PS1="\${debian_chroot:+(\$debian_chroot)}\\['$colorRoot'\\]\\u\\[\\e[1;37m\\]@\\['$color'\\]\\h\\[\\e[1;37m\\]:\\W\\['$colorRoot'\\]\$\\[\\e[0;0m\\]\"|' "$file"
+_keepcpts ${file}
+sed -i 's|^\( *\)\(PS1.*033.*32m.*\)$|\1PS1="\${debian_chroot:+(\$debian_chroot)}\\['$colorRoot'\\]\\u\\[\\e[1;37m\\]@\\['$color'\\]\\h\\[\\e[1;37m\\]:\\W\\['$colorRoot'\\]\$\\[\\e[0;0m\\]\"|' ${file}
+sed -i 's|^#\?\(force_color_prompt\).*$|\1=yes|' ${file}
 
-! grep -q '/etc/server/env.conf' "$file" && echo '
+! grep -q "${S_PATH_SCRIPT_CONF}/env" ${file} && echo "
 # source global variables
-[ -f /etc/server/env.conf ] && . /etc/server/env.conf
+[ -f ${S_PATH_SCRIPT_CONF}/env ] && . ${S_PATH_SCRIPT_CONF}/env
 
 # functions
 [ -f ~/.bash_functions ] && . ~/.bash_functions
-' >> "$file"
+" >> ${file}
 
 _echoT "------------------  .bash_aliases"
 
 file=~/.bash_aliases
-[ -f "$file" ] && sudo rm "$file"
-ln -s "$file_bash_aliases" "$file"
+[ -f ${file} ] && sudo rm ${file}
+ln -s ${file_bash_aliases} ${file}
 
 
 _echoT "------------------  .bash_functions"
 
 file=~/.bash_functions
-[ -f "$file" ] && sudo rm "$file"
-ln -s "$file_bash_functions" "$file"
+[ -f ${file} ] && sudo rm ${file}
+ln -s ${file_bash_functions} ${file}
 
 
 _echoT "------------------  bash completion"
 
-_evalq sudo cp -a "${S_PATH_INSTALL_CONF}/bash_completion"/* "/usr/share/bash-completion/completions/"
+_evalqr "cp -a ${S_PATH_INSTALL_CONF}/bash-completion/* /usr/share/bash-completion/completions/"
 
 
 _echoT "------------------ hosts ovh-cluster"
 
 file=/etc/hosts
 servers_list=${!S_CLUSTER[*]}
-! grep -q "# ${S_DOMAIN_NAME} cluster" "$file" && echo -e "\n# ${S_DOMAIN_NAME} cluster" | sudo tee -a "$file"
+! sudo grep -q "# ${S_DOMAIN_NAME} cluster" ${file} && sudo sh -c "echo '\n# ${S_DOMAIN_NAME} cluster' >> ${file}"
 for host in ${servers_list/$HOSTNAME/}; do
-	eval ${S_CLUSTER[$host]}
-	sudo sed -i "/${ip}/d" "$file"
-	! grep -q "$host" "$file" && echo -e "${ip}\t${host}\t${name}" | sudo tee -a "$file"
+	eval ${S_CLUSTER[${host}]}
+	[ "${s_ip}" ] && sudo sed -i "/${s_ip}/d" ${file}
+	! grep -q "${host}" ${file} && [ "${s_ip}" ] && sudo sh -c "echo '${s_ip}\t${host}\t${s_name}' >> ${file}"
 done
 
 
-########################################  END
+########################  END
 
-_echoT "------------------ write ${_PART}"
+_echoT "===================== ${_PART} end"
 _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
 
-_echoT "#################### END ${_PART}"
 

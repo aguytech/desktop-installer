@@ -1,0 +1,96 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
+
+########################  MAIN
+
+
+#_echoT "------------------ gnome-xcf-thumbnailer"
+#! [ -d /usr/share/thumbnailers ] && sudo mkdir -p /usr/share/thumbnailers
+#! [ -e /usr/share/thumbnailers/gnome-xcf.thumbnailer ] && echo -e "[Thumbnailer Entry]\nTryExec=gnome-xcf-thumbnailer\nExec=gnome-xcf-thumbnailer %i %o\nMimeType=image/x-xcf;image/x-compressed-xcf;" | sudo tee /usr/share/thumbnailers/gnome-xcf.thumbnailer
+#nautilus -q
+#[ -d ~/.thumbnails/fail ] && rm -r ~/.thumbnails/fail
+#[ -d ~/.cache/thumbnails/fail ] && rm -r ~/.cache/thumbnails/fail
+
+
+_echoT "------------------ gedit settings"
+#dconf write /org/nemo/extensions/nemo-terminal/default-visible false
+gsettings set org.gnome.gedit.preferences.ui max-recents 30
+dconf write /org/gnome/gedit/plugins/sourcecodebrowser/show-line-numbers true
+
+# plugins
+pathplug=~/.local/share/gedit/plugins
+! [ -d $pathplug ] && mkdir -p $pathplug
+
+
+_echoT "------------------ gedit / restore-tabs"
+path=restore-tabs
+cd $pathplug
+_keepmvts "$path"
+curl -o master.zip https://codeload.github.com/raelgc/gedit-restore-tabs/zip/master
+unzip master.zip
+rm master.zip
+mv gedit-restore-tabs-master $path
+rm $path/.gitignore
+sudo cp $path/org.gnome.gedit.plugins.restoretabs.gschema.xml /usr/share/glib-2.0/schemas/
+sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
+
+_echoT "------------------ gedit / duplicate-line"
+path=duplicate-line
+cd $pathplug
+_keepmvts "$path"
+curl -o master.zip https://codeload.github.com/hardpixel/gedit-duplicate-line/zip/master
+unzip master.zip
+rm master.zip
+mv gedit-duplicate-line-master $path
+sed -i 's|^\(\s*modifiers = event.state.*\)|#\1|' $path/duplicate_line.py
+sed -i 's|^\(\s*\)\(if modifiers ==.*\)|#\1\2\n\1if event.state \& Gdk.ModifierType.CONTROL_MASK and event.state \& Gdk.ModifierType.SHIFT_MASK:|' $path/duplicate_line.py
+#if event.state & Gdk.ModifierType.CONTROL_MASK and event.state & Gdk.ModifierType.SHIFT_MASK:
+
+
+_echoT "------------------ gedit / gedit-markdown"
+path=markdown_preview
+cd $pathplug
+_keepmvts "$path"
+curl -o master.zip https://codeload.github.com/maoschanz/gedit-plugin-markdown_preview/zip/master
+unzip master.zip
+rm master.zip
+mv gedit-plugin-markdown_preview-master $path
+
+
+_echoT "------------------ numlock-state conf"
+
+sudo gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
+
+
+_echoT "------------------ gstreamer preset"
+
+file="/usr/share/sound-juicer/rhythmbox.gep"
+sch="\[streamprofile-oggvorbis-1\]"
+str="preset = ogg_very_high"
+sudo sed -i "/$sch/ a $str" "$file"
+
+sch="\[profile-oggopus\]"
+str="[profile-oggvorbis2]\nname = oggvorbis2\ndescription = Ogg Vorbis High\nformat = application/ogg\ntype = container\n\n[streamprofile-oggvorbis-12]\nparent = oggvorbis2\ntype = audio\npreset = ogg_high\nformat = audio/x-vorbis\npresence = 1\n\n[profile-oggvorbis3]\nname = oggvorbis3\ndescription = Ogg Vorbis Very High\nformat = application/ogg\ntype = container\n\n[streamprofile-oggvorbis-13]\nparent = oggvorbis3\ntype = audio\npreset = ogg_very_high\nformat = audio/x-vorbis\npresence = 1\n"
+sudo sed -i "/$sch/ i $str" "$file"
+
+
+_echoT "------------------ _LAPTOP"
+[ "$_LAPTOP" ] && sudo systemctl enable tlp tlp-sleep
+
+
+_echoT "------------------ virtualbox"
+[ "$_VIRTUALBOX" ] && sudo usermod -aG vboxusers $USER
+
+
+########################  END
+
+_echoT "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
+_partadd "${_PART}/${S_RELEASE_DESKTOP}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}/${S_RELEASE_DESKTOP}"
+
+

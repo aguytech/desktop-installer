@@ -1,13 +1,13 @@
 ## ubuntu
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_hp17_2t1-btrfs.exc /ext/ /media/$USER/2t1-btrfs/ext/ -av --delete -n
 #
-# sudo rsync /ext/backups/$HOSTNAME/ /media/$USER/2t1-btrfs/ext/backups/$HOSTNAME/ -av -n
+# sudo rsync /ext/backup/$HOSTNAME/ /media/$USER/2t1-btrfs/ext/backup/$HOSTNAME/ -av -n
 
 ## manjaro
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_hp17_2t1-btrfs.exc /ext/ /run/media/$USER/2t1-btrfs/ext/ -av --delete -n
-# sudo rsync /ext/backups/$HOSTNAME/ /run/media/$USER/2t1-btrfs/ext/backups/$HOSTNAME/ -av -n
+# sudo rsync /ext/backup/$HOSTNAME/ /run/media/$USER/2t1-btrfs/ext/backup/$HOSTNAME/ -av -n
 #
-# sudo rsync /ext/backups/$HOSTNAME/ /run/media/$USER/2t1-btrfs/ext/backups/$HOSTNAME/ -av -n
+# sudo rsync /ext/backup/$HOSTNAME/ /run/media/$USER/2t1-btrfs/ext/backup/$HOSTNAME/ -av -n
 
 .Trash-*
 .tmp*
@@ -15,7 +15,7 @@ lost+found
 ._sync_*
 .sync-*
 
-/backups
+/backup
 /ovh
 /shared/_back
 /shared/_new

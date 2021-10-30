@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+<action>
+	<icon>Terminal</icon>
+	<name>Terminal</name>
+	<unique-id>1367866030392833-1</unique-id>
+	<command>exo-open --working-directory %f --launch TerminalEmulator</command>
+	<description></description>
+	<patterns>*</patterns>
+	<directories/>
+</action>
+<action>
+	<icon>stock_folder</icon>
+	<name>Thunar Root</name>
+	<unique-id>1367866030392883-2</unique-id>
+	<command>pkexec thunar %f</command>
+	<description>Thunar Root</description>
+	<patterns>*</patterns>
+	<directories/>
+</action>
+<action>
+	<icon>system-search</icon>
+	<name>Search</name>
+	<unique-id>1367866030392913-3</unique-id>
+	<command>catfish %f</command>
+	<description>find files and folders</description>
+	<patterns>*</patterns>
+	<directories/>
+</action>
+<action>
+	<icon>/home/shared/dev/install-desktop/xtra/icons/meld-add.svg</icon>
+	<name>meld add</name>
+	<unique-id>1635239071232089-1</unique-id>
+	<command>thunar_ca meld add %f</command>
+	<description>add files to meld</description>
+	<patterns>*</patterns>
+	<directories/>
+	<other-files/>
+	<text-files/>
+</action>
+<action>
+	<icon>/home/shared/dev/install-desktop/xtra/icons/meld-with.svg</icon>
+	<name>meld with</name>
+	<unique-id>1635239155815307-2</unique-id>
+	<command>thunar_ca meld with %f</command>
+	<description>meld with selected files</description>
+	<patterns>*</patterns>
+	<directories/>
+	<other-files/>
+	<text-files/>
+</action>
+<action>
+	<icon>/home/shared/dev/install-desktop/xtra/icons/meld.svg</icon>
+	<name>meld</name>
+	<unique-id>1635239251803666-3</unique-id>
+	<command>meld %F</command>
+	<description>meld with selected</description>
+	<patterns>*</patterns>
+	<directories/>
+	<other-files/>
+	<text-files/>
+</action>
+<action>
+	<icon>go-last</icon>
+	<name>create symlinks</name>
+	<unique-id>1635239757729076-4</unique-id>
+	<command>ln -s %f %n.lnk</command>
+	<description>create symlinks</description>
+	<patterns>*</patterns>
+</action>
+</actions>

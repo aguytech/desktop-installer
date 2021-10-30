@@ -4,68 +4,83 @@
 
 echo "####################  ${BASH_SOURCE[0]}  ####################"
 
-################################ global functions
-#S_TRACE=debug
+######################## global functions
+S_TRACE=debug
 
-#allow conf-init
+# allow conf-init
 _INSTALL=ubuntu
+_PATH_LOG=/var/log/install
 
 path=`dirname "${BASH_SOURCE[0]}"`
-if [[ -z "$S_GLOBAL_FUNCTIONS" || -f $S_GLOBAL_FUNCTIONS ]]; then
-	S_GLOBAL_FUNCTIONS=`readlink -e "${path}/inc-functions"`
-	if ! [ -f "$S_GLOBAL_FUNCTIONS" ]; then echo -e "\e[1;31merror - unable to find file '$S_GLOBAL_FUNCTIONS' from ${BASH_SOURCE[0]}\e[0;0m"; exit 1; fi
+if [[ -z "${S_GLOBAL_FUNCTIONS}" || ! -f ${S_GLOBAL_FUNCTIONS} ]]; then
+	S_GLOBAL_FUNCTIONS=`readlink -e "${path}/../bs/inc-functions.sh"`
+	if ! [ -f "${S_GLOBAL_FUNCTIONS}" ]; then echo -e "\e[1;31m[error] - unable to find file '${S_GLOBAL_FUNCTIONS}' from ${BASH_SOURCE[0]}\e[0;0m"; exit 1; fi
 fi
-. $S_GLOBAL_FUNCTIONS
+. ${S_GLOBAL_FUNCTIONS}
 
-################################  DATA
+########################  DATA
 
-S_FILE_INSTALL_CONF="${S_PATH_CONF}/install.conf"
-S_FILE_INSTALL_DONE="${S_PATH_CONF}/install.done"
 _PATH_SSH_KEEP="/home/shared/.perso/.ssh"
-_PATH_SOFT=/ext/shared/Soft/multi
-
-# path
-[ -d "${_PATH_SOFT}" ] && ! [ -w "${_PATH_SOFT}" ] && sudo find "${_PATH_LOG}" -type d -exec sudo chown :1000 "{}" \; -exec sudo chmod g+rw "{}" \;
+[ -d ~/Soft/multi ] && _PATH_SOFT=~/Soft/multi || _PATH_SOFT=/ext/shared/Soft/multi
+_PATH_SOFT_BACKUP=${_PATH_SOFT}/backup
 
 # after btrfs1
-if ! grep -q '^S_RELEASE_NAME=' "$S_FILE_INSTALL_CONF"; then
+if ! grep -q '^S_RELEASE_NAME=' "${S_FILE_INSTALL_CONF}"; then
 	sed -i "1i _SCRIPT=\"${_INSTALL/%.install}\"\nS_RELEASE_NAME=\"$S_RELEASE_NAME\"\n" "${S_FILE_INSTALL_CONF}"
 fi
 
-# require
-if ! [ -f "${S_FILE_INSTALL_CONF}" ]; then echo -e "\e[0;31mUnable to load file '${S_FILE_INSTALL_CONF}' from '${BASH_SOURCE[0]}'\e[0;0m"; exit 1; fi
-. "${S_FILE_INSTALL_CONF}"
+########################  CONF
 
-# ssh
-! [ -d ${_PATH_SSH_KEEP} ] && echo -e "\e[0;31mUnable to find dir : ${_PATH_SSH_KEEP}\e[0;0m" && exit 1
+[ -f "${S_FILE_INSTALL_CONF}" ] && . "${S_FILE_INSTALL_CONF}"
 
 
-################################  PATH
+########################  RIGHTS
+
+_echoT "----------  path log rights"
+
+for path in ${S_PATH_LOG_SERVER} ${S_PATH_LOG_INSTALL}; do
+	[ ${USER} != root ] && _evalqr chown -R :1000 ${path} && _evalqr chmod -R g+rw ${path}
+done
+
+
+########################  BS
 
 file="/etc/profile.d/bs_path.sh"
-[ ! -e "$file" ] && echo 'export PATH=${PATH}:/usr/local/bs' | sudo tee -a "$file"
+sudo [ ! -e "$file" ] && sudo sh -c "echo 'export PATH=${PATH}:/usr/local/bs' >> ${file}"
 
 
-################################  HALT
-
-[ -z ${_STEP+x} ] && anstmp=n && _askno "Do you want an installation with halts for each parts ($anstmp)" && _STEP=${_ANSWER:-$anstmp} && _STEP=${_STEP/n/} && _confset _STEP "$_STEP"
-
-
-################################ btrfs2-
+######################## BTRFS2
 
 _PART=btrfs2
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoI "performed *** ${_PART}"; fi
 
 
-################################  CONF
-str="# install"; ! grep -q "^$str" "${S_FILE_INSTALL_CONF}" && echo -e "\n$str" >> "${S_FILE_INSTALL_CONF}"
+########################  REQUIRE
+
+_echoT "----------  ${_PATH_SOFT}"
+
+_requirep ${_PATH_SSH_KEEP} ${_PATH_SOFT}
+
+[ -d "${_PATH_SOFT}" ] && ! [ -w "${_PATH_SOFT}" ] && sudo find "${_PATH_SOFT}" -type d -exec sudo chown :1000 "{}" \; -exec sudo chmod g+rw "{}" \;
+
+
+########################  HALT
+
+[ -z ${_STEP+x} ] && anstmp=n && _askno "Do you want an installation with halts for each parts ($anstmp)" && _STEP=${_ANSWER:-$anstmp} && _STEP=${_STEP/n/} && _confset _STEP "$_STEP"
+
+
+########################  CONF
+str="# install"; ! grep -q "^${str}" "${S_FILE_INSTALL_CONF}" && echo -e "\n${str}" >> "${S_FILE_INSTALL_CONF}"
 
 #[ -z ${S_RELEASE_NAME+x} ] && anstmp="${S_RELEASE_NAME}" && _askno "Give the name of release ($_ANSWER)"  && S_RELEASE_NAME=${_ANSWER} && _confset S_RELEASE_NAME "${S_RELEASE_NAME}"
 
-[ -d "/etc/xdg/xfce4" ] && S_RELEASE_DESKTOP="xfce"
-[ -d "/etc/gdm" ] && S_RELEASE_DESKTOP="gnome"
-[ "${S_RELEASE_DESKTOP}" ] && _echoI "Dekstop environement are ${S_RELEASE_DESKTOP}"
-[ -z ${S_RELEASE_DESKTOP+x} ] && _menu "Select a desktop environement for manjaro" xfce gnome && S_RELEASE_DESKTOP=$_ANSWER && _confset S_RELEASE_DESKTOP "${S_RELEASE_DESKTOP}"
+[ -d /etc/xdg/xfce4 ] && S_RELEASE_DESKTOP="xfce"
+[ -d /etc/gdm* ] && S_RELEASE_DESKTOP="gnome"
+if [ "${S_RELEASE_DESKTOP}" ]; then
+	_echoI "Dekstop environement are ${S_RELEASE_DESKTOP}"
+else
+	_menu "Select a desktop environement for manjaro" xfce gnome && S_RELEASE_DESKTOP=$_ANSWER && _confset S_RELEASE_DESKTOP "${S_RELEASE_DESKTOP}"
+fi
 
 # if not btrfs
 [ -z ${_LXD+x} ] && anstmp=y && _askno "Do you want to configure computer for lxd ($anstmp)" && _LXD=${_ANSWER:-$anstmp} && _LXD=${_LXD/n/} && _confset _LXD "$_LXD"
@@ -79,46 +94,37 @@ str="# install"; ! grep -q "^$str" "${S_FILE_INSTALL_CONF}" && echo -e "\n$str" 
 
 [ -z ${_DEV+x} ] && anstmp=y && _askno "Do you want install 'developping' softwares? ($anstmp)" && _DEV=${_ANSWER:-$anstmp} && _DEV=${_DEV/n/} && _confset _DEV "$_DEV"
 
-[ -z ${_VIDEO+x} ] && anstmp=y && _askno "Do you want install 'videos' softwares? ($anstmp)" && _VIDEO=${_ANSWER:-$anstmp} && _VIDEO=${_VIDEO/n/} && _confset _VIDEO "$_VIDEO"
+[ -z ${_VIDEO+x} ] && anstmp=n && _askno "Do you want install 'videos' softwares? ($anstmp)" && _VIDEO=${_ANSWER:-$anstmp} && _VIDEO=${_VIDEO/n/} && _confset _VIDEO "$_VIDEO"
 
-[ -z ${_NETWORK+x} ] && anstmp=y && _askno "Do you want install 'network' softwares? ($anstmp)" && _NETWORK=${_ANSWER:-$anstmp} && _NETWORK=${_NETWORK/n/} && _confset _NETWORK "$_NETWORK"
+[ -z ${_NETWORK+x} ] && anstmp=n && _askno "Do you want install 'network' softwares? ($anstmp)" && _NETWORK=${_ANSWER:-$anstmp} && _NETWORK=${_NETWORK/n/} && _confset _NETWORK "$_NETWORK"
 
-if ! [ "$_LXD" ] && [ -z ${_VMWARE+x} ]; then
-	anstmp=y && _askno "Do you want install 'vmware' software? ($anstmp)" && _VMWARE=${_ANSWER:-$anstmp} && _VMWARE=${_VMWARE/n/}
-	_confset _VMWARE "$_VMWARE"
-fi
+[ -z ${_VMWARE+x} ] && anstmp=n && _askno "Do you want install 'vmware' software? ($anstmp)" && _VMWARE=${_ANSWER:-$anstmp} && _VMWARE=${_VMWARE/n/} && _confset _VMWARE "$_VMWARE"
 
-if ! [ "$_LXD" ] && ! [ "$_VMWARE" ] && [ -z ${_VIRTUALBOX+x} ]; then
-	anstmp=y && _askno "Do you want install 'virtualbox' software? ($anstmp)" && _VIRTUALBOX=${_ANSWER:-$anstmp} && _VIRTUALBOX=${_VIRTUALBOX/n/}
-	_confset _VIRTUALBOX "$_VIRTUALBOX"
-fi
+[ -z ${_VIRTUALBOX+x} ] && anstmp=n && _askno "Do you want install 'virtualbox' software? ($anstmp)" && _VIRTUALBOX=${_ANSWER:-$anstmp} && _VIRTUALBOX=${_VIRTUALBOX/n/} && _confset _VIRTUALBOX "$_VIRTUALBOX"
+
+[ -z ${_FREECAD+x} ] && anstmp=n && _askno "Do you want install 'freecad' software? ($anstmp)" && _FREECAD=${_ANSWER:-$anstmp} && _FREECAD=${_FREECAD/n/} && _confset _FREECAD "$_FREECAD"
 
 [ -z ${_SSH_BACK+x} ] && _menu "Select an ssh identity for user ${_USERNAME}" none $(ls -a1 -I. -I.. -I.ssh-all ${_PATH_SSH_KEEP}|xargs) && _SSH_BACK=${_ANSWER/none/} && _confset _SSH_BACK "$_SSH_BACK"
 
 [ -z ${_SSH_BACK_ROOT+x} ] && _menu "Select an ssh identity for user root" none $(ls -a1 -I. -I.. -I.ssh-all ${_PATH_SSH_KEEP}|xargs) && _SSH_BACK_ROOT=${_ANSWER/none/} && _confset _SSH_BACK_ROOT "$_SSH_BACK_ROOT"
 
-[ -z ${_FREECAD+x} ] && anstmp=n && _askno "Do you want install 'freecad' software? ($anstmp)" && _FREECAD=${_ANSWER:-$anstmp} && _FREECAD=${_FREECAD/n/} && _confset _FREECAD "$_FREECAD"
 
-[ -z ${_MULTIBOOT+x} ] && anstmp="9.2.0" && _askno "Give the version of multiboot to install 9.2.0 ($anstmp)" && _MULTIBOOT=${_ANSWER:-$anstmp} && _MULTIBOOT=${_MULTIBOOT/n/} && _confset _MULTIBOOT "$_MULTIBOOT"
-
-
-
-################################  COMMON-
+########################  COMMON-
 
 _PART=common
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoI "performed *** ${_PART}"; fi
 
-################################  REPOSITORIES-
+########################  REPOSITORIES-
 
 _PART=repositories
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoI "performed *** ${_PART}"; fi
 
-################################  UPGRADE-
+########################  UPGRADE-
 
 _PART=upgrade
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoI "performed *** ${_PART}"; fi
 
-################################  INSTALL-
+########################  INSTALL-
 
 _PART=install
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
@@ -128,19 +134,7 @@ else
 	_echoI "performed *** ${_PART}"
 fi
 
-################################  DEV-
-
-if [ "$_DEV" ]; then
-	_PART=dev
-	if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-		! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
-		[ "$_STEP" ] && _askno "Valid to continue"
-	else
-		_echoI "performed *** ${_PART}"
-	fi
-fi
-
-################################  LXD-
+########################  LXD-
 
 if [ "$_LXD" ]; then
     _PART=lxd
@@ -152,7 +146,19 @@ if [ "$_LXD" ]; then
 	fi
 fi
 
-################################  CONFIGURATION-
+########################  DEV-
+
+if [ "$_DEV" ]; then
+	_PART=dev
+	if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+		! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+		[ "$_STEP" ] && _askno "Valid to continue"
+	else
+		_echoI "performed *** ${_PART}"
+	fi
+fi
+
+########################  CONFIGURATION-
 
 _PART=configuration
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
@@ -162,7 +168,7 @@ else
 	_echoI "performed *** ${_PART}"
 fi
 
-################################  LAUNCHER-
+########################  LAUNCHER-
 
 _PART=launcher
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
@@ -172,7 +178,7 @@ else
 	_echoI "performed *** ${_PART}"
 fi
 
-################################  AUTOSTART-
+########################  AUTOSTART-
 
 _PART=autostart
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
@@ -182,7 +188,7 @@ else
 	_echoI "performed *** ${_PART}"
 fi
 
-################################  SSH-
+########################  SSH-
 
 _PART=ssh
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
@@ -193,7 +199,7 @@ else
 fi
 
 
-################################  ROOT-
+########################  ROOT-
 
 _PART=root
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
@@ -203,7 +209,7 @@ else
 	_echoI "performed *** ${_PART}"
 fi
 
-################################  END-
+########################  END-
 
 _PART=end
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
@@ -219,13 +225,13 @@ _echoI "\n!!!!! This installation are complety DONE ;o) !!!!!"
 
 <<KEEP
 
-######################################## m_audio_delta_66
+######################## m_audio_delta_66
 
 # driver mudita24 replace Envy24
 sudo apt install -y mudita24
 
 
-########################################  FIREFOX
+########################  FIREFOX
 
 about:config
 browser.search.openintab;true
@@ -233,18 +239,18 @@ browser.tabs.loadBookmarksInTabs;true
 browser.tabs.insertRelatedAfterCurrent;true
 
 
-########################################  FLASH
+########################  FLASH
 
 sudo apt install --reinstall flashplugin-installer ttf-mscorefonts-installer
 
 
-########################################  SHUT_DOWN
+########################  SHUT_DOWN
 
 #sudo systemctl disable NetworkManager-wait-online.service
 #sudo systemctl disable plymouth-quit-wait.service
 
 
-########################################  USB_SYSTEM
+########################  USB_SYSTEM
 
 sudo cp -p /etc/fstab /etc/fstab.keep; echo "tmpfs   /tmp		tmpfs   defaults,noatime,mode=1777	0 0
 tmpfs   /var/tmp	tmpfs   defaults,noatime,mode=1777	0 0
@@ -255,7 +261,7 @@ tmpfs   /var/cache/apt	tmpfs   defaults			0 0
 #tmpfs   /var/cache	tmpfs   defaults,noatime,mode=0755	0 0" | sudo tee -a /etc/fstab
 
 
-########################################  USB_LIVE
+########################  USB_LIVE
 
 # update_kernel
 sudo mv /usr/sbin/update-initramfs /usr/sbin/update-initramfs.keep; sudo ln -s /rofs/usr/sbin/update-initramfs /usr/sbin/update-initramfs; sudo dpkg --configure -a # copy initrd & vmlinuz to /casper

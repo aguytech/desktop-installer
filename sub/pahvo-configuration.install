@@ -1,0 +1,236 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+
+file_meld_conf=${S_PATH_INSTALL_CONF}/soft/meld-dark.xml
+_require ${file_meld_conf}
+
+path_vim=${S_PATH_INSTALL_CONF}/vim
+_requirep ${path_vim}
+
+########################  MAIN
+
+_echoT "================== ${_PART} / global configuration"
+
+_echoT "------------------ reduce swapiness"
+echo "vm.swappiness=10" |sudo tee -a /etc/sysctl.d/99-swappiness.conf
+
+
+_echoT "------------------ grub"
+file=/etc/default/grub
+sudo sed -i "/^GRUB_DEFAULT=/ s|=.*|=0|" ${file}
+sudo sed -i "/^GRUB_TIMEOUT=/ s|=.*|=2|" ${file}
+#sudo sed -i "/^GRUB_TIMEOUT_STYLE=/ s|=hidden|menu|" ${file}
+sudo sed -i "/^GRUB_SAVEDEFAULT=/ s|=.*|=false|" ${file}
+
+# add identifier to menuentry
+file=/etc/grub.d/30_os-prober
+file_keep=${file}.$(date +%s)
+if ! grep -q 'LONGNAME="${LONGNAME} ${BTRFSsubvol/#subvol=/}"' ${file}; then
+    _keepcpts ${file} && sudo chmod -x ${file_keep}
+    sudo sed -i "/LONGNAME=\"\${LABEL}\"/ a\  else\n    LONGNAME=\"\${LONGNAME} \${BTRFSsubvol/#subvol=/}\"" ${file}
+fi
+
+sudo update-grub
+
+
+_echoT "------------------ numlock tty service"
+
+file_exec="/usr/local/bin/numlock"
+echo '#!/bin/bash
+for tty in /dev/tty{1..6}
+do
+    /usr/bin/setleds -D +num < "$tty";
+done' | sudo tee ${file_exec}
+sudo chmod +x ${file_exec}
+
+file_service="/etc/systemd/system/numlock.service"
+sudo sh -c "echo '[Unit]
+Description=numlock
+
+[Service]
+ExecStart=${file_exec}
+StandardInput=tty
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target' > ${file_service}"
+
+_service enable numlock
+
+
+if type vim >/dev/null 2>&1 ; then
+    _echoT "------------------  vim links edit"
+
+    for file in /usr/bin/edit /usr/bin/editor; do
+        [ -e ${file} ] && _evalr rm ${file}
+        _evalr ln -sv /usr/bin/vim ${file}
+    done
+
+	_echoT "------------------ dev vim"
+	sudo cp ${path_vim}/* /usr/share/vim/vim*/colors/
+
+    _echoT "----------  conf vim"
+    file=/etc/vimrc
+    sudo sed -i "s|^\"\(syntax\).*|\1 on|" ${file}
+
+    opts="background=dark showmatch"
+    # uncomment
+    for opt in $opts; do
+        sudo sed -i "s|^\"\(set $opt.*\)$|\1|" ${file}
+    done
+fi
+
+
+_echoT "------------------  /usr/local/bs/conf links"
+
+for file in .nanorc .tmux.conf .vimrc; do
+    path_from="${S_PATH_SCRIPT_CONF}/${file}"
+    path=~/${file}
+    [ -e "${path}" ] && sudo rm -fR ${path}
+    ln -s "${path_from}" "${path}"
+done
+
+_echoT "------------------ gstreamer preset"
+path=~/.local/share/gstreamer-1.0/presets
+! [ -d "${path}" ] && mkdir -p ${path}
+
+file=${path}/GstVorbisEnc.prs
+_keepmvts ${file}
+echo "[_presets_]
+element-name=GstVorbisEnc
+version=0.10
+
+[ogg_high]
+name=vorbisenc
+perfect-timestamp=true
+hard-resync=false
+tolerance=40000000
+quality=0.8
+managed=false
+
+[ogg_very_high]
+name=vorbisenc
+perfect-timestamp=true
+hard-resync=false
+tolerance=40000000
+quality=0.9
+managed=false" > ${file}
+
+
+_echoT "------------------ git config"
+
+git config --global user.name "aguy tech"
+git config --global user.email aguytech@free.fr
+git config --global core.editor nano
+git config --global merge.tool meld
+
+echo -e "[alias]
+\tci = commit
+\tco = checkout
+\tst = status
+\tbr = branch
+" >> ~/.gitconfig
+
+_echoT "------------------ meld style"
+sudo cp ${file_meld_conf} /usr/share/meld/styles/meld-dark.xml
+
+
+_echoT "------------------ nano"
+
+for str in conf install; do
+    sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/$str.nanorc
+    sudo sed -i 's|^\(syntax \).*|\1"'$str'" "\.'$str'$"|' /usr/share/nano/$str.nanorc
+done
+
+file=/etc/nanorc
+_keepcpts ${file}
+sudo sed -i 's|^.*\(set tabsize\).*|\1 4|' ${file}
+sudo sed -i 's|^\(set cut.*\)$|# \1|' ${file}
+sudo sed -i 's|^\(set linenumbers.*\)$|# \1|' ${file}
+sudo sed -i '/^# *include/ s/^# //' ${file}
+
+# various
+opts="constantshow historylog matchbrackets multibuffer nohelp softwrap "
+# color
+opts+="errorcolor functioncolor keycolor numbercolor selectedcolor statuscolor stripecolor titlecolor"
+# uncomment
+for opt in ${opts}; do
+    sudo sed -i "s|^.*\(set $opt .*\)$|\1|"  ${file}
+done
+
+
+_echoT "------------------ language-specs conf"
+
+sudo cp -a ${S_PATH_INSTALL_CONF}/gtk/conf.lang /usr/share/gtksourceview-3.0/language-specs/
+sudo cp -a ${S_PATH_INSTALL_CONF}/gtk/install.lang /usr/share/gtksourceview-3.0/language-specs/
+
+
+_echoT "------------------ firefox tweaks"
+path=~/.mozilla/firefox/${USER}
+if [ -d "${path}" ]; then
+	ln -sv "${S_PATH_SCRIPT_CONF}/user.js" ${path}
+	chown 1000:1000 ${path}
+else
+	_echoI "please link '${S_PATH_INSTALL_CONF}/firefox/user.js'\nto your firefox path of profile: ${path}"
+	_askno "Confirm"
+fi
+
+
+_echoT "------------------ tmux"
+
+file=~/.tmux.conf
+
+# plugins
+path=~/.tmux/plugins/resurect
+[ -d "${path}" ] || mkdir -p ${path}
+git clone https://github.com/tmux-plugins/tmux-resurrect ${path}
+grep -q resurrect.tmux ${file} || echo -e "# resurect plugin\nrun-shell ${path}/resurrect.tmux" >> ${file}
+
+# set conf file
+tmux source-file ${file} 2>/dev/null
+
+# bash completion
+sudo cp "${S_PATH_INSTALL_CONF}/bash-completion/tmux" /usr/share/bash-completion/completions/
+
+
+_echoT "------------------  logrotate server"
+
+# logrotate
+sudo sh -c "echo '# Logrotate file for server functions logs
+#$S_PATH_LOG_INSTALL/*.log
+$S_PATH_LOG_SERVER/*.log
+$S_PATH_LOG_SERVER/*.err
+$S_PATH_LOG_SERVER/*.debug
+{
+	su 0 1000
+    missingok
+    compress
+    delaycompress
+    notifempty
+    weekly
+    rotate 8
+}
+' > /etc/logrotate.d/server"
+
+
+_echoT "------------------ launcher clean"
+
+sudo sed -i 's|;;|;|' /usr/share/applications/*.desktop
+
+
+######################## required ${S_RELEASE_DESKTOP}
+
+file=${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}-${S_RELEASE_DESKTOP}.install
+if [ -f "${file}" ]; then
+	_echoT "------------------ ${S_RELEASE_DESKTOP} required"
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}-${S_RELEASE_DESKTOP}.install && echo "wrong '${_PART}'" && exit
+fi
+
+########################  END
+
+_echoT "===================== ${_PART} end"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"

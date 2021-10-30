@@ -1,0 +1,230 @@
+#!/bin/bash
+#
+# write by Aguy
+
+echo "####################  ${BASH_SOURCE[0]}  ####################"
+
+######################## global functions
+S_TRACE=debug
+
+# allow conf-init
+_INSTALL=manjaro
+_PATH_LOG=/var/log/install
+
+path=`dirname "${BASH_SOURCE[0]}"`
+if [[ -z "${S_GLOBAL_FUNCTIONS}" || ! -f ${S_GLOBAL_FUNCTIONS} ]]; then
+	S_GLOBAL_FUNCTIONS=`readlink -e "${path}/../bs/inc-functions.sh"`
+	if ! [ -f "${S_GLOBAL_FUNCTIONS}" ]; then echo -e "\e[1;31m[error] - unable to find file '${S_GLOBAL_FUNCTIONS}' from ${BASH_SOURCE[0]}\e[0;0m"; exit 1; fi
+fi
+. ${S_GLOBAL_FUNCTIONS}
+
+########################  DATA
+
+_PATH_SSH_KEEP="/home/shared/.perso/.ssh"
+[ -d ~/Soft/multi ] && _PATH_SOFT=~/Soft/multi || _PATH_SOFT=/ext/shared/Soft/multi
+_PATH_SOFT_BACKUP=${_PATH_SOFT}/backup
+
+# after btrfs1
+if ! grep -q '^S_RELEASE_NAME=' "${S_FILE_INSTALL_CONF}"; then
+	sed -i "1i _SCRIPT=\"${_INSTALL/%.install}\"\nS_RELEASE_NAME=\"$S_RELEASE_NAME\"\n" "${S_FILE_INSTALL_CONF}"
+fi
+
+########################  CONF
+
+[ -f "${S_FILE_INSTALL_CONF}" ] && . "${S_FILE_INSTALL_CONF}"
+
+
+########################  RIGHTS
+
+_echoT "----------  path log rights"
+
+for path in ${S_PATH_LOG_SERVER} ${S_PATH_LOG_INSTALL}; do
+	[ ${USER} != root ] && _evalqr chown -R :1000 ${path} && _evalqr chmod -R g+rw ${path}
+done
+
+
+########################  BS
+
+file="/etc/profile.d/bs_path.sh"
+sudo [ ! -e "$file" ] && sudo sh -c "echo 'export PATH=${PATH}:/usr/local/bs' >> ${file}"
+
+
+######################## BTRFS2
+
+_PART=btrfs2
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoI "performed *** ${_PART}"; fi
+
+
+########################  REQUIRE
+
+_echoT "----------  ${_PATH_SOFT}"
+
+_requirep ${_PATH_SSH_KEEP} ${_PATH_SOFT}
+
+[ -d "${_PATH_SOFT}" ] && ! [ -w "${_PATH_SOFT}" ] && sudo find "${_PATH_SOFT}" -type d -exec sudo chown :1000 "{}" \; -exec sudo chmod g+rw "{}" \;
+
+
+########################  HALT
+
+[ -z ${_STEP+x} ] && anstmp=n && _askno "Do you want an installation with halts for each parts ($anstmp)" && _STEP=${_ANSWER:-$anstmp} && _STEP=${_STEP/n/} && _confset _STEP "$_STEP"
+
+
+########################  CONF
+str="# install"; ! grep -q "^${str}" "${S_FILE_INSTALL_CONF}" && echo -e "\n${str}" >> "${S_FILE_INSTALL_CONF}"
+
+#[ -z ${S_RELEASE_NAME+x} ] && anstmp="${S_RELEASE_NAME}" && _askno "Give the name of release ($_ANSWER)"  && S_RELEASE_NAME=${_ANSWER} && _confset S_RELEASE_NAME "${S_RELEASE_NAME}"
+
+[ -d /etc/xdg/xfce4 ] && S_RELEASE_DESKTOP="xfce"
+[ -d /etc/gdm* ] && S_RELEASE_DESKTOP="gnome"
+if [ "${S_RELEASE_DESKTOP}" ]; then
+	_echoI "Dekstop environement are ${S_RELEASE_DESKTOP}"
+else
+	_menu "Select a desktop environement for manjaro" xfce gnome && S_RELEASE_DESKTOP=$_ANSWER && _confset S_RELEASE_DESKTOP "${S_RELEASE_DESKTOP}"
+fi
+
+# if not btrfs
+[ -z ${_LXD+x} ] && anstmp=y && _askno "Do you want to configure computer for lxd ($anstmp)" && _LXD=${_ANSWER:-$anstmp} && _LXD=${_LXD/n/} && _confset _LXD "$_LXD"
+
+[ -z ${_USERNAME+x} ] && _menu "Select a user name" ${S_RELEASE_NAME} && _USERNAME=$_ANSWER && _confset _USERNAME "${_USERNAME}"
+
+[ -z ${_SYSNAME+x} ] && anstmp="${_SYSNAME}" && _askno "Give the btrfs volume name for system device '$_DEVICE_SYS' for btrfs ($anstmp)" && _SYSNAME=${_ANSWER:-$anstmp} && _confset _SYSNAME "$_SYSNAME"
+
+
+[ -z ${_LAPTOP+x} ] && anstmp=n && _askno "Do you want an installation for laptop ($anstmp)" && _LAPTOP=${_ANSWER:-$anstmp} && _LAPTOP=${_LAPTOP/n/} && _confset _LAPTOP "$_LAPTOP"
+
+[ -z ${_DEV+x} ] && anstmp=y && _askno "Do you want install 'developping' softwares? ($anstmp)" && _DEV=${_ANSWER:-$anstmp} && _DEV=${_DEV/n/} && _confset _DEV "$_DEV"
+
+[ -z ${_VIDEO+x} ] && anstmp=n && _askno "Do you want install 'videos' softwares? ($anstmp)" && _VIDEO=${_ANSWER:-$anstmp} && _VIDEO=${_VIDEO/n/} && _confset _VIDEO "$_VIDEO"
+
+[ -z ${_NETWORK+x} ] && anstmp=n && _askno "Do you want install 'network' softwares? ($anstmp)" && _NETWORK=${_ANSWER:-$anstmp} && _NETWORK=${_NETWORK/n/} && _confset _NETWORK "$_NETWORK"
+
+[ -z ${_VMWARE+x} ] && anstmp=n && _askno "Do you want install 'vmware' software? ($anstmp)" && _VMWARE=${_ANSWER:-$anstmp} && _VMWARE=${_VMWARE/n/} && _confset _VMWARE "$_VMWARE"
+
+[ -z ${_VIRTUALBOX+x} ] && anstmp=n && _askno "Do you want install 'virtualbox' software? ($anstmp)" && _VIRTUALBOX=${_ANSWER:-$anstmp} && _VIRTUALBOX=${_VIRTUALBOX/n/} && _confset _VIRTUALBOX "$_VIRTUALBOX"
+
+[ -z ${_FREECAD+x} ] && anstmp=n && _askno "Do you want install 'freecad' software? ($anstmp)" && _FREECAD=${_ANSWER:-$anstmp} && _FREECAD=${_FREECAD/n/} && _confset _FREECAD "$_FREECAD"
+
+[ -z ${_SSH_BACK+x} ] && _menu "Select an ssh identity for user ${_USERNAME}" none $(ls -a1 -I. -I.. -I.ssh-all ${_PATH_SSH_KEEP}|xargs) && _SSH_BACK=${_ANSWER/none/} && _confset _SSH_BACK "$_SSH_BACK"
+
+[ -z ${_SSH_BACK_ROOT+x} ] && _menu "Select an ssh identity for user root" none $(ls -a1 -I. -I.. -I.ssh-all ${_PATH_SSH_KEEP}|xargs) && _SSH_BACK_ROOT=${_ANSWER/none/} && _confset _SSH_BACK_ROOT "$_SSH_BACK_ROOT"
+
+
+########################  COMMON-
+
+_PART=common
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoI "performed *** ${_PART}"; fi
+
+########################  UPGRADE-
+
+_PART=upgrade
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install; [ "$_STEP" ] && _askno "Valid to continue"; else _echoI "performed *** ${_PART}"; fi
+
+########################  INSTALL-
+
+_PART=install
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	[ "$_STEP" ] && _askno "Valid to continue"
+else
+	_echoI "performed *** ${_PART}"
+fi
+
+########################  LXD-
+
+if [ "$_LXD" ]; then
+    _PART=lxd
+    if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+		! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+		[ "$_STEP" ] && _askno "Valid to continue"
+    else
+		_echoI "performed *** ${_PART}"
+	fi
+fi
+
+########################  DEV-
+
+if [ "$_DEV" ]; then
+	_PART=dev
+	if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+		! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+		[ "$_STEP" ] && _askno "Valid to continue"
+	else
+		_echoI "performed *** ${_PART}"
+	fi
+fi
+
+########################  AUR-
+
+_PART=aur
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	[ "$_STEP" ] && _askno "Valid to continue"
+else
+	_echoI "performed *** ${_PART}"
+fi
+
+########################  CONFIGURATION-
+
+_PART=configuration
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	[ "$_STEP" ] && _askno "Valid to continue"
+else
+	_echoI "performed *** ${_PART}"
+fi
+
+########################  LAUNCHER-
+
+_PART=launcher
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	[ "$_STEP" ] && _askno "Valid to continue"
+else
+	_echoI "performed *** ${_PART}"
+fi
+
+########################  AUTOSTART-
+
+_PART=autostart
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	[ "$_STEP" ] && _askno "Valid to continue"
+else
+	_echoI "performed *** ${_PART}"
+fi
+
+########################  SSH-
+
+_PART=ssh
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	[ "$_STEP" ] && _askno "Valid to continue"
+else
+	_echoI "performed *** ${_PART}"
+fi
+
+
+########################  ROOT-
+
+_PART=root
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	[ "$_STEP" ] && _askno "Valid to continue"
+else
+	_echoI "performed *** ${_PART}"
+fi
+
+########################  END-
+
+_PART=end
+if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	[ "$_STEP" ] && _askno "Valid to continue"
+else
+	_echoI "performed *** ${_PART}"
+fi
+
+_echoT "####################  end  ####################"
+
+_echoI "\n!!!!! This installation are complety DONE ;o) !!!!!"
+

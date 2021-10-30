@@ -10,6 +10,6 @@ lost+found
 ._sync_*
 .sync-*
 
-/backups
+/backup
 /ovh
 /shared/Podcasts

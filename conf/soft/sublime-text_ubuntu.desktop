@@ -1,0 +1,87 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sublime Text
+GenericName=Text Editor
+Comment=Sophisticated text editor for code, markup and prose
+Exec=sublime-text %F
+Terminal=false
+MimeType=text/plain;
+Icon=sublime-text
+Categories=TextEditor;Development;
+StartupNotify=true
+StartupWMClass=sublime_text
+Actions=Document;ProjBS;ProjBsNode1;Separator;Dbeaver;Eclipse;Ghex;FirefoxDev;GitG;Meld;Smartgit;SquirrelSql;Gedit;Separator;SshDev;SshS;SshNode1;SshLxd;
+
+[Desktop Action Window]
+Name=New Window
+Exec=sublime-text -n
+
+[Desktop Action Document]
+Name=New File
+Exec=sublime-text --command new_file
+
+[Desktop Action Separator]
+Name=−−−−−−−−−−
+Exec=
+
+[Desktop Action ProjBS]
+Name=project / local bs
+Exec=sublime-text --project ~/.sublime-project/bs.sublime-project
+
+[Desktop Action ProjBsNode1]
+Name=project / node1 bs
+Exec=sublime-text --project ~/.sublime-project/node1-bs.sublime-project
+
+[Desktop Action Gedit]
+Name=Gedit
+Exec=gedit
+
+[Desktop Action FirefoxDev]
+Name=Firefox developer edition
+Exec=/usr/bin/firefox-developer %u
+
+[Desktop Action Eclipse]
+Name=Eclipse
+Exec=eclipse
+
+[Desktop Action Ghex]
+Name=Ghex
+Exec=ghex %F
+
+[Desktop Action GitG]
+Name=Gitg
+Exec=gitg --no-wd %U
+
+[Desktop Action Smartgit]
+Name=Smartgit
+Exec=smartgit %u
+
+[Desktop Action Dbeaver]
+Name=Dbeaver
+Exec=dbeaver
+
+[Desktop Action SquirrelSql]
+Name=Squirrel Sql
+Exec=squirrel-sql
+
+[Desktop Action Meld]
+Name=Meld
+Exec=meld
+
+[Desktop Action SshDev]
+Name=ssh dev
+Exec=gnome-terminal --tab --tab-with-profile node1
+
+[Desktop Action SshS]
+Name=ssh server
+Exec=gnome-terminal -e ssh-server
+
+[Desktop Action SshNode1]
+Name=ssh node1
+Exec=gnome-terminal --tab-with-profile node1
+
+[Desktop Action SshLxd]
+Name=ssh lxd
+Exec=gnome-terminal -e ssh-lxd
+

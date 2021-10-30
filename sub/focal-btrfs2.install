@@ -3,172 +3,168 @@
 # write by Aguy
 
 
-_echoT "#################### START ${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
-########################################  MAIN
+########################  MAIN
 
 
 _echoT "Part 2 of btrfs configuration"
-_askyn "This part have to be launched after installation and AfTER reboot\nConfirm" && [ "$_ANSWER" == "n" ] && exit 0
+_askyn "This part have to be launched after installation and AfTER reboot\nConfirm" && [ "${_ANSWER}" == n ] && exit 0
 
 
-#_echoT "------------------ root user"
-#echo -e "ct\nct" | sudo passwd root
-#echo "give 'ct' for password :" && su -
+_echoT "------------------ root user"
+_ask "Give the password for root" && echo -e "${_ANSWER}\n${_ANSWER}" | sudo passwd root
 
 
 _echoT "------------------ Data"
 
-! [ "$_LXD" ] && _askyn "Do you want to configure computer for lxd ? " && _LXD=${_ANSWER/n/}
-_confset _LXD "$_LXD"
+[ "${S_HOST_TYPE}" = lxd ] && _LXD=y
+[ -z "${_LXD}" ] && _askyn "Do you want to configure computer for lxd ? " && _LXD=${_ANSWER/n/}
+_confset _LXD "${_LXD}"
 
-! [ "$_SSD" ] && _askyn "the device '$_DEVICE_SYS' named '${_SYSNAME}' are they a ssd disk ? " && _SSD=${_ANSWER/n/}
-_confset _SSD "$_SSD"
+[ -z "${_SSD}" ] && _askyn "the device '${_DEVICE_SYS}' named '${_SYSNAME}' are they a ssd disk ? " && _SSD=${_ANSWER/n/}
+_confset _SSD "${_SSD}"
 
-! [ "$_MEM" ] && anstmp=2G && _askno "Give the size of memory used for /tmp dir ($anstmp)" && _MEM=${_ANSWER:-$anstmp}
-_confset _MEM "$_MEM"
+[ -z "${_MEM}" ] && anstmp=2G && _askno "Give the size of memory used for /tmp dir ($anstmp)" && _MEM=${_ANSWER:-$anstmp}
+_confset _MEM "${_MEM}"
+
+path_lxd=/vm
 
 
-_echoT "------------------ mount $_DEVICE_SYS"
+_echoT "------------------ mount ${_DEVICE_SYS}"
 
 # sys
-sudo mount $_DEVICE_SYS /mnt
+sudo mount ${_DEVICE_SYS} /mnt
 cd /mnt
 
 #mv ${_SYSNAME}/var/log ${_SYSNAME}/var/log.keep
 
-_echoT "btrfs subvolume list $PWD"
+_echoT "btrfs subvolume list ${PWD}"
 _echoI "$(sudo btrfs subvolume list .)"
 
 
 _echoT "------------------ create btrfs subvolumes"
 
-#subvs="home/shared save"
-subvs="save"
-for subv in $subvs; do
-    ! [ "$(sudo btrfs subvolume show $subv 2>/dev/null)" ] && sudo btrfs subvolume create $subv
-done
+subv=save
+! sudo [ -d ${subv} ] && sudo btrfs subvolume create ${subv}
 
 # create volume for LXD
-[ "$(sudo btrfs subvolume show lxd-${_SYSNAME} 2>/dev/null)" ] && sudo mv "lxd-${_SYSNAME}" "lxd-${_SYSNAME}.keep$(date +%s)"
+sudo [ -d lxd-${_SYSNAME} ] && sudo mv "lxd-${_SYSNAME}" "lxd-${_SYSNAME}.keep$(date +%s)"
 sudo btrfs subvolume create lxd-${_SYSNAME}
 
-_echoT "btrfs subvolume list $PWD"
+_echoT "btrfs subvolume list ${PWD}"
 _echoI "$(sudo btrfs subvolume list .)"
+
+
+if [ "${_LXD}" ]; then
+	_echoT "------------------ create lxd path"
+	[ -d ${path_lxd} ] || mkdir /mnt${path_lxd} 
+fi
 
 #chmod o-rwx ${_SYSNAME}/.snapshots
 #rsync -av ${_SYSNAME}/var/log.keep/ ${_SYSNAME}/var/log/
 #rm -fR ${_SYSNAME}/var/log.keep
 
-_echoT "------------------ umount $_DEVICE_SYS"
+_echoT "------------------ umount ${_DEVICE_SYS}"
 
 cd /
 sudo umount /mnt
 
-
-[ "${_DEVICE_EXT}" ] && device=${_DEVICE_EXT} || device=$_DEVICE_SYS
+if [ "${_DEVICE_EXT}" ]; then
+	device=${_DEVICE_EXT}
+	subv=
+else
+	device=${_DEVICE_SYS}
+	subv=ext
+fi
 
 _echoT "------------------ mount $device"
 
-sudo mount $device /mnt
-cd /mnt
-
-_echoT "btrfs subvolume list $PWD"
-_echoI "$(sudo btrfs subvolume list .)"
+sudo mount ${device} /mnt
 
 
 _echoT "------------------ create btrfs subvolumes"
 
-#subvs="ext ext/backups ext/ovh ext/shared"
-subvs="ext"
-for subv in $subvs; do
-    ! [ "$(sudo btrfs subvolume show ${subv} 2>/dev/null)" ] && sudo btrfs subvolume create $subv
-	sudo chown :1000 $subv
-	sudo chmod g+rwx $subv
-done
+[ "${subv}" ] && ! sudo [ -d ${subv} ] && sudo btrfs subvolume create ${subv}
 
-_echoT "btrfs subvolume list $PWD"
-_echoI "$(sudo btrfs subvolume list .)"
+sudo chown :1000 -R /mnt/${subv}
+sudo chmod g+rwx -R /mnt/${subv}
 
-cd /
 sudo umount /mnt
 
 
+_echoT "------------------ /etc/fstab global"
+
+# fstab
+uuidsys=$(sudo blkid |grep ${_DEVICE_SYS} |sed 's|.* UUID="\([^"]\+\)" .*|\1|')
+[ "${_DEVICE_EXT}" ] && uuidext=$(sudo blkid |grep ${_DEVICE_EXT} |sed 's|.* UUID="\([^"]\+\)" .*|\1|')
+_echoI "uuidsys=${uuidsys}\nuuidext=${uuidext}"
+
+! [ "${uuidsys}" ] && _ask "Please give the UUID for sys" && uuidsys=${_ANSWER} && _echoI "uuidsys=${uuidsys}"
+[ "${_DEVICE_EXT}" ] && ! [ "${uuidext}" ] && _ask "Please give the UUID for ext" && uuidext=${_ANSWER} && _echoI "uuidext=${uuidext}"
+
+file=/etc/fstab
+_keepcpts ${file}
+sudo sed -i '/^UUID=.* btrfs .*/ s|^|#|' ${file}
+
+sudo sh -c "echo '
+# btrfs sys
+UUID=${uuidsys}   /                 btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/${_SYSNAME}      0    1
+UUID=${uuidsys}   /home             btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/home       0    2
+UUID=${uuidsys}   /home/${_USERNAME}      btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/user-${_SYSNAME} 0    2
+UUID=${uuidsys}   /save             btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/save       0    2' >> ${file}"
+[ "${_LXD}" ] && sudo sh -c "echo 'UUID=${uuidsys}   ${path_lxd}               btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/lxd-${_SYSNAME}      0    2' >> ${file}"
+
+[ "${_DEVICE_EXT}" ] || sudo sh -c "echo 'UUID=${uuidsys}   /ext              btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/ext        0    2' >> ${file}"
+sudo sh -c "echo '\nUUID=${uuidsys}   /btrfs/sys        btrfs   defaults,noauto,noatime,space_cache,autodefrag,compress=zstd            0    2' >> ${file}"
+
+[ "${_SSD}" ] && sudo sed -i '/btrfs/ s|noatime,|noatime,ssd,|' ${file}
+
+if grep -q '^tmp.*\/tmp' /etc/fstab; then
+	[ "${_MEM:0:1}" != 0 ] && sudo sed -i "/tmpfs/ s|mode=1777|mode=1777,size=${_MEM}|" ${file}
+else
+	sudo sh -c "echo '\ntmpfs                                       /tmp              tmpfs   defaults,noatime,mode=1777,size=${_MEM}     0 0' >> ${file}"
+fi
+
+[ "${_DEVICE_EXT}" ] && sudo sh -c "echo '
+# btrfs ext
+UUID=${uuidext}      /ext              btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/ext           0    2
+
+UUID=${uuidext}      /btrfs/ext        btrfs   defaults,noauto,noatime,space_cache,autodefrag,compress=zstd               0    2' >> ${file}"
+
+_echoI "$(cat "${file}")"
+
+#_echoT "------------------ mount all"
+#sudo mount -a
+
 _echoT "------------------ create dirs & rights"
 
-dirs="/btrfs/sys /btrfs/ext /ext ext/backups ext/ovh ext/shared /home /home/shared /home/shared/dev/bs /home/shared/www /opt /usr/local/bs /save/${_USERNAME}"
-[ "$_LXD" ] && dirs+="/var/lib/lxd"
-
-for dir in $dirs; do
-	! [ -d $dir ] && sudo mkdir -p $dir
-	sudo chown :1000 $dir
-	sudo chmod g+rwx $dir
+dirs="${S_PATH_SCRIPT} ${S_PATH_LOG_INSTALL} ${S_PATH_LOG_SERVER} /btrfs/sys /btrfs/ext /ext ext/backups ext/ovh ext/shared /home /home/shared /home/shared/dev/bs /home/shared/www /opt /save/${_USERNAME}"
+for dir in ${dirs}; do
+	! [ -d ${dir} ] && sudo mkdir -p ${dir}
+	sudo chown :1000 ${dir}
+	sudo chmod g+rwx ${dir}
 done
 
 
-_echoT "------------------ /etc/fstab modify"
-
-# fstab
-uuidsys=$(sudo blkid |grep $_DEVICE_SYS |sed 's|.*UUID="\([^"]\+\)" .*|\1|')
-uuidext=$(sudo blkid |grep ${_DEVICE_EXT} |sed 's|.*UUID="\([^"]\+\)" .*|\1|')
-! [ "${_DEVICE_EXT}" ] && uuidext=$uuidsys
-_echoI "uuidsys=$uuidsys\nuuidext=$uuidext"
-
-! [ "${uuidsys}" ] && _ask "Please give th UUID for sys" && uuidsys=$_ANSWER
-! [ "${uuidext}" ] && _ask "Please give th UUID for ext" && uuidext=$_ANSWER
-_echoI "uuidsys=$uuidsys\nuuidext=$uuidext"
-
-file="/etc/fstab"
-! sudo [ -f ${file}.keep ] && sudo cp -a ${file} ${file}.keep
-sudo sed -i 's|^\(UUID=.* btrfs .*\)$|#\1|' "$file"
-
-echo "
-# btrfs sys
-UUID=$uuidsys      /                 btrfs   defaults,noatime,space_cache,compress=lzo,subvol=${_SYSNAME}      0    1
-UUID=$uuidsys      /home             btrfs   defaults,noatime,space_cache,compress=lzo,subvol=home          0    2
-UUID=$uuidsys      /home/${_USERNAME}      btrfs   defaults,noatime,space_cache,compress=lzo,subvol=user-${_SYSNAME}  0    2
-UUID=$uuidsys      /var/lib/lxd      btrfs   defaults,noatime,space_cache,compress=lzo,subvol=lxd-${_SYSNAME}  0    2
-UUID=$uuidsys      /save             btrfs   defaults,noatime,space_cache,compress=lzo,subvol=save          0    2" | sudo tee -a "$file"
-! [ "${_DEVICE_EXT}" ] && echo "UUID=$uuidsys      /ext           btrfs   defaults,noatime,space_cache,compress=lzo,subvol=ext           0    2" | sudo tee -a "$file"
-echo "UUID=$uuidsys      /btrfs/sys        btrfs   defaults,noauto,noatime,space_cache,compress=lzo               0    2" | sudo tee -a "$file"
-
-[ "$_SSD" ] && sudo sed -i '/btrfs/ s|noatime,|noatime,ssd,|' "$file"
-
-if grep -q '^tmp.*\/tmp' /etc/fstab; then
-	[ "${_MEM:0:1}" != 0 ] && sudo sed -i "/tmpfs/ s|mode=1777|mode=1777,size=${_MEM}|" "$file"
-else
-	echo "tmpfs                                     /tmp           tmpfs   defaults,noatime,mode=1777,size=${_MEM}     0 0" | sudo tee -a "$file"
-fi
-
-[ "${_DEVICE_EXT}" ] && echo "
-# btrfs ext
-UUID=$uuidext      /ext              btrfs   defaults,noatime,space_cache,compress=lzo,subvol=ext           0    2
-UUID=$uuidext      /btrfs/ext        btrfs   defaults,noauto,noatime,space_cache,compress=lzo               0    2" | sudo tee -a "$file"
-
-echo "
-# bind
-/home/shared/dev/bs   /usr/local/bs    none    bind                    0    0" | sudo tee -a "$file"
-
-_echoI "$(cat "$file")"
-
 _echoT "------------------ grub"
 
-sudo sed -i 's|^\(GRUB_CMDLINE_LINUX=".*\)"|\1 biosdevname=0"|' /etc/default/grub
+file=/etc/default/grub
+grep -q '^GRUB_CMDLINE_LINUX=.*biosdevname' ${file} || sudo sed -i '/^GRUB_CMDLINE_LINUX=/ s|"$| biosdevname=0"|' ${file}
 sudo update-grub
 
 
 #mount -a
 
-########################################  END
+########################  END
 
-_echoT "------------------ write ${_PART}"
+_echoT "===================== ${_PART} end"
 _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
 
-_echoT "#################### END ${_PART}"
 
 _echoI "You have to restart the computer for system file modifications"
 _echoI "After restarting you can follow installation"
-_askyn "The computer now will reboot, please confirm" && [ "$_ANSWER" == n ] && exit 1
+_askyn "The computer will now reboot, please confirm" && [ "${_ANSWER}" == n ] && exit 1
 
 reboot
 
@@ -188,7 +184,7 @@ sudo apt install -y apt-btrfs-snapshot snapper # system-storage-manage btrbk
 # see https://github.com/agronick/apt-btrfs-snapper
 
 
-########################################  SNAPPER
+########################  SNAPPER
 
 file=/etc/snapper/config-templates/default
 cp -a $file $file.keep$(date +%s)
@@ -218,7 +214,7 @@ snapper -c ext.shared create-config /ext/shared
 snapper list-configs
 
 
-########################################  SNAPPER_GUI
+########################  SNAPPER_GUI
 
 # see https://github.com/ricardomv/snapper-gui
 apt install -y python3 libgtksourceview-3.0-1 python3-dbus python3-setuptools

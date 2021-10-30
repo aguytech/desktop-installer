@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+########################  MAIN
+
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+
+
+_echoT "------------------ update"
+
+sudo pacman -Syy --noconfirm
+
+
+_echoT "------------------ upgrade & downgrade"
+
+sudo pacman -Suu --noconfirm
+
+
+#_echoT "------------------ clean"
+
+#sudo pacman -Sc --noconfirm
+
+
+########################  END
+
+_echoT "===================== ${_PART} end"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+

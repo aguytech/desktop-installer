@@ -1,0 +1,87 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+
+file_env=${S_PATH_SCRIPT_CONF}/env
+file_bash_aliases=${S_PATH_SCRIPT_CONF}/.bash_aliases
+file_bash_functions=${S_PATH_SCRIPT_CONF}/.bash_functions
+file_bashrc=${S_PATH_SCRIPT_CONF}/.bashrc-manjaro
+
+_echoT "------------------ file required"
+_require ${file_env} ${file_bash_aliases} ${file_bash_functions}
+
+########################  MAIN
+
+
+_echoT "------------------ bs link"
+
+! [ -e /bs ] && sudo ln -s /usr/local/bs /bs
+
+
+_echoT "------------------ conf mirror sources"
+# Change the mirror of software sources
+sudo pacman-mirrors --country-list
+sudo pacman-mirrors -c France
+
+
+_echoT "------------------ conf bash"
+color='\\e[1;34m' # home / host
+colorRoot=$color
+
+<<KEEP
+color='\\e[1;33m' # vz
+color='\\e[1;38;5;172m' # vm
+color='\\e[1;32m' # ovh
+colorRoot='\\e[1;31m'
+KEEP
+
+file=~/.bashrc
+_keepmvts ${file}
+ln -s ${file_bashrc} ${file}
+
+
+_echoT "------------------  .bash_aliases"
+
+file=~/.bash_aliases
+[ -f ${file} ] && sudo rm ${file}
+ln -s ${file_bash_aliases} ${file}
+
+
+_echoT "------------------  .bash_functions"
+
+file=~/.bash_functions
+[ -f ${file} ] && sudo rm ${file}
+ln -s ${file_bash_functions} ${file}
+
+
+_echoT "------------------  bash completion"
+
+_evalqr "cp -a ${S_PATH_INSTALL_CONF}/bash-completion/* /usr/share/bash-completion/completions/"
+
+
+_echoT "------------------ hosts ovh-cluster"
+
+file=/etc/hosts
+servers_list=${!S_CLUSTER[*]}
+! sudo grep -q "# ${S_DOMAIN_NAME} cluster" ${file} && sudo sh -c "echo -e '\n# ${S_DOMAIN_NAME} cluster' >> ${file}"
+for host in ${servers_list/$HOSTNAME/}; do
+	eval ${S_CLUSTER[${host}]}
+	[ "${s_ip}" ] && sudo sed -i "/${s_ip}/d" ${file}
+	! grep -q "${host}" ${file} && [ "${s_ip}" ] && sudo sh -c "echo -e '${s_ip}\t${host}\t${s_name}' >> ${file}"
+done
+
+
+_echoT "------------------ timeshift"
+
+sudo pacman --noconfirm -R timeshift timeshift-autosnap-manjaro
+
+
+########################  END
+
+_echoT "===================== ${_PART} end"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+
+

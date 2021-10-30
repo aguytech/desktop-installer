@@ -6,19 +6,19 @@ _echoT "#################### START ${_PARTDEV}"
 
 
 
-########################################  MAIN
+########################  MAIN
 
 cmd="sudo apt install -y"
 
 
 _echoT "------------------ base install"
 
-packages="cython python3-pip"
+packages="cython3 python3-pip"
 
 $cmd $packages
 
 
-########################################  END
+########################  END
 
 _echoT "------------------ write ${_PARTDEV}"
 _partadd ${_PARTDEV} $_FILE_DEV_DONE

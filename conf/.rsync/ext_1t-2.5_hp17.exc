@@ -11,7 +11,7 @@
 .tmp*
 lost+found
 
-/backups
+/backup
 /ovh
 #/shared/android
 /shared/Music

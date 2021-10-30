@@ -4,189 +4,114 @@
 
 _echoT "#################### START ${_PARTDEV}"
 
-########################################  MAIN
+########################  DATA
 
-path_opt=/opt/eclipse_${_ECLIPSE_THEME}_${_ECLIPSE_VER}
+path_opt=/opt/eclipse_${_ECLIPSE_THEME}
 path_conf=.eclipse
-path_proj=dev/eclipse-workspaces
 path_desk=~/.local/share/applications
-file_bin="/usr/bin/eclipse"
+path_proj=/home/shared/dev/eclipse-workspaces-${_ECLIPSE_THEME}
+file_desk=${path_desk}/eclipse_java.desktop
+file_bin=/usr/bin/eclipse_${_ECLIPSE_THEME}
 
+file_desk_conf=${S_PATH_INSTALL_CONF}/soft/eclipse_${_ECLIPSE_THEME}_ubuntu.desktop
+
+_require ${file_desk_conf}
+
+
+########################  MAIN
 
 _echoT "------------------ backup"
 
-#_keepmvts "${path_opt}"
-#_keepmvts "${path_conf}"
-#_keepmvts "${path_proj}"
-if [ -d "$path_opt" ] || [ -d ~/"$path_conf" ] || [ -d ~/"$path_proj" ]; then
-	tar czf "${_PATH_SOFT}/eclipse_${_ECLIPSE_THEME}_${_ECLIPSE_VER}.keep$(date +%s).tar.gz" "$path_opt" ~/"$path_conf" ~/"$path_proj"
+paths=
+if [ -d ${path_opt} ] || [ -d ~/${path_conf} ] || [ -d ${path_proj} ]; then
+  for path in ${path_opt} ~/${path_conf} ${path_proj} ${file_desk} ${file_bin}; do
+    [ -e ${path} ] && paths+=" ${path}"
+  done
+	tar czf ${_PATH_SOFT_BACKUP}/eclipse_${_ECLIPSE_THEME}_backup_${_DATE}-$(date +%s).tar.gz ${path_opt} ${paths}
 fi
 
 
 _echoT "------------------ clean instance"
 
 # delete existing folder
-for path in opt "${path_opt#*/}" "$path_opt" ~/"$path_conf" ; do [ -d "$path" ] && rm -fR "$path"; done # ~/"$path_proj"
+for path in ${path_opt} ~/${path_conf} ${path_proj} ${file_desk} ${file_bin}; do
+	[ -e ${path} ] && rm -fR ${path}
+done
 
 
 ####################  RESTORE
 
-if [ "$_ECLIPSE_BACK" ]; then
+if [ "${_ECLIPSE_DATE}" ]; then
 
-    _echoT "------------------ get file"
-
-    anstmp="${_ECLIPSE_VER}"
-    file="${_PATH_SOFT}/eclipse_${_ECLIPSE_THEME}_${anstmp}.tar.gz"
-    while ! [ -f "${file}" ]; do
-        _echoE "Unable to find file: '$file'"
-        _ask "Please give a good build in place of '${anstmp}'"
-        _ECLIPSE_VER="${_ANSWER:-$anstmp}" && _confset _ECLIPSE_VER "${_ECLIPSE_VER}"
-        file="${_PATH_SOFT}/eclipse_${_ECLIPSE_THEME}_${_ECLIPSE_VER}.tar.gz"
-    done
+	[ -h ~/dev ] || ln -s /home/shared/dev ~/dev
+    ${S_PATH_SCRIPT}/backup-soft --restore ${_ECLIPSE_DATE} eclipse_${_ECLIPSE_THEME} --force
 
 
-    _echoT "------------------ unpack build $_ECLIPSE_VER"
+####################  FRESH INSTALL
 
-    cd /tmp
-
-    tar xzf "${file}"
-    # soft
-    mv ${path_opt#*/} ${path_opt%/*}/
-    # conf
-    mv home/*/"$path_conf" ~/
-    # project
-    # mv home/*/"$path_proj" ~/"${path_proj%/*}"/
-
-    # clean paths
-    rm -fR home opt
-
-
-####################  FRESH
-
-else
+elif [ "${_ECLIPSE_VER}" ]; then
 
     cd /tmp
 
     _echoT "------------------ get"
 
-    file="eclipse-javascript-${_ECLIPSE_VER}-R-linux-gtk-x86_64.tar.gz"
-    url="http://mirror.ibcp.fr/pub/eclipse//technology/epp/downloads/release/${_ECLIPSE_VER}/R/${file}"
+    file=eclipse-java-${_ECLIPSE_VER}-R-linux-gtk-x86_64.tar.gz
+    url=http://mirror.ibcp.fr/pub/eclipse//technology/epp/downloads/release/${_ECLIPSE_VER}/R/${file}
 
-    if [ -f "${_PATH_SOFT}/$file" ]; then
-        cp "${_PATH_SOFT}/$file" "$file"
+    if [ -f "${_PATH_SOFT}/${file}" ]; then
+        cp ${_PATH_SOFT}/${file} .
     else
-        _ANSWER="$file"
+        _ANSWER=${file}
         while ! curl -o "$_ANSWER" "$url"; do
-            _ask "Unable to donwload:\n$url\nGive a good url to download $file\nConfirm"
+            _ask "Unable to donwload:\n$url\nGive a good url to download ${file}\nConfirm"
         done
-        cp "$file" "${_PATH_SOFT}/"
+        cp ${file} ${_PATH_SOFT}/
     fi
 
 
     _echoT "------------------ install"
 
-    path="eclipse"
-    [ -d "$path" ] && rm -fR "$path"
-    tar xzf "$file"
-    mv "$path" "${path_opt}"
-    rm "$file"
+    path=eclipse
+    [ -d ${path} ] && rm -fR ${path}
+    tar xzf ${file}
+    mv ${path} ${path_opt}
+    rm ${file}
+
+	_echoT "------------------ ${file_bin} bind"
+
+	sudo [ -e ${file_bin} ] && sudo rm ${file_bin}
+	sudo ln -s ${path_opt}/eclipse ${file_bin}
+
+	_echoT "------------------ launcher"
+
+	cp ${file_desk_conf} ${file_desk}
+	chmod +x ${file_desk}
 
 fi
 
 
 ####################  COMMON
 
-_echoT "------------------ $file_bin bind"
+_echoT "------------------ conf"
 
-[ -e "$file_bin" ] || [ -h "$file_bin" ] && sudo rm "$file_bin"
-sudo ln -s "${path_opt}/eclipse" "$file_bin"
-
-
-_echoT "------------------ launcher"
-
-file="${path_desk}"/eclipse.desktop
-echo "[Desktop Entry]
-Name=Eclipse ${_ECLIPSE_THEME} ${_ECLIPSE_VER}
-GenericName=Eclipse Studio
-Comment=An IDE for applications developpments
-Keywords=development;IDE;
-Exec=eclipse
-Terminal=false
-Type=Application
-Icon=${path_opt}/icon.xpm
-Categories=Application;GTK;Development;IDE;
-StartupNotify=true
-Actions=EclipseClean;Separator;Dbeaver;Ghex;FirefoxDev;GitG;Meld;Smartgit;SquirrelSql;SublimeText;GEdit;Separator;SshDev;SshS;SshNode1;SshLxd;
-
-[Desktop Action EclipseClean]
-Name=Eclipse -clean
-Exec=eclipse -clean
-
-[Desktop Action Separator]
-Name=−−−−−−−−−−
-Exec=
-
-[Desktop Action FirefoxDev]
-Name=Firefox developer edition
-Exec=/usr/lib/firefox-developer-edition/firefox %u
-
-[Desktop Action SublimeText]
-Name=Sublime Text
-Exec=sublime-text
-
-[Desktop Action GEdit]
-Name=GEdit
-Exec=gedit %U
-
-[Desktop Action Ghex]
-Name=Ghex
-Exec=ghex %F
-
-[Desktop Action GitG]
-Name=Gitg
-Exec=gitg --no-wd %U
-
-[Desktop Action Smartgit]
-Name=Smartgit
-Exec=smartgit %u
-
-[Desktop Action Dbeaver]
-Name=Dbeaver
-Exec=dbeaver
-
-[Desktop Action SquirrelSql]
-Name=Squirrel Sql
-Exec=squirrel-sql
-
-[Desktop Action Meld]
-Name=Meld
-Exec=meld
-
-[Desktop Action SshDev]
-Name=ssh dev
-Exec=xfce4-terminal --tab --tab --title=node1 -x ssh-server node1
-
-[Desktop Action SshS]
-Name=ssh server
-Exec=xfce4-terminal --title=server -x ssh-server
-
-[Desktop Action SshNode1]
-Name=ssh node1
-Exec=xfce4-terminal --tab --title=node1 -x ssh-server node1
-
-[Desktop Action SshLxd]
-Name=ssh lxd
-Exec=xfce4-terminal --tab --title=LXD -x ssh-server ssh-lxd
-" > "$file"
-chmod +x "$file"
+file=${path_opt}/eclipse.ini
+grep -q '^-Duser' ${file} || sed -i "/^-vmargs/ a-Duser.home=${HOME}/.eclipse_${_ECLIPSE_THEME}" ${file}
+sed -i "/^-Dosgi.instance.area.default/ s|=.*|=${path_proj}/init|" ${file}
+#sed -i "/^-Dosgi.instance.area.default/ s|=.*|=${path_proj}/eclipse-workspaces-${_ECLIPSE_THEME}|" ${file}
 
 
-########################################  END
+_echoT "------------------ jdk src doc"
+
+sudo apt install -y openjdk-17-source openjdk-17-doc
+
+
+########################  END
 
 _echoT "------------------ write ${_PARTDEV}"
 _partadd "${_PARTDEV}" "$_FILE_DEV_DONE"
 
 _echoT "#################### END ${_PARTDEV}"
+
 
 <<KEEP
 ####  marketplace
@@ -197,7 +122,7 @@ https://marketplace.eclipse.org/content/jenkins-editor
 http://www.eclipsecolorthemes.org
 
 
-####  plugins
+####  dev
 
 # pydev
 http://pydev.org/updates
@@ -207,13 +132,40 @@ https://dl.bintray.com/de-jcup/basheditor
 http://www.genuitec.com/updates/devstyle/ci
 # quickrex
 http://netceteragroup.github.io/quickrex/updatesite
-# dbeaver
-https://dbeaver.io/update/latest/
 # dev-utils
 http://kangtae49.github.io/dev-utils-plugin/update
 
+
+####  modeling
+
+# remove
+gradle
+EclEmma
+Java development tools
+justJ
+m2e maven
+POM
+TM terminal
+WWW
+
+####  add
+efxclipse
+GEF dot
+
 # color theme
 http://eclipse-color-theme.github.io/update/
+
+# dbeaver
+https://dbeaver.io/update/latest/
+
+# Papyrus
+https://download.eclipse.org/modeling/mdt/papyrus/updates/releases/2021-09
+https://download.eclipse.org/modeling/mdt/papyrus/updates/nightly/master
+# SysML16
+https://download.eclipse.org/modeling/mdt/papyrus/components/sysml16/2021-09
+# Papyrus Software designer
+http://download.eclipse.org/modeling/mdt/papyrus/components/designer/2.0.0
+
 
 ##### others
 
@@ -261,6 +213,4 @@ http://sourceforge.net/projects/esftp/
     * PostgreSQL
           o Driver Class: org.postgresql.Driver
           o Connection URL: jdbc:postgresql://
-
-
 KEEP

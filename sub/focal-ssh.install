@@ -2,9 +2,9 @@
 #
 # write by Aguy
 
-_echoT "#################### START ${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
-########################################  MAIN
+########################  MAIN
 
 _echoT "------------------ ssh keep"
 
@@ -28,24 +28,23 @@ fi
 
 _echoT "------------------ client conf"
 
-file='/etc/ssh/ssh_config'
+file=/etc/ssh/ssh_config
 sudo [ -f "${file}" ] && sudo cp -a "${file}" "${file}.keep$(date +%s)"
 sudo sed -i "s/^#\(\s*GSSAPIAuthentication\).*/ \1 no/" $file
-sudo sed -i "/Host\s\+\*/ s|#\s\+||" "$file"
-! sudo grep -q ServerAliveInterval "$file" && echo "    ServerAliveInterval 240" | sudo tee -a "$file"
+sudo sed -i "/Host\s\+\*/ s|#\s\+||" ${file}
+! sudo grep -q ServerAliveInterval ${file} && sudo sh -c "echo '    ServerAliveInterval 240' >> ${file}"
 
 _echoT "------------------ server conf"
 
-file='/etc/ssh/sshd_config'
+file=/etc/ssh/sshd_config
 sudo [ -f "${file}" ] && sudo cp -a "${file}" "${file}.keep$(date +%s)"
-! grep -q "UseDNS" "$file" && echo "UseDNS no" | sudo tee -a $file
+! grep -q "UseDNS" ${file} && echo "UseDNS no" | sudo tee -a $file
 sudo systemctl restart sshd.service
 
 
-########################################  END
+########################  END
 
-_echoT "------------------ write ${_PART}"
+_echoT "===================== ${_PART} end"
 _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
 
-_echoT "#################### END ${_PART}"
 

@@ -1,12 +1,12 @@
 ## ubuntu
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_hp17_2t1-btrfs.exc /home/ /media/$USER/2t1-btrfs/home/ -av --delete -n
+#
+#  sudo rsync /home/shared/virt/ /media/$USER/2t1-btrfs/home/shared/virt/ -av -n
 
 ## manjaro
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_hp17_2t1-btrfs.exc /home/ /run/media/$USER/2t1-btrfs/home/ -av --delete -n
 #
-#  sudo rsync /home/shared/virtualbox /run/media/$USER/2t1-btrfs/home/shared/virtualbox -av -n
-#  sudo rsync /home/shared/vmware /run/media/$USER/2t1-btrfs/home/shared/vmware -av -n
-#  sudo rsync /home/shared/virt /run/media/$USER/2t1-btrfs/home/shared/virt -av -n
+#  sudo rsync /home/shared/virt/ /run/media/$USER/2t1-btrfs/home/shared/virt/ -av -n
 
 .Trash-*
 .tmp*

@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
+
+########################  MAIN
+
+cmd="sudo pacman -S --noconfirm"
+
+_echoT "------------------ remove ${S_RELEASE_DESKTOP} pre-installed"
+packages="vlc gcolor2"
+for package in $packages; do
+	sudo pacman -Rs --noconfirm $package
+done
+
+_echoT "------------------ tools"
+part_install=${S_RELEASE_DESKTOP}-tools
+
+packages="catfish gtksourceview3 gcolor3 plank numlockx xdotool dconf-editor galculator gpicview" # xfce4-hardware-monitor-plugin
+
+if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+_echoT "------------------ media"
+part_install=${S_RELEASE_DESKTOP}-media
+
+packages="subtitleeditor celluloid"
+
+if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
+
+
+########################  END
+
+_echoT "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
+_partadd "${_PART}/${S_RELEASE_DESKTOP}" "${S_FILE_INSTALL_DONE}"
+
+_echoT "#################### END ${_PART}/${S_RELEASE_DESKTOP}"

@@ -1,0 +1,175 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "#################### START ${_PARTDEV}"
+
+########################  DATA
+
+path_opt=/opt/sublime_text
+path_conf=.config/sublime-text-3
+path_proj=.sublime-project
+path_desk=~/.local/share/applications
+file_desk=~/${path_desk}/sublime-text.desktop
+file_bin=/usr/bin/sublime-text
+
+file_desk_conf=${S_PATH_INSTALL_CONF}/soft/sublime-text.desktop
+file_license=${S_PATH_INSTALL_XTRA}/soft/sublime-text.license
+
+_require ${file_desk_conf} ${file_license}
+
+
+########################  MAIN
+
+_echoT "------------------ backup"
+
+paths=
+if [ -d ${path_opt} ] || [ -d ~/${path_conf} ] || [ -d ${path_proj} ]; then
+  for path in ${path_opt} ~/${path_conf} ~/${path_proj} ${file_desk} ${file_bin}; do
+    [ -e ${path} ] && paths+=" ${path}"
+  done
+    tar czf ${_PATH_SOFT_BACKUP}/eclipse_${_ECLIPSE_THEME}_backup_${_DATE}-$(date +%s).tar.gz ${path_opt} ${paths}
+fi
+
+
+_echoT "------------------ clean instance"
+
+# delete existing folder
+for path in ${path_opt} ~/${path_conf} ~/${path_proj} ${file_desk} ${file_bin}; do
+	[ -e ${path} ] && rm -fR ${path}
+done
+
+
+####################  RESTORE
+
+if [ "${_SUBLIMETEXT_DATE}" ]; then
+
+    ${S_PATH_SCRIPT}/backup-soft --restore ${_SUBLIMETEXT_DATE} sublime_text --force
+
+
+####################  FRESH INSTALL
+
+elif [ "${_SUBLIMETEXT_VER}" ]; then
+
+    cd /tmp
+
+    _echoT "------------------ get"
+    file=sublime_text_${_SUBLIMETEXT_VER}_x64.tar.gz
+    url="http://download.sublimetext.com/${file}"
+
+    if [ -f "${_PATH_SOFT}/${file}" ]; then
+        cp ${_PATH_SOFT}/${file} ${file}
+    else
+        _ANSWER=${file}
+        while ! curl -o "$_ANSWER" "$url"; do
+            _ask "Unable to donwload:\n$url\nGive a good url to download ${file}\nConfirm"
+        done
+        cp ${file} ${_PATH_SOFT}/
+    fi
+
+
+    _echoT "------------------ install"
+    path=sublime_text_3
+    [ -d ${path} ] && rm -fR ${path}
+    tar xzf ${file}
+    mv ${path} ${path_opt}
+    rm ${file}
+
+	_echoT "------------------ ${file_bin} bind"
+	sudo [ -e ${file_bin} ] || [ -h ${file_bin} ] && sudo rm ${file_bin}
+	sudo ln -s ${path_opt}/sublime_text ${file_bin}
+
+	_echoT "------------------ launcher"
+	cp ${file_desk_conf} ${file_desk}
+	chmod +x ${file_desk}
+
+fi
+
+
+####################  COMMON
+
+
+_echoT "------------------ /etc/hosts hack"
+file="/etc/hosts"
+if grep -q sublimetext.com ${file}; then
+	sudo sed -i 's|^#\(.*sublimetext\.com.*\)$|\1|' ${file}
+else
+    sudo sh -c "echo -e '\n# sublime-text hack\n127.0.0.1\tsublimetext.com\n127.0.0.1\twww.sublimetext.com\n127.0.0.1\tlicense.sublimehq.com' >> ${file}"
+fi
+
+
+_echoT "------------------ iptables add rules"
+ips="45.55.255.55"
+for ip in ${ips}; do sudo iptables -A OUTPUT -d ${ip} -j DROP; done
+
+
+_echoT "------------------ iptables-persistent install"
+path="/etc/iptables"
+[ -d "${path}" ] || sudo mkdir "${path}"
+sudo iptables-save -f /etc/iptables/iptables.rules
+
+
+_echoT "------------------ autostart"
+path=~/.config/autostart
+file=${path}/60-sublime-text.desktop
+
+[ ! -d ${path} ] && mkdir -p ${path}
+
+echo "[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sublime Text
+GenericName=Text Editor
+Comment=Sophisticated text editor for code, markup and prose
+Exec=sublime-text
+Terminal=false
+MimeType=text/plain;
+Icon=sublime-text
+Categories=TextEditor;Development;
+StartupNotify=true
+X-GNOME-Autostart-Delay=6
+X-GNOME-Autostart-enabled=false
+Hidden=true" > ${file}
+
+
+_echoT "------------------ license"
+cat ${file_license}
+
+
+########################  END
+
+_echoT "------------------ write ${_PARTDEV}"
+_partadd "${_PARTDEV}" "$_FILE_DEV_DONE"
+
+_echoT "#################### END ${_PARTDEV}"
+
+
+<<KEEP
+https://packagecontrol.io # packages info + shortcuts
+
+####  color schemes
+package control -> Install Package -> Package​Resource​Viewer
+package control -> Package​Resource​Viewer:  Open Resource -> select scheme
+
+####  packages
+
+# python
+Anaconda # Anaconda turns your Sublime Text 3 in a full featured Python development IDE
+Python Debugger # Graphical Debugger for Sublime Text
+Python 3 # Python 3 and Cython language bundles for Sublime Text and TextMate
+Doc​Blockr_Python # Sublime Text DocBlockr for python. Simplifies writing docstring comments in Python
+
+
+# Git Diff View - Sublime Text 3
+https://packagecontrol.io/packages/GitDiffView
+
+# EasyDiff
+https://packagecontrol.io/packages/EasyDiff
+
+# Sublime​Git
+https://packagecontrol.io/packages/SublimeGit
+
+# Sublimerge 3
+https://packagecontrol.io/packages/Sublimerge%203
+
+KEEP

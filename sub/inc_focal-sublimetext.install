@@ -4,227 +4,120 @@
 
 _echoT "#################### START ${_PARTDEV}"
 
-# xprop WM_CLASS
-########################################  MAIN
+########################  DATA
 
 path_opt=/opt/sublime_text
 path_conf=.config/sublime-text-3
 path_proj=.sublime-project
 path_desk=~/.local/share/applications
-file_bin="/usr/bin/sublime-text"
+file_desk=~/${path_desk}/sublime-text.desktop
+file_bin=/usr/bin/sublime-text
 
+file_desk_conf=${S_PATH_INSTALL_CONF}/soft/sublime-text_ubuntu.desktop
+file_license=${S_PATH_INSTALL_XTRA}/soft/sublime-text.license
+
+_require ${file_desk_conf} ${file_license}
+
+
+# xprop WM_CLASS
+########################  MAIN
 
 _echoT "------------------ backup"
 
-#_keepmvts "${path_opt}"
-#_keepmvts "${path_conf}"
-#_keepmvts "${path_proj}"
-if [ -d "$path_opt" ] || [ -d ~/"$path_conf" ] || [ -d ~/"$path_proj" ]; then
-	tar czf "${_PATH_SOFT}/sublime_text_${_SUBLIMETEXT_VER}.keep$(date +%s).tar.gz" "$path_opt" ~/"$path_conf" ~/"$path_proj"
+paths=
+if [ -d ${path_opt} ]; then
+	for path in ${path_opt} ~/${path_conf} ~/${path_proj} ${file_desk} ${file_bin}; do
+		[ -e ${path} ] && paths+=" ${path}"
+	done
+	tar czf ${_PATH_SOFT_BACKUP}/eclipse_${_ECLIPSE_THEME}_backup_${_DATE}-$(date +%s).tar.gz ${paths}
 fi
 
 
 _echoT "------------------ clean instance"
 
 # delete existing folder
-for path in opt "${path_opt#*/}" "$path_opt" ~/"$path_conf" ~/"$path_proj"; do [ -d "$path" ] && rm -fR "$path"; done
+for path in ${path_opt} ~/${path_conf} ~/${path_proj} ${file_desk} ${file_bin}; do
+	[ -e ${path} ] && rm -fR ${path}
+done
 
 
 ####################  RESTORE
 
-if [ "$_SUBLIMETEXT_BACK" ]; then
+if [ "${_SUBLIMETEXT_DATE}" ]; then
 
-    _echoT "------------------ get file"
-
-    anstmp="${_SUBLIMETEXT_VER}"
-    file="${_PATH_SOFT}/sublime_text_${anstmp}.tar.gz"
-    while ! [ -f "${file}" ]; do
-        _echoE "Unable to find file: '$file'"
-        _ask "Please give a good build in place of '${anstmp}'"
-        _SUBLIMETEXT_VER="${_ANSWER:-$anstmp}" && _confset _SUBLIMETEXT_VER "${_SUBLIMETEXT_VER}"
-        file="${_PATH_SOFT}/sublime_text_${_SUBLIMETEXT_VER}.tar.gz"
-    done
+	${S_PATH_SCRIPT}/backup-soft --restore ${_SUBLIMETEXT_DATE} sublime_text --force
 
 
-    _echoT "------------------ unpack build $_SUBLIMETEXT_VER"
+####################  FRESH INSTALL
 
-    cd /tmp
+elif [ "${_SUBLIMETEXT_VER}" ]; then
 
-    tar xzf "${file}"
-    # soft
-    mv ${path_opt#*/} ${path_opt%/*}/
-    # conf
-    mv home/*/"$path_conf" ~/"${path_conf%/*}"/
-    # project
-    mv home/*/"$path_proj" ~/
+	cd /tmp
 
-    # clean paths
-    rm -fR home opt
+	_echoT "------------------ get"
+	file=sublime_text_${_SUBLIMETEXT_VER}_x64.tar.gz
+	url="http://download.sublimetext.com/${file}"
 
-
-####################  FRESH
-
-else
-
-    cd /tmp
-
-    _echoT "------------------ get"
-
-    file="sublime_text_${_SUBLIMETEXT_VER}_x64.tar.gz"
-    url="http://download.sublimetext.com/${file}"
-
-    if [ -f "${_PATH_SOFT}/$file" ]; then
-        cp "${_PATH_SOFT}/$file" "$file"
-    else
-        _ANSWER="$file"
-        while ! curl -o "$_ANSWER" "$url"; do
-            _ask "Unable to donwload:\n$url\nGive a good url to download $file\nConfirm"
-        done
-        cp "$file" "${_PATH_SOFT}/"
-    fi
+	if [ -f "${_PATH_SOFT}/${file}" ]; then
+		cp ${_PATH_SOFT}/${file} ${file}
+	else
+		_ANSWER=${file}
+		while ! curl -o "$_ANSWER" "$url"; do
+			_ask "Unable to donwload:\n$url\nGive a good url to download ${file}\nConfirm"
+		done
+		cp ${file} ${_PATH_SOFT}/
+	fi
 
 
-    _echoT "------------------ install"
+	_echoT "------------------ install"
+	path=sublime_text_3
+	[ -d ${path} ] && rm -fR ${path}
+	tar xzf ${file}
+	mv ${path} ${path_opt}
+	rm ${file}
 
-    path="sublime_text_3"
-    [ -d "$path" ] && rm -fR "$path"
-    tar xzf "$file"
-    mv "$path" "${path_opt}"
-    rm "$file"
+	_echoT "------------------ ${file_bin} bind"
+	sudo [ -e ${file_bin} ] || [ -h ${file_bin} ] && sudo rm ${file_bin}
+	sudo ln -s ${path_opt}/sublime_text ${file_bin}
+
+	_echoT "------------------ launcher"
+	cp ${file_desk_conf} ${file_desk}
+	chmod +x ${file_desk}
 
 fi
 
 
 ####################  COMMON
 
-_echoT "------------------ $file_bin bind"
-
-[ -e "$file_bin" ] || [ -h "$file_bin" ] && sudo rm "$file_bin"
-sudo ln -s "${path_opt}/sublime_text" "$file_bin"
-
 
 _echoT "------------------ /etc/hosts hack"
-
 file="/etc/hosts"
-if grep -q sublimetext.com "$file"
-then sudo sed -i 's|^#\(.*sublimetext\.com.*\)$|\1|' "$file"
-else echo -e "\n# sublime-text hack\n127.0.0.1\tsublimetext.com\n127.0.0.1\twww.sublimetext.com\n127.0.0.1\tlicense.sublimehq.com" | sudo tee -a "$file"
+if grep -q sublimetext.com ${file}; then
+	sudo sed -i 's|^#\(.*sublimetext\.com.*\)$|\1|' ${file}
+else
+	sudo sh -c "echo '\n# sublime-text hack\n127.0.0.1\tsublimetext.com\n127.0.0.1\twww.sublimetext.com\n127.0.0.1\tlicense.sublimehq.com' >> ${file}"
 fi
 
 
-_echoT "------------------ iptables add rules"
+_echoT "------------------ install iptables-persistent"
+_evalqr apt install -y iptables-persistent
 
-IPS="45.55.255.55"
-for IP in $IPS; do sudo iptables -A OUTPUT -d $IP -j DROP; done
+_echoT "------------------ iptables add rules"
+ips="45.55.255.55"
+for ip in ${ips}; do sudo iptables -A OUTPUT -d ${ip} -j DROP; done
 
 
 _echoT "------------------ iptables-persistent install"
-
 path="/etc/iptables"
-! [ -d "${path}" ] && sudo mkdir "${path}"
-sudo iptables-save | sudo tee "${path}/rules.v4"
-
-
-_echoT "------------------ launcher"
-
-file="${path_desk}"/sublime-text.desktop
-echo "[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Sublime Text
-GenericName=Text Editor
-Comment=Sophisticated text editor for code, markup and prose
-Exec=sublime-text %F
-Terminal=false
-MimeType=text/plain;
-Icon=sublime-text
-Categories=TextEditor;Development;
-StartupNotify=true
-StartupWMClass=sublime_text
-Actions=Document;ProjBS;ProjBsNode1;Separator;Dbeaver;Eclipse;Ghex;FirefoxDev;GitG;Meld;Smartgit;SquirrelSql;Gedit;Separator;SshDev;SshS;SshNode1;SshLxd;
-
-[Desktop Action Window]
-Name=New Window
-Exec=sublime-text -n
-
-[Desktop Action Document]
-Name=New File
-Exec=sublime-text --command new_file
-
-[Desktop Action Separator]
-Name=−−−−−−−−−−
-Exec=
-
-[Desktop Action ProjBS]
-Name=project / local bs
-Exec=sublime-text --project ~/.sublime-project/bs.sublime-project
-
-[Desktop Action ProjBsNode1]
-Name=project / node1 bs
-Exec=sublime-text --project ~/.sublime-project/node1-bs.sublime-project
-
-[Desktop Action Gedit]
-Name=Gedit
-Exec=gedit
-
-[Desktop Action FirefoxDev]
-Name=Firefox developer edition
-Exec=/usr/bin/firefox-developer %u
-
-[Desktop Action Eclipse]
-Name=Eclipse
-Exec=eclipse
-
-[Desktop Action Ghex]
-Name=Ghex
-Exec=ghex %F
-
-[Desktop Action GitG]
-Name=Gitg
-Exec=gitg --no-wd %U
-
-[Desktop Action Smartgit]
-Name=Smartgit
-Exec=smartgit %u
-
-[Desktop Action Dbeaver]
-Name=Dbeaver
-Exec=dbeaver
-
-[Desktop Action SquirrelSql]
-Name=Squirrel Sql
-Exec=squirrel-sql
-
-[Desktop Action Meld]
-Name=Meld
-Exec=meld
-
-[Desktop Action SshDev]
-Name=ssh dev
-Exec=gnome-terminal --tab --tab-with-profile node1
-
-[Desktop Action SshS]
-Name=ssh server
-Exec=gnome-terminal -e ssh-server
-
-[Desktop Action SshNode1]
-Name=ssh node1
-Exec=gnome-terminal --tab-with-profile node1
-
-[Desktop Action SshLxd]
-Name=ssh lxd
-Exec=gnome-terminal -e ssh-lxd
-" > "$file"
-
-chmod +x $file
+[ -d "${path}" ] || sudo mkdir "${path}"
+sudo iptables-save -f /etc/iptables/rules.v4
 
 
 _echoT "------------------ autostart"
-
 path=~/.config/autostart
-file="$path/60-sublime-text.desktop"
+file=${path}/60-sublime-text.desktop
 
-[ ! -d "$path" ] && mkdir -p "$path"
+[ ! -d ${path} ] && mkdir -p ${path}
 
 echo "[Desktop Entry]
 Version=1.0
@@ -240,17 +133,16 @@ Categories=TextEditor;Development;
 StartupNotify=true
 StartupWMClass=sublime_text
 X-GNOME-Autostart-Delay=6
-X-GNOME-Autostart-enabled=false" > "$file"
+X-GNOME-Autostart-enabled=false" > ${file}
 
-chmod +x "$file"
+chmod +x ${file}
 
 
 _echoT "------------------ license"
+cat ${file_license}
 
-cat ${S_PATH_INSTALL_CONF}/sublime-text/sublime-text.license
 
-
-########################################  END
+########################  END
 
 _echoT "------------------ write ${_PARTDEV}"
 _partadd "${_PARTDEV}" "$_FILE_DEV_DONE"

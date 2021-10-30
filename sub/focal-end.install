@@ -3,15 +3,15 @@
 # write by Aguy
 
 
-_echoT "#################### START ${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
-########################################  MAIN
+########################  MAIN
 
 
 _echoT "------------------ languages"
 
 _askno "Please select 'Region & language' & 'Manage installed languages' to update required files & close windows, After you valid to continue"
-gnome-control-center
+sudo gnome-control-center
 
 
 _echoT "------------------ Upgrade"
@@ -19,10 +19,9 @@ _echoT "------------------ Upgrade"
 upgrade
 
 
-########################################  END
+########################  END
 
-_echoT "------------------ write ${_PART}"
+_echoT "===================== ${_PART} end"
 _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
 
-_echoT "#################### END ${_PART}"
 

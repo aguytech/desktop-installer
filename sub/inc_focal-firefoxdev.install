@@ -6,7 +6,7 @@ _echoT "#################### START ${_PARTDEV}"
 
 
 
-########################################  MAIN
+########################  MAIN
 
 cmd="sudo apt install -y"
 
@@ -16,7 +16,7 @@ _echoT "------------------ install"
 $cmd firefox-dev
 
 
-########################################  END
+########################  END
 
 _echoT "------------------ write ${_PARTDEV}"
 _partadd ${_PARTDEV} $_FILE_DEV_DONE

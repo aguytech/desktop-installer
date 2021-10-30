@@ -10,7 +10,7 @@ lost+found
 ._sync_*
 .sync-*
 
-/backups
+/backup
 /ovh
 /shared/_back
 /shared/_new

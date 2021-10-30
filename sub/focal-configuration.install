@@ -3,34 +3,51 @@
 # write by Aguy
 
 
-_echoT "#################### START ${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
-########################################  MAIN
+file_meld_conf=${S_PATH_INSTALL_CONF}/soft/meld-dark.xml
+_require ${file_meld_conf}
+
+path_vim=${S_PATH_INSTALL_CONF}/vim
+_requirep ${path_vim}
+
+########################  MAIN
 
 _echoT "================== ${_PART} / global configuration"
 
 _echoT "------------------ grub"
 
 file=/etc/default/grub
-_keepcpts_rt "$file"
-sudo sed -i "/^GRUB_TIMEOUT=/ s|=.*|=2|" "$file"
-sudo sed -i "/^GRUB_HIDDEN_TIMEOUT_QUIET=/ s|=.*|=false|" "$file"
-sudo sed -i "/^GRUB_HIDDEN_TIMEOUT_QUIET=/ s/^/#/" "$file"
+_keepcpts ${file}
+sudo sed -i "/^GRUB_TIMEOUT=/ s|=.*|=2|" ${file}
+sudo sed -i "/^GRUB_HIDDEN_TIMEOUT_QUIET=/ s|=.*|=false|" ${file}
+sudo sed -i "/^GRUB_HIDDEN_TIMEOUT_QUIET=/ s/^/#/" ${file}
 
 file=/etc/grub.d/00_header
-sudo sed -i "s|30|2|g" "$file"
+sudo sed -i "s|30|2|g" ${file}
 
 sudo update-grub
 
 
-if type vim 2>/dev/null 1>&2 ; then
+if type vim >/dev/null 2>&1 ; then
+    _echoT "------------------  vim links edit"
 
-    _echoT "------------------  /usr/bin/edit links"
+    for file in /usr/bin/edit /usr/bin/editor; do
+        [ -e ${file} ] && _evalr rm ${file}
+        _evalr ln -sv /usr/bin/vim ${file}
+    done
 
-    files="/usr/bin/edit /usr/bin/editor"
-    for file in $files; do
-        [ -e ${file} ] && sudo rm ${file}
-        sudo ln -sv /usr/bin/vim ${file}
+	_echoT "------------------ dev vim"
+	sudo cp ${path_vim}/* /usr/share/vim/vim*/colors/
+
+    _echoT "----------  conf vim"
+    file=/etc/vim/vimrc
+    sudo sed -i "s|^\"\(syntax\).*|\1 on|" ${file}
+
+    opts="background=dark showmatch"
+    # uncomment
+    for opt in $opts; do
+        sudo sed -i "s|^\"\(set $opt.*\)$|\1|" ${file}
     done
 fi
 
@@ -39,17 +56,17 @@ _echoT "------------------  /usr/local/bs/conf links"
 
 for file in .nanorc .tmux.conf .vimrc; do
     path_from="${S_PATH_SCRIPT_CONF}/${file}"
-    path=~/"$file"
-    [ -e "$path" ] && sudo rm -fR "$path"
+    path=~/${file}
+    [ -e "${path}" ] && sudo rm -fR ${path}
     ln -s "${path_from}" "${path}"
 done
 
 _echoT "------------------ gstreamer preset"
 path=~/.local/share/gstreamer-1.0/presets
-! [ -d $path ] && mkdir -p "$path"
+! [ -d "${path}" ] && mkdir -p ${path}
 
-file="$path/GstVorbisEnc.prs"
-_keepmvts "$file"
+file=${path}/GstVorbisEnc.prs
+_keepmvts ${file}
 echo "[_presets_]
 element-name=GstVorbisEnc
 version=0.10
@@ -68,17 +85,17 @@ perfect-timestamp=true
 hard-resync=false
 tolerance=40000000
 quality=0.9
-managed=false" > "$file"
+managed=false" > ${file}
 
-file="/usr/share/sound-juicer/rhythmbox.gep"
-_keepmvts_rt "$file"
+file=/usr/share/sound-juicer/rhythmbox.gep
+_keepcpts ${file}
 sch="\[streamprofile-oggvorbis-1\]"
 str="preset = ogg_very_high"
-sudo sed -i "/$sch/ a $sch" "$file"
+sudo sed -i "/${sch}/ a ${str}" ${file}
 
 sch="\[profile-oggopus\]"
 str="[profile-oggvorbis2]\nname = oggvorbis2\ndescription = Ogg Vorbis High\nformat = application/ogg\ntype = container\n\n[streamprofile-oggvorbis-12]\nparent = oggvorbis2\ntype = audio\npreset = ogg_high\nformat = audio/x-vorbis\npresence = 1\n\n[profile-oggvorbis3]\nname = oggvorbis3\ndescription = Ogg Vorbis Very High\nformat = application/ogg\ntype = container\n\n[streamprofile-oggvorbis-13]\nparent = oggvorbis3\ntype = audio\npreset = ogg_very_high\nformat = audio/x-vorbis\npresence = 1\n"
-sudo sed -i "/$sch/ i $str" "$file"
+sudo sed -i "/$sch/ i $str" ${file}
 
 _echoT "------------------ dvd"
 sudo dpkg-reconfigure libdvd-pkg
@@ -97,14 +114,100 @@ echo -e "[alias]
 \tbr = branch
 " >> ~/.gitconfig
 
-<<KEEP
-_echoT "------------------ gnome-xcf-thumbnailer"
-! [ -d /usr/share/thumbnailers ] && sudo mkdir -p /usr/share/thumbnailers
-! [ -e /usr/share/thumbnailers/gnome-xcf.thumbnailer ] && echo -e "[Thumbnailer Entry]\nTryExec=gnome-xcf-thumbnailer\nExec=gnome-xcf-thumbnailer %i %o\nMimeType=image/x-xcf;image/x-compressed-xcf;" | sudo tee /usr/share/thumbnailers/gnome-xcf.thumbnailer
-nautilus -q
-[ -d ~/.thumbnails/fail ] && rm -r ~/.thumbnails/fail
-[ -d ~/.cache/thumbnails/fail ] && rm -r ~/.cache/thumbnails/fail
-KEEP
+_echoT "------------------ meld style"
+sudo cp ${file_meld_conf} /usr/share/meld/styles/meld-dark.xml
+
+_echoT "------------------ nano"
+
+for str in conf install; do
+    sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/$str.nanorc
+    sudo sed -i 's|^\(syntax \).*|\1"'$str'" "\.'$str'$"|' /usr/share/nano/$str.nanorc
+done
+
+file=/etc/nanorc
+_keepcpts ${file}
+sudo sed -i 's|^.*\(set tabsize\).*|\1 4|' ${file}
+sudo sed -i 's|^\(set cut.*\)$|# \1|' ${file}
+sudo sed -i 's|^\(set linenumbers.*\)$|# \1|' ${file}
+sudo sed -i '/^# *include/ s/^# //' ${file}
+
+# various
+opts="constantshow historylog matchbrackets multibuffer nohelp softwrap "
+# color
+opts+="errorcolor functioncolor keycolor numbercolor selectedcolor statuscolor stripecolor titlecolor"
+# uncomment
+for opt in ${opts}; do
+    sudo sed -i "s|^.*\(set $opt .*\)$|\1|"  ${file}
+done
+
+
+_echoT "------------------ language-specs conf"
+
+sudo cp -a ${S_PATH_INSTALL_CONF}/gtk/conf.lang /usr/share/gtksourceview-3.0/language-specs/
+sudo cp -a ${S_PATH_INSTALL_CONF}/gtk/install.lang /usr/share/gtksourceview-3.0/language-specs/
+
+
+_echoT "------------------ firefox tweaks"
+path=~/.mozilla/firefox/${USER}
+if [ -d "${path}" ]; then
+	ln -sv "${S_PATH_SCRIPT_CONF}/user.js" ${path}
+	chown 1000:1000 ${path}
+else
+	_echoI "please link '${S_PATH_INSTALL_CONF}/firefox/user.js'\nto your firefox path of profile: ${path}"
+	_askno "Confirm"
+fi
+
+
+_echoT "------------------ tmux"
+
+file=~/.tmux.conf
+
+# plugins
+path=~/.tmux/plugins/resurect
+[ -d "${path}" ] || mkdir -p ${path}
+git clone https://github.com/tmux-plugins/tmux-resurrect ${path}
+grep -q resurrect.tmux ${file} || echo -e "# resurect plugin\nrun-shell ${path}/resurrect.tmux" >> ${file}
+
+# set conf file
+tmux source-file ${file} 2>/dev/null
+
+# bash completion
+sudo cp "${S_PATH_INSTALL_CONF}/bash-completion/tmux" /usr/share/bash-completion/completions/
+
+
+_echoT "------------------  logrotate server"
+
+# logrotate
+sudo sh -c "echo '# Logrotate file for server functions logs
+#$S_PATH_LOG_INSTALL/*.log
+$S_PATH_LOG_SERVER/*.log
+$S_PATH_LOG_SERVER/*.err
+$S_PATH_LOG_SERVER/*.debug
+{
+	su 0 1000
+    missingok
+    compress
+    delaycompress
+    notifempty
+    weekly
+    rotate 8
+}
+' > /etc/logrotate.d/server"
+
+
+_echoT "------------------ gtk styles"
+
+file="$HOME/.local/share/gtksourceview-4"
+! [ -e ${file} ] && ln -sv /home/shared/.local/share/gtksourceview-3.0 ${file}
+
+_echoT "------------------ _LAPTOP"
+[ "$_LAPTOP" ] && sudo systemctl enable tlp
+
+
+if [ -n "${_VIRTUALBOX}" ]; then
+    _echoT "------------------ virtualbox"
+    [ "$_VIRTUALBOX" ] && sudo adduser $USER vboxusers
+fi
 
 _echoT "------------------ gedit settings"
 #dconf write /org/nemo/extensions/nemo-terminal/default-visible false
@@ -118,12 +221,12 @@ dconf write /org/gnome/gedit/plugins/filebrowser/enable-remote true
 
 # plugins
 path_plug=~/.local/share/gedit/plugins
-! [ -d $path_plug ] && mkdir -p $path_plug
+! [ -d "${path_plug}" ] && mkdir -p ${path_plug}
 
 _echoT "------------------ gedit / restore-tabs"
 path=restore-tabs
-cd $path_plug
-_keepmvts "$path"
+cd ${path_plug}
+_keepmvts ${path}
 curl -o master.zip https://codeload.github.com/raelgc/gedit-restore-tabs/zip/master
 unzip master.zip
 rm master.zip
@@ -134,8 +237,8 @@ sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
 
 _echoT "------------------ gedit / duplicate-line"
 path=duplicate-line
-cd $path_plug
-_keepmvts "$path"
+cd ${path_plug}
+_keepmvts ${path}
 curl -o master.zip https://codeload.github.com/hardpixel/gedit-duplicate-line/zip/master
 unzip master.zip
 rm master.zip
@@ -146,116 +249,22 @@ sed -i 's|^\(\s*\)\(if modifiers ==.*\)|#\1\2\n\1if event.state \& Gdk.ModifierT
 
 _echoT "------------------ gedit / gedit-markdown"
 path=markdown_preview
-cd $path_plug
-_keepmvts "$path"
+cd ${path_plug}
+_keepmvts ${path}
 curl -o master.zip https://codeload.github.com/maoschanz/gedit-plugin-markdown_preview/zip/master
 unzip master.zip
 rm master.zip
-mv gedit-plugin-markdown_preview-master $path
-
-_echoT "------------------ nano"
-
-for str in conf install; do
-    sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/$str.nanorc
-    sudo sed -i 's|^\(syntax \).*|\1"'$str'" "\.'$str'$"|' /usr/share/nano/$str.nanorc
-done
-
-file=/etc/nanorc
-sudo cp -a $file $file.keep$(date +%s)
-sudo sed -i 's|^.*\(set tabsize\).*|\1 4|' "$file"
-sudo sed -i 's|^\(set cut.*\)$|# \1|' "$file"
-sudo sed -i 's|^\(set linenumbers.*\)$|# \1|' "$file"
-sudo sed -i '/^# *include/ s/^# //' "$file"
-
-# various
-opts="constantshow historylog matchbrackets multibuffer nohelp softwrap "
-# color
-opts+="errorcolor functioncolor keycolor numbercolor selectedcolor statuscolor stripecolor titlecolor"
-# uncomment
-for opt in $opts; do
-    sudo sed -i "s|^.*\(set $opt .*\)$|\1|"  $file
-done
+mv gedit-plugin-markdown_preview-master ${path}
 
 
-if [ "$_DEV" ]; then
-    _echoT "----------  conf vim"
-
-    file="/etc/vim/vimrc"
-    sudo sed -i "s|^\"\(syntax\).*|\1 on|" "$file"
-
-    opts="background=dark showmatch"
-    # uncomment
-    for opt in $opts; do
-        sudo sed -i "s|^\"\(set $opt.*\)$|\1|" "$file"
-    done
-fi
-
-_echoT "------------------ language-specs conf"
-
-sudo cp -a ${S_PATH_INSTALL_CONF}/gtk/conf.lang /usr/share/gtksourceview-3.0/language-specs/
-sudo cp -a ${S_PATH_INSTALL_CONF}/gtk/install.lang /usr/share/gtksourceview-3.0/language-specs/
-
-
-_echoT "------------------ gtk styles"
-
-file="$HOME/.local/share/gtksourceview-4"
-! [ -e "$file" ] && ln -sv /home/shared/.local/share/gtksourceview-3.0 "$file"
-
-_echoT "------------------ _LAPTOP"
-[ "$_LAPTOP" ] && sudo systemctl enable tlp
-
-
-if [ -n "${_VIRTUALBOX}" ]; then
-    _echoT "------------------ virtualbox"
-    [ "$_VIRTUALBOX" ] && sudo adduser $USER vboxusers
-fi
-
-_echoT "------------------ firefox tweaks"
-
-path=~/.mozilla/firefox/$USER
-if [ -d "$path" ]; then
-	ln -sv "${S_PATH_SCRIPT_CONF}/user.js" "$path"
-	chown 1000:1000 "$path"
-else
-	_echoI "copy file '${S_PATH_INSTALL_CONF}/firefox/user.js'\nto your firefox path of profile"
-	_askno "Confirm"
-fi
-
-
-_echoT "------------------ tmux"
-
-file=~/.tmux.conf
-
-# plugins
-path=".tmux/plugins/resurect"
-! [ -d ~/"$path" ] && mkdir -p ~/"$path"
-git clone https://github.com/tmux-plugins/tmux-resurrect ~/"$path"
-rm -fR ~/"$path/.git"
-! grep -q resurrect.tmux "$file" && echo -e "# resurect plugin\nrun-shell ~/$path/resurrect.tmux" >> "$file"
-
-# set conf file
-tmux source-file "$file" 2>/dev/null
-
-# bash completion
-sudo cp "${S_PATH_INSTALL_CONF}/bash_completion/tmux" /usr/share/bash-completion/completions/
-
-_echoT "------------------  logrotate server"
-
-# logrotate
-echo "# Logrotate file for server functions logs
-#$S_PATH_LOG_INSTALL/*.log
-$S_PATH_LOG_SERVER/*.log
-$S_PATH_LOG_SERVER/*.err
-$S_PATH_LOG_SERVER/*.debug
-{
-    missingok
-    compress
-    delaycompress
-    notifempty
-    weekly
-    rotate 8
-}
-" | sudo tee /etc/logrotate.d/server
+<<KEEP
+_echoT "------------------ gnome-xcf-thumbnailer"
+! [ -d /usr/share/thumbnailers ] && sudo mkdir -p /usr/share/thumbnailers
+! [ -e /usr/share/thumbnailers/gnome-xcf.thumbnailer ] && echo -e "[Thumbnailer Entry]\nTryExec=gnome-xcf-thumbnailer\nExec=gnome-xcf-thumbnailer %i %o\nMimeType=image/x-xcf;image/x-compressed-xcf;" | sudo tee /usr/share/thumbnailers/gnome-xcf.thumbnailer
+nautilus -q
+[ -d ~/.thumbnails/fail ] && rm -r ~/.thumbnails/fail
+[ -d ~/.cache/thumbnails/fail ] && rm -r ~/.cache/thumbnails/fail
+KEEP
 
 
 _echoT "------------------ launcher clean"
@@ -263,18 +272,11 @@ _echoT "------------------ launcher clean"
 sudo sed -i 's|;;|;|' /usr/share/applications/*.desktop
 
 
-if [ "$_DEV" ]; then
-	_echoT "------------------ dev vim"
+########################  END
 
-	sudo cp "${S_PATH_INSTALL_CONF}"/vim/* /usr/share/vim/vim*/colors/
-fi
-
-########################################  END
-
-_echoT "------------------ write ${_PART}"
+_echoT "===================== ${_PART} end"
 _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
 
-_echoT "#################### END ${_PART}"
 
 
 <<KEEP
@@ -304,7 +306,7 @@ grep -lr 'X-GNOME-Autostart-enabled=true' /etc/xdg/autostart/tracker-*|xargs sud
 
 _echoT "------------------ pulseaudio"
 file=/etc/pulse/default.pa
-sudo sed -i 's|\(load-module module-switch-on-port-available\)|#\1|' $file
+sudo sed -i 's|\(load-module module-switch-on-port-available\)|#\1|' ${file}
 
 _echoT "------------------ tap-to-click"
 gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
@@ -322,20 +324,20 @@ echo '#!/bin/bash
 for tty in /dev/tty{1..6}
 do
     /usr/bin/setleds -D +num < "$tty";
-done' | sudo tee "$file_exec"
-sudo chmod +x "$file_exec"
+done' | sudo tee "${file_exec}"
+sudo chmod +x "${file_exec}"
 
 file_service="/etc/systemd/system/numlock.service"
 echo "[Unit]
 Description=numlock
 
 [Service]
-ExecStart=$file_exec
+ExecStart=${file_exec}
 StandardInput=tty
 RemainAfterExit=yes
 
 [Install]
-WantedBy=multi-user.target" | sudo tee "$file_service"
+WantedBy=multi-user.target" | sudo tee "${file_service}"
 
 sudo systemctl enable numlock.service
 KEEP

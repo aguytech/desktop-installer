@@ -1,8 +1,12 @@
 ## ubuntu
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_hp17_1t-2.5.exc /home/ /media/$USER/1t-2.5/home/ -av --delete -n
+#
+#  sudo rsync /home/shared/virt/ /media/$USER/1t-2.5/home/shared/virt/ -av -n
 
 ## manjaro
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_hp17_1t-2.5.exc /home/ /run/media/$USER/1t-2.5/home/ -av --delete -n
+#
+#  sudo rsync /home/shared/virt/ /run/media/$USER/1t-2.5/home/shared/virt/ -av -n
 
 .snapshots
 ._sync*
@@ -20,7 +24,7 @@ lost+found
 /shared/.aMule/Temp
 /shared/virtualbox
 /shared/vmware
-#/shared/virt
+/shared/virt/images
 #/shared/vm
 /shared/.config/mpv/watch_later
 /shared/dev

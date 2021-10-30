@@ -1,0 +1,45 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+
+########################  MAIN
+
+
+_echoT "================== ${_PART} / global configuration"
+
+_echoT "------------------ pacman Upgrade"
+
+sudo pacman -Syu
+
+#sudo pacman -Sc --noconfirm
+
+#sudo pacman -R $(pacman -Qdtq)
+
+_echoT "------------------ yay Upgrade"
+
+yay -Syu
+
+#yay -Sc --noconfirm
+
+#rm -fR ~/.cache/yay
+
+
+######################## required ${S_RELEASE_DESKTOP}
+
+file="${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}-${S_RELEASE_DESKTOP}.install"
+if [ -f "$file" ]; then
+	_echoT "------------------ ${S_RELEASE_DESKTOP} required"
+
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}-${S_RELEASE_DESKTOP}.install && echo "wrong '${_PART}'" && exit
+fi
+
+
+########################  END
+
+_echoT "===================== ${_PART} end"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+
+

@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# write by Aguy
+
+
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+
+########################  MAIN
+
+packages=
+
+_echoT "------------------ common"
+
+#_echoT "------------------ media"
+# ${cmd} babl gegl gimp-plugin-registry gimp-plugin-satequalizer gimp-plugin-fblur gimp-refocus gimp-plugin-wavelet-denoise # gimp-plugin-duplicate-to-another-image gimp-plugin-saveforweb gimp-plugin-lqr
+
+[ "$_DEV" ] && packages+=" lnav" && _echoT "------------------ dev"
+[ "$_VMWARE" ] && packages+=" linux-headers fuse2 gtkmm pcsclite libcanberra ncurses5-compat-libs vmware-workstation" && _echoT "------------------ vmware"
+[ "${S_RELEASE_DESKTOP}" = xfce  ] && packages+=" radiotray-ng zuki-themes" && _echoT "------------------ xfce"
+[ "${S_RELEASE_DESKTOP}" = gnome  ] && packages+=" nautilus-compare" && _echoT "------------------ gnome"
+
+
+_echoT "------------------ install packages"
+for package in ${packages}; do
+	if yay -Qe ${package} >/dev/null 2>&1; then
+		_echoT "------------------ install ${package}"
+		yay -S --noconfirm --needed ${package} || _exite "Unable to install: ${package}"
+	fi
+done
+
+if [ "$_VMWARE" ]; then
+	_echoT "------------------ vmware services enable"
+	sudo systemctl enable vmware-usbarbitrator.service # vmware-networks.service vmware-hostd.service
+	sudo systemctl start vmware-usbarbitrator.service # vmware-networks.service vmware-hostd.service
+
+	_echoT "------------------ vmware modules enable"
+	sudo modprobe -a vmw_vmci vmmon
+
+	_echoT "------------------ vmware services status"
+	sudo systemctl status vmware-usbarbitrator.service # vmware-networks.service vmware-hostd.service
+fi
+
+
+########################  END
+
+_echoT "===================== ${_PART} end"
+_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
