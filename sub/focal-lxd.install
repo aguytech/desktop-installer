@@ -21,9 +21,7 @@ _require ${file_rsyslog_cron} ${file_rsyslog_client_auth} ${file_logrotate_serve
 _echoT "----------  data"
 
 [ -z ${_LXD_DHCP_MIN+x} ] && anstmp="20" && _askno "Give minimal range IP for DHCP container (${anstmp})" && _LXD_DHCP_MIN="${_ANSWER:-$anstmp}" && _confset _LXD_DHCP_MIN "${_LXD_DHCP_MIN}"
-
 [ -z ${_LXD_DHCP_MAX+x} ] && anstmp="254" && _askno "Give maximal range IP for DHCP container (${anstmp})" && _LXD_DHCP_MAX="${_ANSWER:-$anstmp}" && _confset _LXD_DHCP_MAX "${_LXD_DHCP_MAX}"
-
 
 # root path of lxd
 _LXD_PATH_ROOT=/var/snap/lxd/common/lxd && _confset _LXD_PATH_ROOT "${_LXD_PATH_ROOT}"
@@ -46,7 +44,7 @@ _LXD_PORT=8443 && _confset _LXD_PORT "${_LXD_PORT}"
 paths="${S_HOST_PATH} ${S_HOST_PATH_SP} ${S_HOST_PATH_SHARE} ${S_HOST_PATH_LOG} ${S_HOST_PATH_SAVE}"
 _echoT "----------  create ${paths}"
 for path in ${paths}; do
-	[ -d "${path}" ] || _evalqr mkdir -p "${path}"
+	[ -d "${path}" ] || _evalqr mkdir -p ${path}
 done
 
 ########################  INSTALL
@@ -66,6 +64,9 @@ if snap list|grep -q '^lxd '; then
 fi
 _evalr snap refresh
 _evalr snap install lxd
+
+_echoT "----------  add user"
+_evalr usermod -a -G lxd ${USER}
 
 
 ########################  RIGHTS
@@ -117,7 +118,7 @@ else
 	_exite "This part have to be implemented"
 fi
 
-_evalr lxd init
+_evalr lxd init || _exite "unable to initalize lxd"
 
 
 ########################  DNS
@@ -134,7 +135,7 @@ if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
 	_keepcpts ${file}
 	if ! grep -q ${s_inet} ${file}; then
 		_evalr "sed -i 's|^|#|' ${file}"
-	 	echo -e 'nameserver 127.0.0.53\noptions edns0 trust-ad\nsearch lxd' | _evalr tee ${file}
+		sudo sh -c "echo 'nameserver 127.0.0.53\noptions edns0 trust-ad\nsearch lxd' > ${file}"
 	 fi
 
 	_echoT "----------  dns home"
@@ -211,7 +212,7 @@ _eval lxc network set ${s_inet} ipv4.address=${s_cidr} ipv4.dhcp.ranges=${s_cidr
 profile="stock"
 _echoT "----------  profiles ${profile}"
 
-lxc profile list -f csv|grep -q "^${profile}," && lxc profile rename ${profile} ${profile}.${_SDATE}
+lxc profile list -f csv|grep -q "^${profile}," && _eval lxc profile rename ${profile} ${profile}.${_SDATE}
 _eval lxc profile create ${profile}
 _eval lxc profile device add ${profile} root disk pool=stock path=/
 _eval lxc network attach-profile lxdbr1 ${profile} eth0

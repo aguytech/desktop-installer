@@ -23,8 +23,8 @@ _echoT "------------------ bs link"
 
 _echoT "------------------ conf mirror sources"
 # Change the mirror of software sources
-sudo pacman-mirrors --country-list
-sudo pacman-mirrors -c France
+_evalr pacman-mirrors --country-list
+_evalr pacman-mirrors -c France
 
 
 _echoT "------------------ conf bash"

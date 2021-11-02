@@ -187,7 +187,7 @@ sudo apt install -y apt-btrfs-snapshot snapper # system-storage-manage btrbk
 ########################  SNAPPER
 
 file=/etc/snapper/config-templates/default
-cp -a $file $file.keep$(date +%s)
+_keepcpts ${file}
 str=${_USERNAME}; sed -i "s|^\(ALLOW_USERS=\).*|\1\"$str\"|" $file
 str=${_USERNAME}; sed -i "s|^\(ALLOW_GROUPS=\).*|\1\"$str\"|" $file
 str=no; sed -i "s|^\(TIMELINE_CREATE=\).*|\1\"$str\"|" $file

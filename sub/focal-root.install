@@ -17,7 +17,7 @@ _require ${file_bash_aliases} ${file_bash_functions} ${file_vimrc}
 _echoT "------------------ .bashrc"
 
 file="/root/.bashrc"
-sudo [ -f "${file}" ] && sudo cp -a "${file}" "${file}.keep$(date +%s)"
+_keepcpts ${file}
 
 color_root="\033[01;31m"
 case "$S_SERVER_TYPE" in
@@ -28,6 +28,9 @@ case "$S_SERVER_TYPE" in
 	kvm)	color='"\\[\\033[01;38;5;172m\\]' ;;
 	*)		color='\\[\\033[01;34m\\]'; color_root=$color ;;
 esac
+
+# force color
+sudo sed -i '/^#force_color_prompt=/ s|#||' ${file}
 
 # PS1
 ps1='${debian_chroot:+($debian_chroot)}'${color}'\\h\\[\\033[00m\\]\\w\\[\\033[01;31m\\]\\$\\[\\033[00m\\]'

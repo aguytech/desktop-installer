@@ -79,7 +79,7 @@ sudo sed -i "/$sch/ i $str" "$file"
 
 
 _echoT "------------------ _LAPTOP"
-[ "$_LAPTOP" ] && sudo systemctl enable tlp tlp-sleep
+[ "$_LAPTOP" ] && _service enable tlp tlp-sleep
 
 
 _echoT "------------------ virtualbox"
