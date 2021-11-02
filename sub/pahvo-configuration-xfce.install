@@ -7,10 +7,13 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 
 ########################  MAIN
 
-_echoT "------------------ acpi enable"
-sudo systemctl is-enabled acpid|grep -q ^enabled || sudo systemctl enable acpid
-sudo systemctl is-active acpid|grep -q ^active || sudo systemctl start acpid
+_echoT "------------------ wallpapers"
+path=${S_PATH_INSTALL_XTRA}/wp
+[ -d "${path}" ] && _evalr cp ${path}/* /usr/share/backgrounds/xfce/
 
+_echoT "------------------ acpi enable"
+systemctl is-enabled acpid|grep -q ^disabled && _service enable acpid
+systemctl is-active acpid|grep -q ^inactive && _service start acpid
 
 file=/etc/lightdm/lightdm-gtk-greeter.conf
 cmd="/usr/bin/numlockx on"

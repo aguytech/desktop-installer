@@ -6,14 +6,16 @@ _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}
 
 ########################  REQUIRED
 
-path_install_server=/home/shared/dev/install/conf
+file_completion_conf=${S_PATH_INSTALL_CONF}/bash-completion/lxc.1804
 file_rsyslog_cron=${path_install_server}/rsyslog/cron.conf
 file_rsyslog_client_auth=${path_install_server}/rsyslog/client-auth.conf
 file_logrotate_server=${path_install_server}/logrotate/client-server
 
+path_install_server=/home/shared/dev/install/conf
+
 _echoT "----------  required files"
 
-_require ${file_rsyslog_cron} ${file_rsyslog_client_auth} ${file_logrotate_server}
+_require ${file_completion_conf} ${file_rsyslog_cron} ${file_rsyslog_client_auth} ${file_logrotate_server}
 
 
 ########################  DATA
@@ -21,12 +23,10 @@ _require ${file_rsyslog_cron} ${file_rsyslog_client_auth} ${file_logrotate_serve
 _echoT "----------  data"
 
 [ -z ${_LXD_DHCP_MIN+x} ] && anstmp="20" && _askno "Give minimal range IP for DHCP container (${anstmp})" && _LXD_DHCP_MIN="${_ANSWER:-$anstmp}" && _confset _LXD_DHCP_MIN "${_LXD_DHCP_MIN}"
-
 [ -z ${_LXD_DHCP_MAX+x} ] && anstmp="254" && _askno "Give maximal range IP for DHCP container (${anstmp})" && _LXD_DHCP_MAX="${_ANSWER:-$anstmp}" && _confset _LXD_DHCP_MAX "${_LXD_DHCP_MAX}"
 
-
 # root path of lxd
-_LXD_PATH_ROOT=/var/lib/lxd && _confset _LXD_PATH_ROOT "${_LXD_PATH_ROOT}"
+_LXD_PATH_ROOT=/var/snap/lxd/common/lxd && _confset _LXD_PATH_ROOT "${_LXD_PATH_ROOT}"
 # root path of storage pools for
 _LXD_PATH_SP=storage-pools && _confset _LXD_PATH_SP "${_LXD_PATH_SP}"
 # path for containers
@@ -46,16 +46,34 @@ _LXD_PORT=8443 && _confset _LXD_PORT "${_LXD_PORT}"
 paths="${S_HOST_PATH} ${S_HOST_PATH_SP} ${S_HOST_PATH_SHARE} ${S_HOST_PATH_LOG} ${S_HOST_PATH_SAVE}"
 _echoT "----------  create ${paths}"
 for path in ${paths}; do
-	[ -d "${path}" ] || _evalqr mkdir -p "${path}"
+	[ -d "${path}" ] || _evalqr mkdir -p ${path}
 done
 
 ########################  INSTALL
 
 _echoT "----------  install"
+_eval yay --noconfirm -S jq snapd
+_evalr systemctl enable --now snapd
+export PATH="${PATH}:/var/lib/snapd/snap/bin"
+sleep 1
 
-_evalr pacman -S lxd jq
-_evalr systemctl enable --now lxd
-_evalr usermod -a -G lxd $USER
+_echoT "----------  snap lxd"
+_evalr snap install lxd
+sleep 1
+_evalr snap refresh
+
+_echoT "----------  activate lxd"
+systemctl is-active
+systemctl is-active snap.lxd.daemon|grep -q ^inactive && _service start snap.lxd.daemon
+
+_echoT "----------  add user"
+_evalr usermod -a -G lxd ${USER}
+
+_echoT "----------  bash completion"
+path=/usr/share/bash-completion/completions
+file=${path}/lxc
+_keepmvts ${file}
+_evalr ln -s  ${file_completion_conf} ${file}
 
 
 ########################  RIGHTS
@@ -107,7 +125,7 @@ else
 	_exite "This part have to be implemented"
 fi
 
-_evalr lxd init
+_evalr lxd init || _exite "unable to initalize lxd"
 
 
 ########################  DNS
@@ -123,13 +141,13 @@ if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
 	file=/etc/resolvconf.conf
 	_keepcpts ${file}
 	if ! grep -q 127.0.0.53 ${file}; then
-	 	echo -e 'name_servers=127.0.0.53\nresolv_conf_options="edns0 trust-ad"\n#search_domains=lxd\nsearch_domains_append=lxd' | _evalr tee -a ${file}
+		sudo sh -c "echo -e 'name_servers=127.0.0.53\nresolv_conf_options=\"edns0 trust-ad\"\n#search_domains=lxd\nsearch_domains_append=lxd' >> ${file}"
 	 fi
 
 	_echoT "----------  systemd resolved"
 
-	sudo systemctl is-active systemd-resolved.service|grep -q ^active || sudo systemctl start systemd-resolved.service
-	sudo systemctl is-enabled systemd-resolved.service|grep -q ^enabled || sudo systemctl enable systemd-resolved.service
+	systemctl is-active systemd-resolved|grep -q ^inactive && _service start systemd-resolved
+	systemctl is-enabled systemd-resolved|grep -q ^disabled && _service enable systemd-resolved
 
 	_echoT "----------  dns home"
 
@@ -218,22 +236,16 @@ _evalr lxc network set ${s_inet} ipv4.address=${s_cidr} ipv4.dhcp.ranges=${s_cid
 profile="stock"
 _echoT "----------  profiles ${profile}"
 
-sudo lxc profile list -f csv|grep -q "^${profile}," && sudo lxc profile rename ${profile} ${profile}.${_SDATE}
+_evalr lxc profile list -f csv|grep -q "^${profile}," && _evalr lxc profile rename ${profile} ${profile}.${_SDATE}
 _evalr lxc profile create ${profile}
 _evalr lxc profile device add ${profile} root disk pool=stock path=/
 _evalr lxc network attach-profile lxdbr1 ${profile} eth0
 
 
-_echoT "----------  lxc container"
-
-_echoI "To install and configure container use:"
-_echoI "$(ls -1 ${S_PATH_INSTALL/-desktop/}/lxd-*)"
-
-
 ########################  RSYSLOG
 
 _echoT "----------  rsyslog install"
-_evalr yay --noconfirm -S rsyslog
+_eval yay --noconfirm -S rsyslog
 
 _echoT "----------  rsyslog path"
 for path in /etc/rsyslog.d /var/spool/rsyslog; do
@@ -278,6 +290,11 @@ KEEP
 
 _echoT "----------  rsyslog restart"
 _service restart rsyslog
+
+
+_echoT "----------  lxc container"
+echoI "To install and configure container use:"
+_echoI "$(ls -1 ${S_PATH_INSTALL/-desktop/}/lxd-*)"
 
 
 ########################  REBOOT

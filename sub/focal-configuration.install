@@ -8,7 +8,7 @@ _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}
 file_meld_conf=${S_PATH_INSTALL_CONF}/soft/meld-dark.xml
 _require ${file_meld_conf}
 
-path_vim=${S_PATH_INSTALL_CONF}/vim
+path_vim=${S_PATH_INSTALL_CONF/-desktop/}/vim
 _requirep ${path_vim}
 
 ########################  MAIN
