@@ -201,7 +201,7 @@ file="$HOME/.local/share/gtksourceview-4"
 ! [ -e ${file} ] && ln -sv /home/shared/.local/share/gtksourceview-3.0 ${file}
 
 _echoT "------------------ _LAPTOP"
-[ "$_LAPTOP" ] && sudo systemctl enable tlp
+[ "$_LAPTOP" ] && _service enable tlp
 
 
 if [ -n "${_VIRTUALBOX}" ]; then
@@ -299,7 +299,7 @@ _echoT "------------------ rsyslog conf"
 
 sudo sed -i 's|^\(\$KLogPermitNonKernelFacility.*\)|#\1|' /etc/rsyslog.conf
 
-sudo systemctl restart rsyslog.service
+_service restart rsyslog
 
 _echoT "------------------ tracker autostart disable"
 grep -lr 'X-GNOME-Autostart-enabled=true' /etc/xdg/autostart/tracker-*|xargs sudo sed -i 's|^\(X-GNOME-Autostart-enabled=\).*|\1false|'
@@ -339,6 +339,6 @@ RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target" | sudo tee "${file_service}"
 
-sudo systemctl enable numlock.service
+_service enable numlock
 KEEP
 

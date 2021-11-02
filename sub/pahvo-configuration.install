@@ -15,23 +15,42 @@ _requirep ${path_vim}
 
 _echoT "================== ${_PART} / global configuration"
 
+if [ "${_LAPTOP}" ]; then
+	_echoT "------------------ enable acpid"
+	service=acpid
+	systemctl is-enabled ${service}|grep -q ^disabled && _service enable ${service}
+	systemctl is-active ${service}|grep -q ^inactive && _service start ${service}
+
+	_echoT "------------------ grub timeout"
+	systemctl is-enabled ${service}|grep -q ^disabled && _service enable tlp
+fi
+
+
 _echoT "------------------ reduce swapiness"
 echo "vm.swappiness=10" |sudo tee -a /etc/sysctl.d/99-swappiness.conf
 
 
-_echoT "------------------ grub"
 file=/etc/default/grub
 sudo sed -i "/^GRUB_DEFAULT=/ s|=.*|=0|" ${file}
 sudo sed -i "/^GRUB_TIMEOUT=/ s|=.*|=2|" ${file}
 #sudo sed -i "/^GRUB_TIMEOUT_STYLE=/ s|=hidden|menu|" ${file}
 sudo sed -i "/^GRUB_SAVEDEFAULT=/ s|=.*|=false|" ${file}
 
+_echoT "------------------ grub os-prober"
 # add identifier to menuentry
 file=/etc/grub.d/30_os-prober
-file_keep=${file}.$(date +%s)
 if ! grep -q 'LONGNAME="${LONGNAME} ${BTRFSsubvol/#subvol=/}"' ${file}; then
-    _keepcpts ${file} && sudo chmod -x ${file_keep}
-    sudo sed -i "/LONGNAME=\"\${LABEL}\"/ a\  else\n    LONGNAME=\"\${LONGNAME} \${BTRFSsubvol/#subvol=/}\"" ${file}
+	_keepcpts ${file} && sudo chmod -x ${file}.${_SDATE}
+	sudo sed -i "/LONGNAME=\"\${LABEL}\"/ a\  else\n    LONGNAME=\"\${LONGNAME} \${BTRFSsubvol/#subvol=/}\"" ${file}
+fi
+
+_echoT "------------------ grub cmdline"
+str=
+#[ "${_LAPTOP}" ] && str+=" acpi_backlight=vendor" # just try
+#[ "${_LAPTOP}" ] && str+=" fbcon=nodefer" # just try
+[ "${_LXD}" ] && str+=" systemd.unified_cgroup_hierarchy=0"
+if [ "${str}" ] && ! grep -q '^GRUB_CMDLINE_LINUX=.*${str}' ${file}; then
+	 sudo sed -i "/^GRUB_CMDLINE_LINUX=/ s|\"$|${str}\"|" ${file}
 fi
 
 sudo update-grub
@@ -43,7 +62,7 @@ file_exec="/usr/local/bin/numlock"
 echo '#!/bin/bash
 for tty in /dev/tty{1..6}
 do
-    /usr/bin/setleds -D +num < "$tty";
+	/usr/bin/setleds -D +num < "$tty";
 done' | sudo tee ${file_exec}
 sudo chmod +x ${file_exec}
 
@@ -63,35 +82,35 @@ _service enable numlock
 
 
 if type vim >/dev/null 2>&1 ; then
-    _echoT "------------------  vim links edit"
+	_echoT "------------------  vim links edit"
 
-    for file in /usr/bin/edit /usr/bin/editor; do
-        [ -e ${file} ] && _evalr rm ${file}
-        _evalr ln -sv /usr/bin/vim ${file}
-    done
+	for file in /usr/bin/edit /usr/bin/editor; do
+		[ -e ${file} ] && _evalr rm ${file}
+		_evalr ln -sv /usr/bin/vim ${file}
+	done
 
 	_echoT "------------------ dev vim"
 	sudo cp ${path_vim}/* /usr/share/vim/vim*/colors/
 
-    _echoT "----------  conf vim"
-    file=/etc/vimrc
-    sudo sed -i "s|^\"\(syntax\).*|\1 on|" ${file}
+	_echoT "----------  conf vim"
+	file=/etc/vimrc
+	sudo sed -i "s|^\"\(syntax\).*|\1 on|" ${file}
 
-    opts="background=dark showmatch"
-    # uncomment
-    for opt in $opts; do
-        sudo sed -i "s|^\"\(set $opt.*\)$|\1|" ${file}
-    done
+	opts="background=dark showmatch"
+	# uncomment
+	for opt in $opts; do
+		sudo sed -i "s|^\"\(set $opt.*\)$|\1|" ${file}
+	done
 fi
 
 
 _echoT "------------------  /usr/local/bs/conf links"
 
 for file in .nanorc .tmux.conf .vimrc; do
-    path_from="${S_PATH_SCRIPT_CONF}/${file}"
-    path=~/${file}
-    [ -e "${path}" ] && sudo rm -fR ${path}
-    ln -s "${path_from}" "${path}"
+	path_from="${S_PATH_SCRIPT_CONF}/${file}"
+	path=~/${file}
+	[ -e "${path}" ] && sudo rm -fR ${path}
+	ln -s "${path_from}" "${path}"
 done
 
 _echoT "------------------ gstreamer preset"
@@ -142,8 +161,8 @@ sudo cp ${file_meld_conf} /usr/share/meld/styles/meld-dark.xml
 _echoT "------------------ nano"
 
 for str in conf install; do
-    sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/$str.nanorc
-    sudo sed -i 's|^\(syntax \).*|\1"'$str'" "\.'$str'$"|' /usr/share/nano/$str.nanorc
+	sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/$str.nanorc
+	sudo sed -i 's|^\(syntax \).*|\1"'$str'" "\.'$str'$"|' /usr/share/nano/$str.nanorc
 done
 
 file=/etc/nanorc
@@ -159,7 +178,7 @@ opts="constantshow historylog matchbrackets multibuffer nohelp softwrap "
 opts+="errorcolor functioncolor keycolor numbercolor selectedcolor statuscolor stripecolor titlecolor"
 # uncomment
 for opt in ${opts}; do
-    sudo sed -i "s|^.*\(set $opt .*\)$|\1|"  ${file}
+	sudo sed -i "s|^.*\(set $opt .*\)$|\1|"  ${file}
 done
 
 
@@ -207,12 +226,12 @@ $S_PATH_LOG_SERVER/*.err
 $S_PATH_LOG_SERVER/*.debug
 {
 	su 0 1000
-    missingok
-    compress
-    delaycompress
-    notifempty
-    weekly
-    rotate 8
+	missingok
+	compress
+	delaycompress
+	notifempty
+	weekly
+	rotate 8
 }
 ' > /etc/logrotate.d/server"
 
