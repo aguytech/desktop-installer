@@ -28,12 +28,10 @@ _confset _SSD "${_SSD}"
 [ -z "${_MEM}" ] && anstmp=2G && _askno "Give the size of memory used for /tmp dir ($anstmp)" && _MEM=${_ANSWER:-$anstmp}
 _confset _MEM "${_MEM}"
 
-path_lxd=/vm
 
+########################  mount ${_DEVICE_SYS}
 
 _echoT "------------------ mount ${_DEVICE_SYS}"
-
-# sys
 sudo mount ${_DEVICE_SYS} /mnt
 cd /mnt
 
@@ -43,53 +41,48 @@ _echoT "btrfs subvolume list ${PWD}"
 _echoI "$(sudo btrfs subvolume list .)"
 
 
-_echoT "------------------ create btrfs subvolumes"
+_echoT "------------------ btrfs create save"
+sudo [ -d save ] || sudo btrfs subvolume create save
 
-subv=save
-! sudo [ -d ${subv} ] && sudo btrfs subvolume create ${subv}
+if [ "${_DEVICE_EXT}" ]; then
+	device_ext=${_DEVICE_EXT}
+	sub_ext=
+else
+	device_ext=${_DEVICE_SYS}
+	sub_ext=/ext
+	sudo btrfs subvolume create ext
+fi
 
-# create volume for LXD
-sudo [ -d lxd-${_SYSNAME} ] && sudo mv "lxd-${_SYSNAME}" "lxd-${_SYSNAME}.keep$(date +%s)"
-sudo btrfs subvolume create lxd-${_SYSNAME}
+_echoT "------------------ create /ext"
+sudo [ -d /ext ] || sudo mkdir /ext
+
+if [ "${_LXD}" ]; then
+	_echoT "------------------ btrfs lxd"
+	path_lxd=/vm
+
+	sudo [ -d ${path_lxd} ] || mkdir ${path_lxd} 
+	sudo [ -d lxd-${_SYSNAME} ] && sudo mv "lxd-${_SYSNAME}" "lxd-${_SYSNAME}.$(date +%s)"
+	sudo btrfs subvolume create lxd-${_SYSNAME}
+fi
 
 _echoT "btrfs subvolume list ${PWD}"
 _echoI "$(sudo btrfs subvolume list .)"
 
-
-if [ "${_LXD}" ]; then
-	_echoT "------------------ create lxd path"
-	[ -d ${path_lxd} ] || mkdir /mnt${path_lxd} 
-fi
-
-#chmod o-rwx ${_SYSNAME}/.snapshots
-#rsync -av ${_SYSNAME}/var/log.keep/ ${_SYSNAME}/var/log/
-#rm -fR ${_SYSNAME}/var/log.keep
-
 _echoT "------------------ umount ${_DEVICE_SYS}"
-
 cd /
 sudo umount /mnt
 
-if [ "${_DEVICE_EXT}" ]; then
-	device=${_DEVICE_EXT}
-	subv=
-else
-	device=${_DEVICE_SYS}
-	subv=ext
-fi
 
-_echoT "------------------ mount $device"
+########################  mount ${device_ext}
 
-sudo mount ${device} /mnt
+_echoT "------------------ mount ${device_ext}"
+sudo mount ${device_ext} /mnt
 
+_echoT "------------------ rights ${device_ext}"
+sudo chown :1000 -R /mnt${sub_ext}
+sudo chmod g+rwx -R /mnt${sub_ext}
 
-_echoT "------------------ create btrfs subvolumes"
-
-[ "${subv}" ] && ! sudo [ -d ${subv} ] && sudo btrfs subvolume create ${subv}
-
-sudo chown :1000 -R /mnt/${subv}
-sudo chmod g+rwx -R /mnt/${subv}
-
+_echoT "------------------ umount ${device_ext}"
 sudo umount /mnt
 
 
@@ -128,8 +121,7 @@ fi
 
 [ "${_DEVICE_EXT}" ] && sudo sh -c "echo '
 # btrfs ext
-UUID=${uuidext}      /ext              btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/ext           0    2
-
+UUID=${uuidext}      /ext              btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd           0    2
 UUID=${uuidext}      /btrfs/ext        btrfs   defaults,noauto,noatime,space_cache,autodefrag,compress=zstd               0    2' >> ${file}"
 
 _echoI "$(cat "${file}")"
@@ -188,13 +180,13 @@ sudo apt install -y apt-btrfs-snapshot snapper # system-storage-manage btrbk
 
 file=/etc/snapper/config-templates/default
 _keepcpts ${file}
-str=${_USERNAME}; sed -i "s|^\(ALLOW_USERS=\).*|\1\"$str\"|" $file
-str=${_USERNAME}; sed -i "s|^\(ALLOW_GROUPS=\).*|\1\"$str\"|" $file
-str=no; sed -i "s|^\(TIMELINE_CREATE=\).*|\1\"$str\"|" $file
-str=no; sed -i "s|^\(TIMELINE_CLEANUP=\).*|\1\"$str\"|" $file
+str=${_USERNAME}; sed -i "s|^\(ALLOW_USERS=\).*|\1\"${str}\"|" $file
+str=${_USERNAME}; sed -i "s|^\(ALLOW_GROUPS=\).*|\1\"${str}\"|" $file
+str=no; sed -i "s|^\(TIMELINE_CREATE=\).*|\1\"${str}\"|" $file
+str=no; sed -i "s|^\(TIMELINE_CLEANUP=\).*|\1\"${str}\"|" $file
 
 file=/etc/updatedb.conf
-cp -a $file $file.keep$(date +%s)
+cp -a $file $file.$(date +%s)
 sed -i 's|^\(# PRUNENAMES.*\)|\1\nPRUNENAMES = ".snapshots"|' $file
 
 
