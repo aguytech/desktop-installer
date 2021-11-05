@@ -5,6 +5,8 @@
 
 _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
+grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_FILE_INSTALL_CONF}"
+
 file_env=${S_PATH_SCRIPT_CONF}/env
 file_bash_aliases=${S_PATH_SCRIPT_CONF}/.bash_aliases
 file_bash_functions=${S_PATH_SCRIPT_CONF}/.bash_functions
@@ -12,6 +14,31 @@ file_bashrc=${S_PATH_SCRIPT_CONF}/.bashrc-manjaro
 
 _echoT "------------------ file required"
 _require ${file_env} ${file_bash_aliases} ${file_bash_functions}
+
+########################  DATA
+
+_echoT "----------  data sysctl.conf"
+
+# host
+[ -z ${_SOMAXCONN+x} ] && anstmp="4096" && _askno "Set $(sysctl net.core.somaxconn) - (${anstmp})" && _SOMAXCONN="${_ANSWER:-$anstmp}" && _confset _SOMAXCONN "${_SOMAXCONN}"
+[ -z ${_MAX_BACKLOG+x} ] && anstmp="1000" && _askno "Set $(sysctl net.core.netdev_max_backlog) - (${anstmp})" && _MAX_BACKLOG="${_ANSWER:-$anstmp}" && _confset _MAX_BACKLOG "${_MAX_BACKLOG}"
+
+# host & vm
+[ -z ${_MAX_SYN_BACKLOG+x} ] && anstmp="1024" && _askno "Set $(sysctl net.ipv4.tcp_max_syn_backlog) - (${anstmp})" && _MAX_SYN_BACKLOG="${_ANSWER:-$anstmp}" && _confset _MAX_SYN_BACKLOG "${_MAX_SYN_BACKLOG}"
+[ -z ${_MAX_TW_BUCKETS+x} ] && anstmp="65536" && _askno "Set $(sysctl net.ipv4.tcp_max_tw_buckets) - (${anstmp})" && _MAX_TW_BUCKETS="${_ANSWER:-$anstmp}" && _confset _MAX_TW_BUCKETS "${_MAX_TW_BUCKETS}"
+[ -z ${_FIN_TIMEOUT+x} ] && anstmp="60" && _askno "Set $(sysctl net.ipv4.tcp_fin_timeout) - (${anstmp})" && _FIN_TIMEOUT="${_ANSWER:-$anstmp}" && _confset _FIN_TIMEOUT "${_FIN_TIMEOUT}"
+[ -z ${_KEEPALIVE_TIME+x} ] && anstmp="7200" && _askno "Set $(sysctl net.ipv4.tcp_keepalive_time) - (${anstmp})" && _KEEPALIVE_TIME="${_ANSWER:-$anstmp}" && _confset _KEEPALIVE_TIME "${_KEEPALIVE_TIME}"
+[ -z ${_KEEPALIVE_INTVL+x} ] && anstmp="75" && _askno "Set $(sysctl net.ipv4.tcp_keepalive_intvl) - (${anstmp})" && _KEEPALIVE_INTVL="${_ANSWER:-$anstmp}" && _confset _KEEPALIVE_INTVL "${_KEEPALIVE_INTVL}"
+[ -z ${_KEEPALIVE_PROBES+x} ] && anstmp="9" && _askno "Set $(sysctl net.ipv4.tcp_keepalive_probes) - (${anstmp})" && _KEEPALIVE_PROBES="${_ANSWER:-$anstmp}" && _confset _KEEPALIVE_PROBES "${_KEEPALIVE_PROBES}"
+
+if [ "${S_STORAGE_DRIVER}" = zfs ]; then
+
+	_echoT "----------  _ZFS_ROOT"
+	anstmp="root"
+	_askno "Give the name of zfs root for device ${S_STORAGE_DEVICE} (${anstmp})"
+	_ZFS_ROOT=${_ANSWER:-$anstmp} && _confset _ZFS_ROOT "${_ZFS_ROOT}"
+fi
+
 
 ########################  MAIN
 
