@@ -70,7 +70,8 @@ _requirep ${_PATH_SSH_KEEP} ${_PATH_SOFT}
 
 
 ########################  CONF
-str="# install"; ! grep -q "^${str}" "${S_FILE_INSTALL_CONF}" && echo -e "\n${str}" >> "${S_FILE_INSTALL_CONF}"
+
+grep -q "^# install" "${S_FILE_INSTALL_CONF}" || echo -e "# install" >> "${S_FILE_INSTALL_CONF}"
 
 #[ -z ${S_RELEASE_NAME+x} ] && anstmp="${S_RELEASE_NAME}" && _askno "Give the name of release ($_ANSWER)"  && S_RELEASE_NAME=${_ANSWER} && _confset S_RELEASE_NAME "${S_RELEASE_NAME}"
 

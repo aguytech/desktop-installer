@@ -161,8 +161,8 @@ sudo cp ${file_meld_conf} /usr/share/meld/styles/meld-dark.xml
 _echoT "------------------ nano"
 
 for str in conf install; do
-	sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/$str.nanorc
-	sudo sed -i 's|^\(syntax \).*|\1"'$str'" "\.'$str'$"|' /usr/share/nano/$str.nanorc
+	sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/${str}.nanorc
+	sudo sed -i 's|^\(syntax \).*|\1"'${str}'" "\.'${str}'$"|' /usr/share/nano/${str}.nanorc
 done
 
 file=/etc/nanorc

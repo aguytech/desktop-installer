@@ -4,6 +4,8 @@
 
 _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
+grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_FILE_INSTALL_CONF}"
+
 ########################  REQUIRED
 
 file_completion_conf=${S_PATH_INSTALL_CONF}/bash-completion/lxc.1804
@@ -85,7 +87,7 @@ link=/lxd
 
 path=${S_HOST_PATH_SHARE}
 _echoT "----------  rights ${path}"
-[ "${S_STORAGE_DRIVER}" = zfs ] && id=1000000 || id=100000
+id=1000000
 _evalr setfacl -Rm u:${id}:rwx ${path}
 _evalr setfacl -Rm d:u:${id}:rwx ${path}
 _evalr chown ${id}:${id} -R "${path}"
@@ -136,13 +138,18 @@ if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
 	# get : s_inet s_cidr s_base
 	eval ${S_HOST_VM_ETH[default]}
 
-	_echoT "----------  dns ovh"
+	_echoT "---------- network-manager"
+	file=/etc/NetworkManager/NetworkManager.conf
+	grep -q 'dns=none' ${file} || sudo sh -c "echo -e '\n[main]\ndns=none' >> ${file}"
+	systemctl is-active NetworkManager.service && _service restart NetworkManager
 
+	_echoT "----------  dns ovh"
 	file=/etc/resolvconf.conf
 	_keepcpts ${file}
 	if ! grep -q 127.0.0.53 ${file}; then
 		sudo sh -c "echo -e 'name_servers=127.0.0.53\nresolv_conf_options=\"edns0 trust-ad\"\n#search_domains=lxd\nsearch_domains_append=lxd' >> ${file}"
 	 fi
+	 _evalr resolvconf -u
 
 	_echoT "----------  systemd resolved"
 

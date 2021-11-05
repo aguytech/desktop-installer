@@ -102,7 +102,7 @@ ${DIR_OPT}/squirrel-sql.sh \$*" | sudo tee /usr/bin/squirrel-sql
 sudo chmod +x /usr/bin/squirrel-sql
 
 # -Xms (min) & -Xmx (max) allocate memory for java software
-#str='-Xms256m -Xmx2048m'; sed -i 's|^\("$JAVACMD"\)\(.*\)$|\1'$str'\2|' ${DIR_OPT}/squirrel.sh
+#str='-Xms256m -Xmx2048m'; sed -i 's|^\("$JAVACMD"\)\(.*\)$|\1'${str}'\2|' ${DIR_OPT}/squirrel.sh
 KEEP
 
 

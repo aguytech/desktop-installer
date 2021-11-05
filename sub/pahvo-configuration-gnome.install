@@ -71,11 +71,11 @@ _echoT "------------------ gstreamer preset"
 file="/usr/share/sound-juicer/rhythmbox.gep"
 sch="\[streamprofile-oggvorbis-1\]"
 str="preset = ogg_very_high"
-sudo sed -i "/$sch/ a $str" "$file"
+sudo sed -i "/$sch/ a ${str}" "$file"
 
 sch="\[profile-oggopus\]"
 str="[profile-oggvorbis2]\nname = oggvorbis2\ndescription = Ogg Vorbis High\nformat = application/ogg\ntype = container\n\n[streamprofile-oggvorbis-12]\nparent = oggvorbis2\ntype = audio\npreset = ogg_high\nformat = audio/x-vorbis\npresence = 1\n\n[profile-oggvorbis3]\nname = oggvorbis3\ndescription = Ogg Vorbis Very High\nformat = application/ogg\ntype = container\n\n[streamprofile-oggvorbis-13]\nparent = oggvorbis3\ntype = audio\npreset = ogg_very_high\nformat = audio/x-vorbis\npresence = 1\n"
-sudo sed -i "/$sch/ i $str" "$file"
+sudo sed -i "/$sch/ i ${str}" "$file"
 
 
 _echoT "------------------ _LAPTOP"

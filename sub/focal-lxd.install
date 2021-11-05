@@ -4,6 +4,8 @@
 
 _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
+grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_FILE_INSTALL_CONF}"
+
 ########################  REQUIRED
 
 path_install_server=/home/shared/dev/install/conf
@@ -78,7 +80,7 @@ link=/lxd
 
 path=${S_HOST_PATH_SHARE}
 _echoT "----------  rights ${path}"
-[ "${S_STORAGE_DRIVER}" = zfs ] && id=1000000 || id=100000
+id=1000000
 _evalr setfacl -Rm u:${id}:rwx ${path}
 _evalr setfacl -Rm d:u:${id}:rwx ${path}
 _evalr chown ${id}:${id} -R "${path}"

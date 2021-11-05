@@ -95,7 +95,7 @@ sudo sed -i "/${sch}/ a ${str}" ${file}
 
 sch="\[profile-oggopus\]"
 str="[profile-oggvorbis2]\nname = oggvorbis2\ndescription = Ogg Vorbis High\nformat = application/ogg\ntype = container\n\n[streamprofile-oggvorbis-12]\nparent = oggvorbis2\ntype = audio\npreset = ogg_high\nformat = audio/x-vorbis\npresence = 1\n\n[profile-oggvorbis3]\nname = oggvorbis3\ndescription = Ogg Vorbis Very High\nformat = application/ogg\ntype = container\n\n[streamprofile-oggvorbis-13]\nparent = oggvorbis3\ntype = audio\npreset = ogg_very_high\nformat = audio/x-vorbis\npresence = 1\n"
-sudo sed -i "/$sch/ i $str" ${file}
+sudo sed -i "/$sch/ i ${str}" ${file}
 
 _echoT "------------------ dvd"
 sudo dpkg-reconfigure libdvd-pkg
@@ -120,8 +120,8 @@ sudo cp ${file_meld_conf} /usr/share/meld/styles/meld-dark.xml
 _echoT "------------------ nano"
 
 for str in conf install; do
-    sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/$str.nanorc
-    sudo sed -i 's|^\(syntax \).*|\1"'$str'" "\.'$str'$"|' /usr/share/nano/$str.nanorc
+    sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/${str}.nanorc
+    sudo sed -i 's|^\(syntax \).*|\1"'${str}'" "\.'${str}'$"|' /usr/share/nano/${str}.nanorc
 done
 
 file=/etc/nanorc
