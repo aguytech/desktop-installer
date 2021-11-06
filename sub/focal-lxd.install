@@ -9,6 +9,7 @@ grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_F
 ########################  REQUIRED
 
 path_install_server=/home/shared/dev/install/conf
+
 file_rsyslog_cron=${path_install_server}/rsyslog/cron.conf
 file_rsyslog_client_auth=${path_install_server}/rsyslog/client-auth.conf
 file_logrotate_server=${path_install_server}/logrotate/client-server
@@ -220,12 +221,6 @@ _eval lxc profile device add ${profile} root disk pool=stock path=/
 _eval lxc network attach-profile lxdbr1 ${profile} eth0
 
 
-_echoT "----------  lxc container"
-
-_echoI "To install and configure container use:"
-_echoI "$(ls -1 ${S_PATH_INSTALL/-desktop/}/lxd-*)"
-
-
 ########################  RSYSLOG
 
 _echoT "----------  rsyslog conf"
@@ -267,6 +262,11 @@ KEEP
 
 _echoT "----------  rsyslog restart"
 _service restart rsyslog
+
+
+_echoT "----------  lxc container"
+_echoI "To install and configure container use:"
+_echoI "$(ls -1 ${S_PATH_INSTALL/-desktop/}/lxd-*)"
 
 
 ########################  REBOOT

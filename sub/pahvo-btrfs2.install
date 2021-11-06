@@ -126,16 +126,17 @@ UUID=${uuidext}      /btrfs/ext        btrfs   defaults,noauto,noatime,space_cac
 
 _echoI "$(cat "${file}")"
 
-#_echoT "------------------ mount all"
-#sudo mount -a
+_echoT "------------------ mount"
+sudo mount /ext
+sudo mount /save
 
 _echoT "------------------ create dirs & rights"
 
-dirs="${S_PATH_SCRIPT} ${S_PATH_LOG_INSTALL} ${S_PATH_LOG_SERVER} /btrfs/sys /btrfs/ext /ext ext/backups ext/ovh ext/shared /home /home/shared /home/shared/dev/bs /home/shared/www /opt /save/${_USERNAME}"
-for dir in ${dirs}; do
-	! [ -d ${dir} ] && sudo mkdir -p ${dir}
-	sudo chown :1000 ${dir}
-	sudo chmod g+rwx ${dir}
+paths="${S_PATH_SCRIPT} ${S_PATH_LOG_INSTALL} ${S_PATH_LOG_SERVER} /btrfs/sys /btrfs/ext /ext ext/backups ext/ovh ext/shared /home /home/shared /home/shared/dev/bs /home/shared/www /opt /save/${_USERNAME}"
+for path in ${paths}; do
+	! [ -d ${path} ] && sudo mkdir -p ${path}
+	sudo chown :1000 ${path}
+	sudo chmod g+rwx ${path}
 done
 
 

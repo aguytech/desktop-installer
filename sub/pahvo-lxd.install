@@ -8,12 +8,12 @@ grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_F
 
 ########################  REQUIRED
 
+path_install_server=/home/shared/dev/install/conf
+
 file_completion_conf=${S_PATH_INSTALL_CONF}/bash-completion/lxc.1804
 file_rsyslog_cron=${path_install_server}/rsyslog/cron.conf
 file_rsyslog_client_auth=${path_install_server}/rsyslog/client-auth.conf
 file_logrotate_server=${path_install_server}/logrotate/client-server
-
-path_install_server=/home/shared/dev/install/conf
 
 _echoT "----------  required files"
 
@@ -300,7 +300,7 @@ _service restart rsyslog
 
 
 _echoT "----------  lxc container"
-echoI "To install and configure container use:"
+_echoI "To install and configure container use:"
 _echoI "$(ls -1 ${S_PATH_INSTALL/-desktop/}/lxd-*)"
 
 
