@@ -139,7 +139,7 @@ _echoT "------------------ firefox"
 
 name=firefox; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
-#sed -i "s|^\(Exec=\).*|\1firefox -P $USER|" ${path}/${name}.desktop
+#sed -i "s|^\(Exec=\).*|\1firefox -P ${USER}|" ${path}/${name}.desktop
 if ! grep -q '\[Desktop Action Separator\]' ${path}/${name}.desktop; then
 	menuadd="Separator;ProfileUser;ProfileManager;SafeMode;Separator;FirefoxDev;Chromium;Separator;Qarte;aMule;"
 	sed -i "s/^\(Actions=.*\)$/\1${menuadd}/" ${path}/${name}.desktop

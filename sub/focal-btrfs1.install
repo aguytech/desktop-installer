@@ -62,7 +62,7 @@ _confset() {
 ########################  MAIN
 
 # exit
-[ "$USER" != root ] && _echoE "You have to run this script under root privileges" && exit 1
+[ "${USER}" != root ] && _echoE "You have to run this script under root privileges" && exit 1
 _parthave ${_PART} ${_FILE_INSTALL_DONE} && _echoI "performed *** ${_PART}" && exit 0
 
 _echoT "btrfs configuration: AFTER installation & BEFORE reboot"

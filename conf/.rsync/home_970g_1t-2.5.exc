@@ -1,8 +1,8 @@
 ## ubuntu
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_970g_1t-2.5.exc /home/ /media/$USER/1t-2.5/home/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_970g_1t-2.5.exc /home/ /media/${USER}/1t-2.5/home/ -av --delete -n
 
 ## manjaro
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_970g_1t-2.5.exc /home/ /run/media/$USER/1t-2.5/home/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_970g_1t-2.5.exc /home/ /run/media/${USER}/1t-2.5/home/ -av --delete -n
 
 .Trash-*
 .tmp*

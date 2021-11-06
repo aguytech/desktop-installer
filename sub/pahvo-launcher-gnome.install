@@ -200,8 +200,8 @@ Name=−−−−−−−−−−
 Exec=
 
 [Desktop Action ProfileUser]
-Name=Profile $USER
-Exec=firefox -P $USER
+Name=Profile ${USER}
+Exec=firefox -P ${USER}
 
 [Desktop Action SafeMode]
 Name=Safe Mode

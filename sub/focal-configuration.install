@@ -206,7 +206,7 @@ _echoT "------------------ _LAPTOP"
 
 if [ -n "${_VIRTUALBOX}" ]; then
     _echoT "------------------ virtualbox"
-    [ "$_VIRTUALBOX" ] && sudo adduser $USER vboxusers
+    [ "$_VIRTUALBOX" ] && sudo adduser ${USER} vboxusers
 fi
 
 _echoT "------------------ gedit settings"

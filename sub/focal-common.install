@@ -105,7 +105,7 @@ _echoT "------------------ hosts ovh-cluster"
 file=/etc/hosts
 servers_list=${!S_CLUSTER[*]}
 ! sudo grep -q "# ${S_DOMAIN_NAME} cluster" ${file} && sudo sh -c "echo '\n# ${S_DOMAIN_NAME} cluster' >> ${file}"
-for host in ${servers_list/$HOSTNAME/}; do
+for host in ${servers_list/${HOSTNAME}/}; do
 	eval ${S_CLUSTER[${host}]}
 	[ "${s_ip}" ] && sudo sed -i "/${s_ip}/d" ${file}
 	! grep -q "${host}" ${file} && [ "${s_ip}" ] && sudo sh -c "echo '${s_ip}\t${host}\t${s_name}' >> ${file}"

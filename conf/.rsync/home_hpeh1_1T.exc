@@ -1,0 +1,35 @@
+## ubuntu
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_hpeh1_1T.exc /home/ /media/${USER}/1T/home/ -av --delete -n
+#
+#  sudo rsync /home/shared/virt/ /media/${USER}/1T/home/shared/virt/ -av -n
+
+## manjaro
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_hpeh1_1T.exc /home/ /run/media/${USER}/1T/home/ -av --delete -n
+#
+#  sudo rsync /home/shared/virt/ /run/media/${USER}/1T/home/shared/virt/ -av -n
+
+.snapshots
+._sync*
+.sync*
+.Trash-*
+.tmp*
+lost+found
+.cache
+
+/nikita
+/cluster
+/cd
+
+/shared/torrent
+/shared/.aMule/Temp
+/shared/virtualbox
+/shared/vmware
+/shared/virt/images
+#/shared/vm
+/shared/.config/mpv/watch_later
+/shared/dev
+/shared/.mozilla*
+/shared/.thunderbird*
+
+#/shared/.tmux
+/shared/.tmux/resurrect

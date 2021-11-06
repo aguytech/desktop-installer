@@ -1,6 +1,6 @@
-# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/2t1_2t2-btrfs.exc /media/$USER/2t1-btrfs/ /media/$USER/2t2-btrfs/
-# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/2t1_2t2-btrfs.exc /media/$USER/2t1-btrfs/ext/ /media/$USER/2t2-btrfs/ext/
-# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/2t1_2t2-btrfs.exc /media/$USER/2t1-btrfs/home/ /media/$USER/2t2-btrfs/home/
+# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/2t1_2t2-btrfs.exc /media/${USER}/2t1-btrfs/ /media/${USER}/2t2-btrfs/
+# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/2t1_2t2-btrfs.exc /media/${USER}/2t1-btrfs/ext/ /media/${USER}/2t2-btrfs/ext/
+# sudo rsync -avn --delete --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/2t1_2t2-btrfs.exc /media/${USER}/2t1-btrfs/home/ /media/${USER}/2t2-btrfs/home/
 
 /lost+found
 .Trash-*

@@ -1,8 +1,8 @@
 ## ubuntu
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_2t1-btrfs_hp17.exc /media/$USER/2t1-btrfs/ext/ /ext/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_2t1-btrfs_hp17.exc /media/${USER}/2t1-btrfs/ext/ /ext/ -av --delete -n
 
 ## manjaro
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_2t1-btrfs_hp17.exc /run/media/$USER/2t1-btrfs/ext/ /ext/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_2t1-btrfs_hp17.exc /run/media/${USER}/2t1-btrfs/ext/ /ext/ -av --delete -n
 
 .Trash-*
 .tmp*

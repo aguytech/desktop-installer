@@ -83,7 +83,7 @@ _echoT "------------------ _LAPTOP"
 
 
 _echoT "------------------ virtualbox"
-[ "$_VIRTUALBOX" ] && sudo usermod -aG vboxusers $USER
+[ "$_VIRTUALBOX" ] && sudo usermod -aG vboxusers ${USER}
 
 
 ########################  END
