@@ -28,7 +28,7 @@
 	<directories/>
 </action>
 <action>
-	<icon>/home/shared/dev/install-desktop/xtra/icons/meld-add.svg</icon>
+	<icon>/home/shared/dev/install-desktop/conf/icons/meld-add.svg</icon>
 	<name>meld add</name>
 	<unique-id>1635239071232089-1</unique-id>
 	<command>thunar_ca meld add %f</command>
@@ -39,7 +39,7 @@
 	<text-files/>
 </action>
 <action>
-	<icon>/home/shared/dev/install-desktop/xtra/icons/meld-with.svg</icon>
+	<icon>/home/shared/dev/install-desktop/conf/icons/meld-with.svg</icon>
 	<name>meld with</name>
 	<unique-id>1635239155815307-2</unique-id>
 	<command>thunar_ca meld with %f</command>
@@ -50,7 +50,7 @@
 	<text-files/>
 </action>
 <action>
-	<icon>/home/shared/dev/install-desktop/xtra/icons/meld.svg</icon>
+	<icon>/home/shared/dev/install-desktop/conf/icons/meld.svg</icon>
 	<name>meld</name>
 	<unique-id>1635239251803666-3</unique-id>
 	<command>meld %F</command>
@@ -67,5 +67,33 @@
 	<command>ln -s %f %n.lnk</command>
 	<description>create symlinks</description>
 	<patterns>*</patterns>
+</action>
+<action>
+	<icon>edit-move</icon>
+	<name>Duplicate</name>
+	<unique-id>1635257796829723-1</unique-id>
+	<command>cp -a %f %f.copy</command>
+	<description>Duplicate</description>
+	<patterns>*</patterns>
+	<directories/>
+	<audio-files/>
+	<image-files/>
+	<other-files/>
+	<text-files/>
+	<video-files/>
+</action>
+<action>
+	<icon>edit-copy</icon>
+	<name>Duplicate root</name>
+	<unique-id>1635257948652123-2</unique-id>
+	<command>pkexec cp -a %f %f.copy</command>
+	<description>Duplicate root</description>
+	<patterns>*</patterns>
+	<directories/>
+	<audio-files/>
+	<image-files/>
+	<other-files/>
+	<text-files/>
+	<video-files/>
 </action>
 </actions>
