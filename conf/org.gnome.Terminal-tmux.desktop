@@ -1,0 +1,54 @@
+[Desktop Entry]
+Name=Gnome-Terminal & Tmux
+Comment=Use the command line
+Keywords=shell;prompt;command;commandline;cmd;
+TryExec=ttmux
+Exec=ttmux
+Icon=/home/shared/dev/install-desktop/conf/icons/tmux.svg
+Type=Application
+Categories=GNOME;GTK;System;TerminalEmulator;
+StartupNotify=true
+X-GNOME-SingleWindow=false
+OnlyShowIn=GNOME;Unity;
+Actions=new-window;preferences;Ssh;Separator;SshcDev;Sshc;SshcLxd;Separator;Nautilus;NautilusComputer;NautilusNetwork;
+X-Ubuntu-Gettext-Domain=ttmux
+
+[Desktop Action new-window]
+Name=New Window
+Exec=gnome-terminal --window
+
+[Desktop Action preferences]
+Name=Preferences
+Exec=gnome-terminal --preferences
+
+[Desktop Action Separator]
+Name=−−−−−−−−−−
+Exec=
+
+[Desktop Action Ssh]
+Name=sshc
+Exec=gnome-terminal --window
+
+[Desktop Action Sshc]
+Name=sshc
+Exec=gnome-terminal -e ssh-server
+
+[Desktop Action SshcDev]
+Name=sshc dev
+Exec=gnome-terminal --tab --tab-with-profile node1
+
+[Desktop Action SshcLxd]
+Name=sshca
+Exec=gnome-terminal -e /home/shared/dev/bs/ssh-lxd
+
+[Desktop Action Nautilus]
+Name=Nautilus
+Exec=nautilus --new-window
+
+[Desktop Action NautilusComputer]
+Name=Nautilus Computer
+Exec=nautilus --new-window computer:///
+
+[Desktop Action NautilusNetwork]
+Name=Nautilus Network
+Exec=nautilus --new-window network:///

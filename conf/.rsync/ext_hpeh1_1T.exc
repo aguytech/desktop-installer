@@ -20,7 +20,7 @@ lost+found
 
 /backup
 /ovh
-/shared/android
+#/shared/android
 /shared/Music
 /shared/Podcasts
 /shared/Soft/diag
