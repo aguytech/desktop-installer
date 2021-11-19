@@ -416,7 +416,7 @@ if ! [ -f "${path}/xfce4-terminal.desktop" ]; then
     sed -i '/^Comment=/ s|=.*|=Terminal Emulator Tmux|' ${file}
     sed -i '/^GenericName=/ s|=.*|=Terminal Emulator Tmux|' ${file}
     sed -i '/^Exec=/ s|=.*|=xfce4-terminal -e "tmux a"|' ${file}
-    sed -i '/^Icon=/ s|=.*|=${S_PATH_INSTALL_XTRA}/icons/tmux.svg|' ${file}
+    sed -i '/^Icon=/ s|=.*|=${S_PATH_INSTALL_CONF}/icons/tmux.svg|' ${file}
 fi
 
 

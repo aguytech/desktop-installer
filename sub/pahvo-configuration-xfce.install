@@ -8,7 +8,7 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 ########################  MAIN
 
 _echoT "------------------ wallpapers"
-path=${S_PATH_INSTALL_XTRA}/wp
+path=${S_PATH_INSTALL_CONF}/wp
 [ -d "${path}" ] && _evalr cp ${path}/* /usr/share/backgrounds/xfce/
 
 _echoT "------------------ acpi enable"

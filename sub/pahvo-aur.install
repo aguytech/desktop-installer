@@ -15,7 +15,7 @@ _echoT "------------------ common"
 # ${cmd} babl gegl gimp-plugin-registry gimp-plugin-satequalizer gimp-plugin-fblur gimp-refocus gimp-plugin-wavelet-denoise # gimp-plugin-duplicate-to-another-image gimp-plugin-saveforweb gimp-plugin-lqr
 
 _echoT "------------------ media"
-packages+=" gmusicbrowser cheese" # webcamoid
+packages+=" gmusicbrowser cheese qarte" # webcamoid
 
 [ "$_DEV" ] && packages+=" lnav" && _echoT "------------------ dev"
 [ "$_VMWARE" ] && packages+=" linux-headers fuse2 gtkmm pcsclite libcanberra ncurses5-compat-libs vmware-workstation" && _echoT "------------------ vmware"
