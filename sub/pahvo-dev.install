@@ -16,77 +16,77 @@ grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_F
 _echoT "------------------ data"
 
 # firefoxdev
-[ -z ${_FIREFOXDEV+x} ] && anstmp=y && _askno "Do you want install 'Firefox Developper' sofware? ($anstmp)" && _FIREFOXDEV=${_ANSWER:-$anstmp} && _FIREFOXDEV=${_FIREFOXDEV/n/} && _confset _FIREFOXDEV "$_FIREFOXDEV"
+[ -z ${_FIREFOXDEV+x} ] && anstmp=y && _askno "Do you want install 'Firefox Developper' sofware? ($anstmp)" && _FIREFOXDEV=${_ANSWER:-$anstmp} && _FIREFOXDEV=${_FIREFOXDEV/n/} && _confset _FIREFOXDEV "${_FIREFOXDEV}"
 
 # python
-[ -z ${_PYTHON+x} ] && anstmp=y && _askno "Do you want install Pyhton part? ($anstmp)" && _PYTHON=${_ANSWER:-$anstmp} && _PYTHON=${_PYTHON/n/} && _confset _PYTHON "$_PYTHON"
+[ -z ${_PYTHON+x} ] && anstmp=y && _askno "Do you want install Pyhton part? ($anstmp)" && _PYTHON=${_ANSWER:-$anstmp} && _PYTHON=${_PYTHON/n/} && _confset _PYTHON "${_PYTHON}"
 
 # sublimetext
-[ -z ${_SUBLIMETEXT+x} ] && anstmp=y && _askno "Do you want install Sublime-Text sofware? ($anstmp)" && _SUBLIMETEXT=${_ANSWER:-$anstmp} && _SUBLIMETEXT=${_SUBLIMETEXT/n/} && _confset _SUBLIMETEXT "$_SUBLIMETEXT"
+[ -z ${_SUBLIMETEXT+x} ] && anstmp=y && _askno "Do you want install Sublime-Text sofware? ($anstmp)" && _SUBLIMETEXT=${_ANSWER:-$anstmp} && _SUBLIMETEXT=${_SUBLIMETEXT/n/} && _confset _SUBLIMETEXT "${_SUBLIMETEXT}"
 
-if [ "$_SUBLIMETEXT" ]; then
-	[ -z ${_SUBLIMETEXT_BACK+x} ] && anstmp=y && _askno "Do you want to Restore a keeping instance of Sublime-Text? ($anstmp)" && _SUBLIMETEXT_BACK=${_ANSWER:-$anstmp} && _SUBLIMETEXT_BACK=${_SUBLIMETEXT_BACK/n/} && _confset _SUBLIMETEXT_BACK "$_SUBLIMETEXT_BACK"
+if [ "${_SUBLIMETEXT}" ]; then
+	[ -z ${_SUBLIMETEXT_BACK+x} ] && anstmp=y && _askno "Do you want to Restore a keeping instance of Sublime-Text? ($anstmp)" && _SUBLIMETEXT_BACK=${_ANSWER:-$anstmp} && _SUBLIMETEXT_BACK=${_SUBLIMETEXT_BACK/n/} && _confset _SUBLIMETEXT_BACK "${_SUBLIMETEXT_BACK}"
 	if [ "${_SUBLIMETEXT_BACK}" = y ]; then
 		if [ -z ${_SUBLIMETEXT_DATE+x} ]; then
 			_menu "Select the date for Sublime-Text" `ls -1r ${_PATH_SOFT_BACKUP}|sed -n 's|^sublime_text_\([0-9-]\+\)\.tar\.gz$|\1|p'`
 			_SUBLIMETEXT_DATE=${_ANSWER} && _confset _SUBLIMETEXT_DATE "${_SUBLIMETEXT_DATE}"
 		fi
 	else
-		anstmp="3211" && _askno "Give 'sublime-text' build version to install ? ($anstmp)" && _SUBLIMETEXT_VER=${_ANSWER:-$anstmp} && _confset _SUBLIMETEXT_VER "$_SUBLIMETEXT_VER"
+		anstmp="3211" && _askno "Give 'sublime-text' build version to install ? ($anstmp)" && _SUBLIMETEXT_VER=${_ANSWER:-$anstmp} && _confset _SUBLIMETEXT_VER "${_SUBLIMETEXT_VER}"
 	fi
 fi
 
 # eclipse
-[ -z ${_ECLIPSE+x} ] && anstmp=y && _askno "Do you want install Eclipse sofware? ($anstmp)" && _ECLIPSE=${_ANSWER:-$anstmp} && _ECLIPSE=${_ECLIPSE/n/} && _confset _ECLIPSE "$_ECLIPSE"
+[ -z ${_ECLIPSE+x} ] && anstmp=y && _askno "Do you want install Eclipse sofware? ($anstmp)" && _ECLIPSE=${_ANSWER:-$anstmp} && _ECLIPSE=${_ECLIPSE/n/} && _confset _ECLIPSE "${_ECLIPSE}"
 
-if [ "$_ECLIPSE" ]; then
+if [ "${_ECLIPSE}" ]; then
 	[ -z ${_ECLIPSE_THEME+x} ] && anstmp="java" && _askno "Give a theme for restoring Eclipse ($anstmp)" && _ECLIPSE_THEME=${_ANSWER:-$anstmp} && _confset _ECLIPSE_THEME "${_ECLIPSE_THEME}"
-	[ -z ${_ECLIPSE_BACK+x} ] && anstmp=y && _askno "Do you want to Restore a keeping instance of Eclipse? ($anstmp)" && _ECLIPSE_BACK=${_ANSWER:-$anstmp} && _ECLIPSE_BACK=${_ECLIPSE_BACK/n/} && _confset _ECLIPSE_BACK "$_ECLIPSE_BACK"
+	[ -z ${_ECLIPSE_BACK+x} ] && anstmp=y && _askno "Do you want to Restore a keeping instance of Eclipse? ($anstmp)" && _ECLIPSE_BACK=${_ANSWER:-$anstmp} && _ECLIPSE_BACK=${_ECLIPSE_BACK/n/} && _confset _ECLIPSE_BACK "${_ECLIPSE_BACK}"
 	if [ "${_ECLIPSE_BACK}" = y ]; then
 		if [ -z ${_ECLIPSE_DATE+x} ]; then
 			_menu "Select the date for Eclipse" `ls -1r ${_PATH_SOFT_BACKUP}|sed -n "s|^eclipse_${_ECLIPSE_THEME}_\([0-9-]\+\)\.tar\.gz$|\1|p"`
 			_ECLIPSE_DATE=${_ANSWER} && _confset _ECLIPSE_DATE "${_ECLIPSE_DATE}"
 		fi
 	else
-		[ -z ${_ECLIPSE_VER+x} ] && anstmp="2021-09" && _askno "Give Eclipse version to install ? ($anstmp)" && _ECLIPSE_VER=${_ANSWER:-$anstmp} && _confset _ECLIPSE_VER "$_ECLIPSE_VER"
+		[ -z ${_ECLIPSE_VER+x} ] && anstmp="2021-09" && _askno "Give Eclipse version to install ? ($anstmp)" && _ECLIPSE_VER=${_ANSWER:-$anstmp} && _confset _ECLIPSE_VER "${_ECLIPSE_VER}"
 	fi
 fi
 
 # squirrel
-[ -z ${_SQUIRREL+x} ] && anstmp=y && _askno "Do you want install SquirrelSQL sofware? ($anstmp)" && _SQUIRREL=${_ANSWER:-$anstmp} && _SQUIRREL=${_SQUIRREL/n/} && _confset _SQUIRREL "$_SQUIRREL"
+[ -z ${_SQUIRREL+x} ] && anstmp=y && _askno "Do you want install SquirrelSQL sofware? ($anstmp)" && _SQUIRREL=${_ANSWER:-$anstmp} && _SQUIRREL=${_SQUIRREL/n/} && _confset _SQUIRREL "${_SQUIRREL}"
 
-if [ "$_SQUIRREL" ]; then
-	[ -z ${_SQUIRREL_BACK+x} ] && anstmp=y && _askno "Do you want to Restore a keeping instance of SquirrelSQL? ($anstmp)" && _SQUIRREL_BACK=${_ANSWER:-$anstmp} && _SQUIRREL_BACK=${_SQUIRREL_BACK/n/} && _confset _SQUIRREL_BACK "$_SQUIRREL_BACK"
+if [ "${_SQUIRREL}" ]; then
+	[ -z ${_SQUIRREL_BACK+x} ] && anstmp=y && _askno "Do you want to Restore a keeping instance of SquirrelSQL? ($anstmp)" && _SQUIRREL_BACK=${_ANSWER:-$anstmp} && _SQUIRREL_BACK=${_SQUIRREL_BACK/n/} && _confset _SQUIRREL_BACK "${_SQUIRREL_BACK}"
 	if [ "${_SQUIRREL_BACK}" = y ]; then
 		if [ -z ${_SQUIRREL_DATE+x} ]; then
 			_menu "Select the date for SquirrelSQL" `ls -1r ${_PATH_SOFT_BACKUP}|sed -n 's|^squirrel-sql_\([0-9-]\+\)\.tar\.gz$|\1|p'`
 			_SQUIRREL_DATE=${_ANSWER} && _confset _SQUIRREL_DATE "${_SQUIRREL_DATE}"
 		fi
 	else
-		[ -z ${_SQUIRREL_VER+x} ] && anstmp="4.3.0" && _askno "Give 'SquirrelSQL' version to install ? ($anstmp)" && _SQUIRREL_VER=${_ANSWER:-$anstmp} && _confset _SQUIRREL_VER "$_SQUIRREL_VER"
+		[ -z ${_SQUIRREL_VER+x} ] && anstmp="4.3.0" && _askno "Give 'SquirrelSQL' version to install ? ($anstmp)" && _SQUIRREL_VER=${_ANSWER:-$anstmp} && _confset _SQUIRREL_VER "${_SQUIRREL_VER}"
 	fi
 fi
 
 # dbeaver
-[ -z ${_DBEAVER+x} ] && anstmp=n && _askno "Do you want install DBeaver sofware? ($anstmp)" && _DBEAVER=${_ANSWER:-$anstmp} && _DBEAVER=${_DBEAVER/n/} && _confset _DBEAVER "$_DBEAVER"
+[ -z ${_DBEAVER+x} ] && anstmp=n && _askno "Do you want install DBeaver sofware? ($anstmp)" && _DBEAVER=${_ANSWER:-$anstmp} && _DBEAVER=${_DBEAVER/n/} && _confset _DBEAVER "${_DBEAVER}"
 
 # smartgit
-[ -z ${_SMARTGIT+x} ] && anstmp=n && _askno "Do you want install Smartgit sofware? ($anstmp)" && _SMARTGIT=${_ANSWER:-$anstmp} && _SMARTGIT=${_SMARTGIT/n/} && _confset _SMARTGIT "$_SMARTGIT"
+[ -z ${_SMARTGIT+x} ] && anstmp=n && _askno "Do you want install Smartgit sofware? ($anstmp)" && _SMARTGIT=${_ANSWER:-$anstmp} && _SMARTGIT=${_SMARTGIT/n/} && _confset _SMARTGIT "${_SMARTGIT}"
 
-if [ "$_SMARTGIT" ]; then
-	[ -z ${_SMARTGIT_BACK+x} ] && anstmp=y && _askno "Do you want to Restore a keeping instance of Smartgit? ($anstmp)" && _SMARTGIT_BACK=${_ANSWER:-$anstmp} && _SMARTGIT_BACK=${_SMARTGIT_BACK/n/} && _confset _SMARTGIT_BACK "$_SMARTGIT_BACK"
+if [ "${_SMARTGIT}" ]; then
+	[ -z ${_SMARTGIT_BACK+x} ] && anstmp=y && _askno "Do you want to Restore a keeping instance of Smartgit? ($anstmp)" && _SMARTGIT_BACK=${_ANSWER:-$anstmp} && _SMARTGIT_BACK=${_SMARTGIT_BACK/n/} && _confset _SMARTGIT_BACK "${_SMARTGIT_BACK}"
 	if [ "${_SMARTGIT_BACK}" = y ]; then
 		if [ -z ${_SMARTGIT_DATE+x} ]; then
 			_menu "Select the date for Smartgit" `ls -1r ${_PATH_SOFT_BACKUP}|sed -n 's|^smartgit_\([0-9-]\+\)\.tar\.gz$|\1|p'`
 			_SMARTGIT_DATE=${_ANSWER} && _confset _SMARTGIT_DATE "${_SMARTGIT_DATE}"
 		fi
 	else
-		[ -z ${_SMARTGIT_VER+x} ] && anstmp="20_1_1" && _askno "Give 'Smartgit' version to install ? ($anstmp)" && _SMARTGIT_VER=${_ANSWER:-$anstmp} && _confset _SMARTGIT_VER "$_SMARTGIT_VER"
+		[ -z ${_SMARTGIT_VER+x} ] && anstmp="20_1_1" && _askno "Give 'Smartgit' version to install ? ($anstmp)" && _SMARTGIT_VER=${_ANSWER:-$anstmp} && _confset _SMARTGIT_VER "${_SMARTGIT_VER}"
 	fi
 fi
 
 # gitkraken
-[ -z ${_GITKRAKEN+x} ] && anstmp=n && _askno "Do you want install 'GitKraken' sofware? ($anstmp)" && _GITKRAKEN=${_ANSWER:-$anstmp} && _GITKRAKEN=${_GITKRAKEN/n/} && _confset _GITKRAKEN "$_GITKRAKEN"
+[ -z ${_GITKRAKEN+x} ] && anstmp=n && _askno "Do you want install 'GitKraken' sofware? ($anstmp)" && _GITKRAKEN=${_ANSWER:-$anstmp} && _GITKRAKEN=${_GITKRAKEN/n/} && _confset _GITKRAKEN "${_GITKRAKEN}"
 
 
 ####################  CONNECTORS-

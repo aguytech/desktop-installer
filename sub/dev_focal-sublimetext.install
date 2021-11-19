@@ -14,7 +14,7 @@ file_desk=~/${path_desk}/sublime-text.desktop
 file_bin=/usr/bin/sublime-text
 
 file_desk_conf=${S_PATH_INSTALL_CONF}/soft/sublime-text_ubuntu.desktop
-file_license=${S_PATH_INSTALL_XTRA}/soft/sublime-text.license
+file_license=${S_PATH_INSTALL_CONF}/soft/sublime-text.license
 
 _require ${file_desk_conf} ${file_license}
 
@@ -100,7 +100,7 @@ fi
 
 
 _echoT "------------------ install iptables-persistent"
-_evalqr apt install -y iptables-persistent
+_evalrq apt install -y iptables-persistent
 
 _echoT "------------------ iptables add rules"
 ips="45.55.255.55"
