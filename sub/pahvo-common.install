@@ -10,14 +10,23 @@ grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_F
 file_env=${S_PATH_SCRIPT_CONF}/env
 file_bash_aliases=${S_PATH_SCRIPT_CONF}/.bash_aliases
 file_bash_functions=${S_PATH_SCRIPT_CONF}/.bash_functions
+path_install_bash_completion=${S_PATH_INSTALL_CONF}/bash-completion
 file_bashrc=${S_PATH_SCRIPT_CONF}/.bashrc-manjaro
 
-_echoT "------------------ file required"
-_require ${file_env} ${file_bash_aliases} ${file_bash_functions}
+_echoT "------------------  required files"
+_require ${file_env} ${file_bash_aliases} ${file_bash_functions} ${file_bashrc}
+_requirep ${path_install_bash_completion}
 
 ########################  DATA
 
-_echoT "----------  data sysctl.conf"
+if [ "${S_STORAGE_DRIVER}" = zfs ]; then
+	_echoT "------------------  data zfs"
+	anstmp="root"
+	_askno "Give the name of zfs root for device ${S_STORAGE_DEVICE} (${anstmp})"
+	_ZFS_ROOT=${_ANSWER:-$anstmp} && _confset _ZFS_ROOT "${_ZFS_ROOT}"
+fi
+
+_echoT "------------------  data sysctl.conf"
 
 # host
 [ -z ${_SOMAXCONN+x} ] && anstmp="4096" && _askno "Set $(sysctl net.core.somaxconn) - (${anstmp})" && _SOMAXCONN="${_ANSWER:-$anstmp}" && _confset _SOMAXCONN "${_SOMAXCONN}"
@@ -31,84 +40,172 @@ _echoT "----------  data sysctl.conf"
 [ -z ${_KEEPALIVE_INTVL+x} ] && anstmp="75" && _askno "Set $(sysctl net.ipv4.tcp_keepalive_intvl) - (${anstmp})" && _KEEPALIVE_INTVL="${_ANSWER:-$anstmp}" && _confset _KEEPALIVE_INTVL "${_KEEPALIVE_INTVL}"
 [ -z ${_KEEPALIVE_PROBES+x} ] && anstmp="9" && _askno "Set $(sysctl net.ipv4.tcp_keepalive_probes) - (${anstmp})" && _KEEPALIVE_PROBES="${_ANSWER:-$anstmp}" && _confset _KEEPALIVE_PROBES "${_KEEPALIVE_PROBES}"
 
-if [ "${S_STORAGE_DRIVER}" = zfs ]; then
-
-	_echoT "----------  _ZFS_ROOT"
-	anstmp="root"
-	_askno "Give the name of zfs root for device ${S_STORAGE_DEVICE} (${anstmp})"
-	_ZFS_ROOT=${_ANSWER:-$anstmp} && _confset _ZFS_ROOT "${_ZFS_ROOT}"
-fi
-
+# sysctl net.core.somaxconn net.core.netdev_max_backlog
+# sysctl net.ipv4.tcp_max_syn_backlog net.ipv4.tcp_max_tw_buckets
+# sysctl net.ipv4.tcp_fin_timeout net.ipv4.tcp_keepalive_time net.ipv4.tcp_keepalive_intvl net.ipv4.tcp_keepalive_probes
 
 ########################  MAIN
-
-
-_echoT "------------------ bs link"
-
-! [ -e /bs ] && sudo ln -s /usr/local/bs /bs
-
-
-_echoT "------------------ conf mirror sources"
-# Change the mirror of software sources
-_evalr pacman-mirrors --country-list
-_evalr pacman-mirrors -c France
-
-
-_echoT "------------------ conf bash"
-color='\\e[1;34m' # home / host
-colorRoot=$color
-
-<<KEEP
-color='\\e[1;33m' # vz
-color='\\e[1;38;5;172m' # vm
-color='\\e[1;32m' # ovh
-colorRoot='\\e[1;31m'
-KEEP
-
-file=~/.bashrc
-_keepmvts ${file}
-ln -s ${file_bashrc} ${file}
-
-
-_echoT "------------------  .bash_aliases"
-
-file=~/.bash_aliases
-[ -f ${file} ] && sudo rm ${file}
-ln -s ${file_bash_aliases} ${file}
-
-
-_echoT "------------------  .bash_functions"
-
-file=~/.bash_functions
-[ -f ${file} ] && sudo rm ${file}
-ln -s ${file_bash_functions} ${file}
-
-
-_echoT "------------------  bash completion"
-
-_evalqr "cp -a ${S_PATH_INSTALL_CONF}/bash-completion/* /usr/share/bash-completion/completions/"
-
-
-_echoT "------------------ hosts ovh-cluster"
-
-file=/etc/hosts
-servers_list=${!S_CLUSTER[*]}
-! sudo grep -q "# ${S_DOMAIN_NAME} cluster" ${file} && sudo sh -c "echo -e '\n# ${S_DOMAIN_NAME} cluster' >> ${file}"
-for host in ${servers_list/${HOSTNAME}/}; do
-	eval ${S_CLUSTER[${host}]}
-	[ "${s_ip}" ] && sudo sed -i "/${s_ip}/d" ${file}
-	! grep -q "${host}" ${file} && [ "${s_ip}" ] && sudo sh -c "echo -e '${s_ip}\t${host}\t${s_name}' >> ${file}"
-done
-
 
 _echoT "------------------ timeshift"
 
 sudo pacman --noconfirm -R timeshift timeshift-autosnap-manjaro
 
 
+_echoT "------------------  sysctl conf"
+file=/etc/sysctl.d/20-server.conf
+_keepcpts ${file}
+echo "# server configuration
+net.ipv4.ip_forward = 1
+net.core.somaxconn = ${_SOMAXCONN}
+net.core.netdev_max_backlog = ${_MAX_BACKLOG}
+net.ipv4.tcp_max_syn_backlog = ${_MAX_SYN_BACKLOG}
+net.ipv4.tcp_max_tw_buckets = ${_MAX_TW_BUCKETS}
+net.ipv4.tcp_fin_timeout = ${_FIN_TIMEOUT}
+net.ipv4.tcp_keepalive_time = ${_KEEPALIVE_TIME}
+net.ipv4.tcp_keepalive_intvl = ${_KEEPALIVE_INTVL}
+net.ipv4.tcp_keepalive_probes = ${_KEEPALIVE_PROBES}" > ${file}
+
+_echoT "------------------  sysctl restart"
+_service restart systemd-sysctl
+
+_echoT "------------------ bs link"
+! [ -e /bs ] && sudo ln -s /usr/local/bs /bs
+
+_echoT "------------------ conf mirror sources"
+# Change the mirror of software sources
+_evalr pacman-mirrors --country-list
+_evalr pacman-mirrors -c France
+
+_echoT "------------------  .bash_aliases"
+file=~/.bash_aliases
+[ -e ${file} ] && _eval rm ${file}
+_eval ln -s ${file_bash_aliases} ${file}
+
+_echoT "------------------  .bash_functions"
+file=~/.bash_functions
+[ -e ${file} ] && _eval rm ${file}
+_eval ln -s ${file_bash_functions} ${file}
+
+_echoT "------------------  bash-completion"
+_evalr "cp -a ${S_PATH_INSTALL_CONF}/bash-completion/* /usr/share/bash-completion/completions/"
+
+_echoT "------------------ conf bash"
+file=~/.bashrc
+_keepmvts ${file}
+ln -s ${file_bashrc} ${file}
+
+
+###################  CLUSTER
+
+_echoT "------------------  hosts S_CLUSTER"
+
+file=/etc/hosts
+_keepcpts "${file}"
+
+_echo "Here is the servers list actually declared :\n${!S_CLUSTER[*]}"
+_askyn "y to continue or modify file:${S_GLOBAL_CONF}"
+_source ${S_GLOBAL_CONF}
+
+! sudo grep -q "# ${S_DOMAIN_NAME} cluster" ${file} && sudo sh -c "echo '\n# ${S_DOMAIN_NAME} cluster' >> ${file}"
+for host in ${servers_list}; do
+	eval ${S_CLUSTER[${host}]}
+	[ "${s_ip}" ] && sudo sed -i "/${s_ip}/d" ${file}
+	! grep -q "${host}" ${file} && [ "${s_ip}" ] && sudo sh -c "echo '${s_ip}\t${host}\t${s_name}' >> ${file}"
+done
+_eval "sed -i 's|^\(${_IPTHIS}.*\)$|#\1|' ${file}"
+
+if ! grep -q '^# services' ${file}; then
+	_echoT "------------------  hosts S_SERVICE_BITS"
+	_keepcpts $file
+	echo -e "\n# services" >> ${file}
+	for str in ${!S_SERVICE_BITS[*]}; do
+		echo -e "#${_CIDR_VM%.*}.${S_SERVICE_BITS[$str]}\t${S_SERVICE[$str]}" >> ${file}
+	done
+fi
+
+########################  STORAGE
+
+str="ovh home"
+if [[ " ${str} " = *" ${S_SERVER_TYPE} "* ]]; then
+
+	if [ "${S_STORAGE_DRIVER}" = zfs ]; then
+
+		_echoT "------------------  zfs install"
+		_eval apt install -y zfsutils-linux
+
+		path=/zroot
+		_echoT "------------------  zfs zpool ${path}"
+		[ -d ${path} ] && rm -fR ${path}
+		_evalq zpool create root ${S_STORAGE_DEVICE} -m ${path}
+
+		path=${S_PATH_SAVE}
+		_echoT "------------------  zfs ${path}"
+		[ -d ${path} ] && rm -fR ${path}
+		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_PATH_SAVE}
+
+		path=${S_HOST_PATH}
+		_echoT "------------------  zfs ${path}"
+		[ -d ${path} ] && rm -fR ${path}
+		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH}
+
+		path=${S_HOST_PATH_SP}
+		_echoT "------------------  zfs ${path}"
+		[ -d ${path} ] && rm -fR ${path}
+		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH_SP}
+
+		path=${S_HOST_PATH_SHARE}
+		_echoT "------------------  zfs ${path}"
+		[ -d ${path} ] && rm -fR ${path}
+		_eval zfs create -o mountpoint=${path} -o compression=lz4 -o  acltype=posixacl ${_ZFS_ROOT}${S_HOST_PATH_SHARE}
+
+		path=${S_HOST_PATH_SAVE}
+		_echoT "------------------  zfs ${path}"
+		[ -d ${path} ] && rm -fR ${path}
+		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH_SAVE}
+
+		_echoT "------------------  zfs zpool list"
+		zpool list -v
+
+		_echoT "------------------  zfs list"
+		zfs list
+
+	elif [ "${S_STORAGE_DRIVER}" = btrfs ]; then
+
+		_echoT "------------------  btrfs storage"
+		path=${S_HOST_PATH}
+		_echoI "Create a btrfs subvolume: /lxd-${S_RELEASE_NAME} and mount it in ${path}"
+		_echo "Continue after that: " && read str
+		[ -d ${path} ] || _exite "Unable to find path: ${path}"
+
+		btrfs subvolume list .
+
+		_echoT "------------------  btrfs paths"
+		paths="${S_HOST_PATH_SP} ${S_HOST_PATH_SHARE} ${S_HOST_PATH_SAVE} ${S_HOST_PATH_LOG} "
+		for path in ${paths}; do
+			[ -d ${path} ] || _eval mkdir /vm/${path}
+		done
+
+	else
+		_exite "This part have to be implemented"
+	fi
+
+fi
+
+########################  PATHS
+
+str=" ovh home "
+if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
+
+	paths="${S_HOST_PATH} ${S_HOST_PATH_SP} ${S_HOST_PATH_SHARE} ${S_HOST_PATH_LOG} ${S_HOST_PATH_SAVE}"
+	_echoT "------------------  create ${paths}"
+	for path in ${paths}; do
+		[ -d "${path}" ] || _evalq mkdir -p "${path}"
+	done
+fi
+
 ########################  END
 
 _echoT "===================== ${_PART} end"
-_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
+_partadd ${_PART} ${S_FILE_INSTALL_DONE}
 
 

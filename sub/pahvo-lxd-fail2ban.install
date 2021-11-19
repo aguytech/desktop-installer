@@ -1,0 +1,88 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART_LXD}"
+
+grep -q "^# ${_PART_LXD}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART_LXD}" >> "${S_FILE_INSTALL_CONF}"
+
+########################  REQUIRED
+
+path_install_conf=${S_PATH_INSTALL_CONF/-desktop/}
+file_conf_global=${path_install_conf}/fail2ban/global.conf
+file_conf_jail_local=${path_install_conf}/fail2ban/jail.local
+file_conf_jail_ssh=${path_install_conf}/fail2ban/jail-ssh.conf
+file_rsyslog_client_fail2ban=${path_install_conf}/rsyslog/client-fail2ban.conf
+file_logrotate_client_fail2ban=${path_install_conf}/rsyslog/client-fail2ban.conf
+
+_echoT "------------------ required files"
+_require ${file_conf_global} ${file_conf_jail_local} ${file_conf_jail_ssh} ${file_rsyslog_client_fail2ban} ${file_logrotate_client_fail2ban}
+
+########################  DATA
+
+_echoT "------------------  data"
+
+#  s_fqdn  s_ip  s_ip6  s_name  s_port  s_type  s_user  s_vm
+eval ${S_CLUSTER[${HOSTNAME}]}
+[ -z "${s_port}" ] && _exite "Unable to find s_port in S_CLUSTER[${HOSTNAME}]"
+_SSH_PORT=${s_port}
+
+eval ${S_HOST_VM_ETH[default]} # get s_inet s_cidr s_base
+
+anstmp="127.0.0.0/8 [::1]/128 ${s_cidr}"
+anstmp+=" $(echo "${S_CLUSTER[*]}"|tr ' ' '\n'|sed -n 's|s_ip=\([^ ]\+\)$|\1|p'|xargs)"
+anstmp+=" $(echo "${S_CLUSTER[*]}"|tr ' ' '\n'|sed -n 's|s_ip6=\([^ ]\+\)$|\1|p'|xargs)"
+_askno "ignored IPs (${anstmp})"
+IPS_IGNORED="${_ANSWER:-$anstmp}" && _confset IPS_IGNORED "${IPS_IGNORED}"
+
+########################  INSTALL
+
+_echoT "------------------  install"
+_evalr yay -S --noconfirm fail2ban
+_evalr systemctl is-enabled fail2ban|grep -q ^disabled && _evalr systemctl enable --now fail2ban
+_evalr systemctl is-active fail2ban|grep -q ^inactive && _evalr systemctl start fail2ban
+
+########################  CONF
+
+_echoT "------------------  conf global"
+_evalr cp ${file_conf_global} /etc/fail2ban/fail2ban.d/
+_service reload fail2ban
+_evalr fail2ban-client get loglevel
+
+_echoT "------------------  conf jail local"
+file=/etc/fail2ban/jail.d/${file_conf_jail_local##*/}
+_evalr cp ${file_conf_jail_local} ${file}
+_var_replace ${file} fail2ban
+
+_echoT "------------------  conf jail ssh"
+file=/etc/fail2ban/jail.d/${file_conf_jail_ssh##*/}
+_evalr cp ${file_conf_jail_ssh} ${file}
+_var_replace ${file} fail2ban
+
+########################  RSYSLOG
+
+_echoT "------------------  path log fail2ban"
+path=${S_PATH_LOG}/fail2ban
+[ -d ${path} ] || _evalr mkdir -p ${path}
+grep -q syslog /etc/passwd && _evalr chown syslog ${path}
+
+_echoT "------------------  rsyslog client-fail2ban"
+file=/etc/rsyslog.d/${file_rsyslog_client_fail2ban##*/}
+_evalr cp -a ${file_rsyslog_client_fail2ban} ${file}
+_var_replace ${file} rsyslog
+
+########################  LOGROTATE
+
+_echoT "------------------  logrotate client-fail2ban"
+file=/etc/logrotate.d/${file_logrotate_client_fail2ban##*/}
+_evalr cp -a ${file_logrotate_client_fail2ban} ${file}
+_var_replace ${file} logrotate
+
+_echoT "------------------  logrotate restart"
+_service restart logrotate
+
+########################  END
+
+_echoT "===================== ${_PART_LXD} end"
+_partadd ${_PART_LXD} ${S_FILE_INSTALL_DONE}
+

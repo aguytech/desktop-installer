@@ -2,11 +2,20 @@
 #
 # write by Aguy
 
-
 _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
+grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_FILE_INSTALL_CONF}"
+
+########################  REQUIRED
+
 file_meld_conf=${S_PATH_INSTALL_CONF}/soft/meld-dark.xml
+
+file_rsyslog_cron=${S_PATH_INSTALL_CONF}/rsyslog/cron.conf
+file_rsyslog_client_auth=${S_PATH_INSTALL_CONF}/rsyslog/client-auth.conf
+file_logrotate_server=${S_PATH_INSTALL_CONF}/logrotate/server
+
 _require ${file_meld_conf}
+_require ${file_rsyslog_cron} ${file_rsyslog_client_auth} ${file_logrotate_server}
 
 path_vim=${S_PATH_INSTALL_CONF/-desktop/}/vim
 _requirep ${path_vim}
@@ -30,35 +39,35 @@ sudo update-grub
 
 
 if type vim >/dev/null 2>&1 ; then
-    _echoT "------------------  vim links edit"
+	_echoT "------------------  vim links edit"
 
-    for file in /usr/bin/edit /usr/bin/editor; do
-        [ -e ${file} ] && _evalr rm ${file}
-        _evalr ln -sv /usr/bin/vim ${file}
-    done
+	for file in /usr/bin/edit /usr/bin/editor; do
+		[ -e ${file} ] && _evalr rm ${file}
+		_evalr ln -sv /usr/bin/vim ${file}
+	done
 
 	_echoT "------------------ dev vim"
 	sudo cp ${path_vim}/* /usr/share/vim/vim*/colors/
 
-    _echoT "----------  conf vim"
-    file=/etc/vim/vimrc
-    sudo sed -i "s|^\"\(syntax\).*|\1 on|" ${file}
+	_echoT "----------  conf vim"
+	file=/etc/vim/vimrc
+	sudo sed -i "s|^\"\(syntax\).*|\1 on|" ${file}
 
-    opts="background=dark showmatch"
-    # uncomment
-    for opt in $opts; do
-        sudo sed -i "s|^\"\(set $opt.*\)$|\1|" ${file}
-    done
+	opts="background=dark showmatch"
+	# uncomment
+	for opt in $opts; do
+		sudo sed -i "s|^\"\(set $opt.*\)$|\1|" ${file}
+	done
 fi
 
 
 _echoT "------------------  /usr/local/bs/conf links"
 
 for file in .nanorc .tmux.conf .vimrc; do
-    path_from="${S_PATH_SCRIPT_CONF}/${file}"
-    path=~/${file}
-    [ -e "${path}" ] && sudo rm -fR ${path}
-    ln -s "${path_from}" "${path}"
+	path_from="${S_PATH_SCRIPT_CONF}/${file}"
+	path=~/${file}
+	[ -e "${path}" ] && sudo rm -fR ${path}
+	ln -s "${path_from}" "${path}"
 done
 
 _echoT "------------------ gstreamer preset"
@@ -120,8 +129,8 @@ sudo cp ${file_meld_conf} /usr/share/meld/styles/meld-dark.xml
 _echoT "------------------ nano"
 
 for str in conf install; do
-    sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/${str}.nanorc
-    sudo sed -i 's|^\(syntax \).*|\1"'${str}'" "\.'${str}'$"|' /usr/share/nano/${str}.nanorc
+	sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/${str}.nanorc
+	sudo sed -i 's|^\(syntax \).*|\1"'${str}'" "\.'${str}'$"|' /usr/share/nano/${str}.nanorc
 done
 
 file=/etc/nanorc
@@ -137,15 +146,12 @@ opts="constantshow historylog matchbrackets multibuffer nohelp softwrap "
 opts+="errorcolor functioncolor keycolor numbercolor selectedcolor statuscolor stripecolor titlecolor"
 # uncomment
 for opt in ${opts}; do
-    sudo sed -i "s|^.*\(set $opt .*\)$|\1|"  ${file}
+	sudo sed -i "s|^.*\(set $opt .*\)$|\1|"  ${file}
 done
 
-
 _echoT "------------------ language-specs conf"
-
 sudo cp -a ${S_PATH_INSTALL_CONF}/gtk/conf.lang /usr/share/gtksourceview-3.0/language-specs/
 sudo cp -a ${S_PATH_INSTALL_CONF}/gtk/install.lang /usr/share/gtksourceview-3.0/language-specs/
-
 
 _echoT "------------------ firefox tweaks"
 path=~/.mozilla/firefox/${USER}
@@ -156,7 +162,6 @@ else
 	_echoI "please link '${S_PATH_INSTALL_CONF}/firefox/user.js'\nto your firefox path of profile: ${path}"
 	_askno "Confirm"
 fi
-
 
 _echoT "------------------ tmux"
 
@@ -171,12 +176,7 @@ grep -q resurrect.tmux ${file} || echo -e "# resurect plugin\nrun-shell ${path}/
 # set conf file
 tmux source-file ${file} 2>/dev/null
 
-# bash completion
-sudo cp "${S_PATH_INSTALL_CONF}/bash-completion/tmux" /usr/share/bash-completion/completions/
-
-
 _echoT "------------------  logrotate server"
-
 # logrotate
 sudo sh -c "echo '# Logrotate file for server functions logs
 #$S_PATH_LOG_INSTALL/*.log
@@ -185,18 +185,16 @@ $S_PATH_LOG_SERVER/*.err
 $S_PATH_LOG_SERVER/*.debug
 {
 	su 0 1000
-    missingok
-    compress
-    delaycompress
-    notifempty
-    weekly
-    rotate 8
+	missingok
+	compress
+	delaycompress
+	notifempty
+	weekly
+	rotate 8
 }
 ' > /etc/logrotate.d/server"
 
-
 _echoT "------------------ gtk styles"
-
 file="$HOME/.local/share/gtksourceview-4"
 ! [ -e ${file} ] && ln -sv /home/shared/.local/share/gtksourceview-3.0 ${file}
 
@@ -257,88 +255,73 @@ rm master.zip
 mv gedit-plugin-markdown_preview-master ${path}
 
 
-<<KEEP
-_echoT "------------------ gnome-xcf-thumbnailer"
-! [ -d /usr/share/thumbnailers ] && sudo mkdir -p /usr/share/thumbnailers
-! [ -e /usr/share/thumbnailers/gnome-xcf.thumbnailer ] && echo -e "[Thumbnailer Entry]\nTryExec=gnome-xcf-thumbnailer\nExec=gnome-xcf-thumbnailer %i %o\nMimeType=image/x-xcf;image/x-compressed-xcf;" | sudo tee /usr/share/thumbnailers/gnome-xcf.thumbnailer
-nautilus -q
-[ -d ~/.thumbnails/fail ] && rm -r ~/.thumbnails/fail
-[ -d ~/.cache/thumbnails/fail ] && rm -r ~/.cache/thumbnails/fail
-KEEP
-
-
 _echoT "------------------ launcher clean"
-
 sudo sed -i 's|;;|;|' /usr/share/applications/*.desktop
 
+########################  CRON
+
+_echoT "------------------  cron conf"
+
+file=/etc/crontab
+_keepcpts ${file}
+str="MAILTO=${S_DOMAIN_EMAIL_TECH}"
+grep -q '^MAILTO' "${file}" || _eval "sed -i '/^PATH=.*/ a ${str}' ${file}"
+
+########################  RSYSLOG
+
+_echoT "------------------  rsyslog conf"
+
+file="/etc/rsyslog.conf"
+_keepcpts "${file}"
+
+# udp
+if [ "${S_RSYSLOG_PTC}" = udp ]; then
+	_eval "sed -i 's|^#\?\(module(load=\"imudp.*\)$|\1|' ${file}"
+	_eval "sed -i 's|^#\?\(input(type=\"imudp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
+# tcp
+elif [ "${S_RSYSLOG_PTC}" = tcp ]; then
+	_eval "sed -i 's|^#\?\(module(load=\"imtcp.*\)$|\1|' ${file}"
+	_eval "sed -i 's|^#\?\(input(type=\"imtcp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
+fi
+
+_echoT "------------------  rsyslog restart"
+_service restart rsyslog
+
+_echoT "------------------  rsyslog conf"
+sed -i '/^auth.*/ s|^|#|' /etc/rsyslog.d/50-default.conf
+sed -i '/^cron.*/ s|^|#|' /etc/rsyslog.d/50-default.conf
+
+_echoT "------------------  rsyslog cron"
+file=/etc/rsyslog.d/70-${file_rsyslog_cron##*/}
+_evalq cp -a ${file_rsyslog_cron} ${file}
+_var_replace ${file} rsyslog
+
+_echoT "------------------  rsyslog client-auth"
+file=/etc/rsyslog.d/72-${file_rsyslog_client_auth##*/}
+_evalq cp -a ${file_rsyslog_client_auth} ${file}
+_var_replace ${file} rsyslog
+
+#TODO add rsyslog mail
+<<KEEP
+_echoT "------------------  rsyslog client-mail conf"
+file="/etc/rsyslog.d/70-default.conf"
+# stop mail logs for syslog
+! grep -q "mail\.\*\s*stop" "${file}" && sed -i '/^mail\.err/ amail.*              stop' "${file}"
+KEEP
+
+########################  LOGROTATE
+
+_echoT "------------------  logrotate global"
+file=/etc/logrotate.conf
+_eval  "sed -i '/^#dateext/ s|^#||' ${file}"
+
+_echoT "------------------  logrotate server"
+file=/etc/logrotate.d/${file_logrotate_server##*/}
+_eval cp -a ${file_logrotate_server} ${file}
+_var_replace ${file} logrotate
 
 ########################  END
 
 _echoT "===================== ${_PART} end"
-_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
-
-
-
-<<KEEP
-_echoT "------------------ numlock-state conf"
-
-sudo gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
-
-
-sudo gsettings set org.gnome.settings-daemon.peripherals.keyboard numlock-state on
-
-_echoI "sudo -i
-su gdm -s /bin/bash
-gsettings set org.gnome.settings-daemon.peripherals.keyboard numlock-state on
-exit
-exit
-"
-_askno "Please write this lines in an another terminal & valid to continue"
-
-_echoT "------------------ rsyslog conf"
-
-sudo sed -i 's|^\(\$KLogPermitNonKernelFacility.*\)|#\1|' /etc/rsyslog.conf
-
-_service restart rsyslog
-
-_echoT "------------------ tracker autostart disable"
-grep -lr 'X-GNOME-Autostart-enabled=true' /etc/xdg/autostart/tracker-*|xargs sudo sed -i 's|^\(X-GNOME-Autostart-enabled=\).*|\1false|'
-
-_echoT "------------------ pulseaudio"
-file=/etc/pulse/default.pa
-sudo sed -i 's|\(load-module module-switch-on-port-available\)|#\1|' ${file}
-
-_echoT "------------------ tap-to-click"
-gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
-
-_echoT "------------------ gstreamer1.0-vaapi remove"
-sudo apt-get remove -y gstreamer1.0-vaapi
-
-_echoT "------------------ gnome-shell-extension-ubuntu-dock remove"
-sudo apt-get remove -y gnome-shell-extension-ubuntu-dock
-
-_echoT "------------------ numlock tty service"
-
-file_exec="/usr/local/bin/numlock"
-echo '#!/bin/bash
-for tty in /dev/tty{1..6}
-do
-    /usr/bin/setleds -D +num < "$tty";
-done' | sudo tee "${file_exec}"
-sudo chmod +x "${file_exec}"
-
-file_service="/etc/systemd/system/numlock.service"
-echo "[Unit]
-Description=numlock
-
-[Service]
-ExecStart=${file_exec}
-StandardInput=tty
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target" | sudo tee "${file_service}"
-
-_service enable numlock
-KEEP
+_partadd ${_PART} ${S_FILE_INSTALL_DONE}
 

@@ -39,7 +39,7 @@ fi
 _echoT "----------  path log rights"
 
 for path in ${S_PATH_LOG_SERVER} ${S_PATH_LOG_INSTALL}; do
-	[ ${USER} != root ] && _evalqr chown -R :1000 ${path} && _evalqr chmod -R g+rw ${path}
+	[ ${USER} != root ] && _evalrq chown -R :1000 ${path} && _evalrq chmod -R g+rw ${path}
 done
 
 

@@ -8,27 +8,22 @@ grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_F
 
 ########################  REQUIRED
 
-path_install_server=/home/shared/dev/install/conf
+path_install_conf=${S_PATH_INSTALL_CONF/-desktop/}
+file_rsyslog_client_lxd=${path_install_conf}/rsyslog/client-lxd.conf
+file_logrotate_client_lxd=${path_install_conf}/rsyslog/client-lxd.conf
 
-file_completion_conf=${S_PATH_INSTALL_CONF}/bash-completion/lxc.1804
-file_rsyslog_cron=${path_install_server}/rsyslog/cron.conf
-file_rsyslog_client_auth=${path_install_server}/rsyslog/client-auth.conf
-file_logrotate_server=${path_install_server}/logrotate/client-server
-
-_echoT "----------  required files"
-
-_require ${file_completion_conf} ${file_rsyslog_cron} ${file_rsyslog_client_auth} ${file_logrotate_server}
-
+_echoT "------------------ required files"
+_require ${file_rsyslog_client_lxd} ${file_logrotate_client_lxd}
 
 ########################  DATA
 
-_echoT "----------  data"
+_echoT "------------------  data"
 
 [ -z ${_LXD_DHCP_MIN+x} ] && anstmp="20" && _askno "Give minimal range IP for DHCP container (${anstmp})" && _LXD_DHCP_MIN="${_ANSWER:-$anstmp}" && _confset _LXD_DHCP_MIN "${_LXD_DHCP_MIN}"
 [ -z ${_LXD_DHCP_MAX+x} ] && anstmp="254" && _askno "Give maximal range IP for DHCP container (${anstmp})" && _LXD_DHCP_MAX="${_ANSWER:-$anstmp}" && _confset _LXD_DHCP_MAX "${_LXD_DHCP_MAX}"
 
 # root path of lxd
-_LXD_PATH_ROOT=/var/snap/lxd/common/lxd && _confset _LXD_PATH_ROOT "${_LXD_PATH_ROOT}"
+_LXD_PATH_ROOT=/var/snap/lxd && _confset _LXD_PATH_ROOT "${_LXD_PATH_ROOT}"
 # root path of storage pools for
 _LXD_PATH_SP=storage-pools && _confset _LXD_PATH_SP "${_LXD_PATH_SP}"
 # path for containers
@@ -41,57 +36,63 @@ _LXD_PATH_SNAPSHOT=snapshots && _confset _LXD_PATH_SNAPSHOT "${_LXD_PATH_SNAPSHO
 _LXD_PATH_EXPORT=export && _confset _LXD_PATH_EXPORT "${_LXD_PATH_EXPORT}"
 # port for remote connection
 _LXD_PORT=8443 && _confset _LXD_PORT "${_LXD_PORT}"
+# uid for shared path
+_LXD_UID=1000000 && _confset _LXD_UID "${_LXD_UID}"
 
+########################  IPTABLES
 
-########################  PATH
+_PART_LXD=lxd-iptables
+if ! _parthave ${_PART_LXD} ${S_FILE_INSTALL_DONE}; then
+	. "${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART_LXD}.install" || _exite "Wrong part: ${_PART_LXD}"
+	[ "$_STEP" ] && _askno "Valid to continue" 
+else
+	_echoW "performed *** ${_PART_LXD}"
+fi
 
-paths="${S_HOST_PATH} ${S_HOST_PATH_SP} ${S_HOST_PATH_SHARE} ${S_HOST_PATH_LOG} ${S_HOST_PATH_SAVE}"
-_echoT "----------  create ${paths}"
-for path in ${paths}; do
-	[ -d "${path}" ] || _evalqr mkdir -p ${path}
-done
+########################  FAIL2BAN
+
+_PART_LXD=lxd-fail2ban
+if ! _parthave ${_PART_LXD} ${S_FILE_INSTALL_DONE}; then
+	. "${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART_LXD}.install" || _exite "Wrong part: ${_PART_LXD}"
+	[ "$_STEP" ] && _askno "Valid to continue" 
+else
+	_echoW "performed *** ${_PART_LXD}"
+fi
+
+########################  STORAGE
+
+if [ "${S_STORAGE_DRIVER}" = zfs ]; then
+		path=${_LXD_PATH_ROOT}
+		_echoT "------------------  zfs ${path}"
+		[ -d ${path} ] && mv ${path} ${path}.${_SDATE}
+		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}/lxd
+fi
 
 ########################  INSTALL
 
-_echoT "----------  install"
+_echoT "------------------  install"
 _eval yay --noconfirm -S jq snapd
 _evalr systemctl enable --now snapd
 export PATH="${PATH}:/var/lib/snapd/snap/bin"
-sleep 1
 
-_echoT "----------  snap lxd"
-_evalr snap install lxd
-sleep 1
-_evalr snap refresh
+_echoT "------------------  snap lxd"
+_evalr snap install --channel=latest lxd
+_evalr snap start lxd --enable
 
-_echoT "----------  activate lxd"
-systemctl is-active
-systemctl is-active snap.lxd.daemon|grep -q ^inactive && _service start snap.lxd.daemon
-
-_echoT "----------  add user"
+_echoT "------------------  add user"
 _evalr usermod -a -G lxd ${USER}
-
-_echoT "----------  bash completion"
-path=/usr/share/bash-completion/completions
-file=${path}/lxc
-_keepmvts ${file}
-_evalr ln -s  ${file_completion_conf} ${file}
-
 
 ########################  RIGHTS
 
-_echoT "----------  link ${_LXD_PATH_ROOT} to /lxd"
-
-link=/lxd
-[ -h ${link} ] || _evalr ln -s ${_LXD_PATH_ROOT} ${link}
+path=${_LXD_PATH_ROOT}/common/lxd
+_echoT "------------------  link ${path} to /lxd"
+[ -h /lxd ] || _evalr ln -s ${path} /lxd
 
 path=${S_HOST_PATH_SHARE}
-_echoT "----------  rights ${path}"
-id=1000000
-_evalr setfacl -Rm u:${id}:rwx ${path}
-_evalr setfacl -Rm d:u:${id}:rwx ${path}
-_evalr chown ${id}:${id} -R "${path}"
-
+_echoT "------------------  rights ${path}"
+_evalr setfacl -Rm u:${_LXD_UID}:rwx "${path}"
+_evalr setfacl -Rm d:u:${_LXD_UID}:rwx "${path}"
+_evalr chown ${_LXD_UID}:${_LXD_UID} -R "${path}"
 
 ########################  CLEAN STORAGE
 
@@ -109,10 +110,9 @@ else
 	_exite "This part have to be implemented"
 fi
 
-
 ########################  INIT
 
-_echoT "----------  lxd init"
+_echoT "------------------  lxd init"
 
 if [ "${S_STORAGE_DRIVER}" = zfs ]; then
 	_echoI "Use this settings:"
@@ -129,7 +129,6 @@ fi
 
 _evalr lxd init || _exite "unable to initalize lxd"
 
-
 ########################  DNS
 
 str=" ovh home "
@@ -138,12 +137,12 @@ if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
 	# get : s_inet s_cidr s_base
 	eval ${S_HOST_VM_ETH[default]}
 
-	_echoT "---------- network-manager"
+	_echoT "------------------ network-manager"
 	file=/etc/NetworkManager/NetworkManager.conf
 	grep -q 'dns=none' ${file} || sudo sh -c "echo -e '\n[main]\ndns=none' >> ${file}"
 	systemctl is-active NetworkManager.service && _service restart NetworkManager
 
-	_echoT "----------  dns ovh"
+	_echoT "------------------  dns ovh"
 	file=/etc/resolvconf.conf
 	_keepcpts ${file}
 	if ! grep -q 127.0.0.53 ${file}; then
@@ -151,12 +150,12 @@ if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
 	 fi
 	 _evalr resolvconf -u
 
-	_echoT "----------  systemd resolved"
+	_echoT "------------------  systemd resolved"
 
+	systemctl is-enabled systemd-resolved|grep -q ^disabled && _service enable --now systemd-resolved
 	systemctl is-active systemd-resolved|grep -q ^inactive && _service start systemd-resolved
-	systemctl is-enabled systemd-resolved|grep -q ^disabled && _service enable systemd-resolved
 
-	_echoT "----------  dns home"
+	_echoT "------------------  dns home"
 
 	service=lxd-dns-${s_inet}
 	file=/etc/systemd/system/${service}.service
@@ -178,14 +177,13 @@ WantedBy=sys-subsystem-net-devices-${s_inet}.device
 	_evalr systemctl enable --now ${service}
 	_evalr resolvectl status ${s_inet}
 
-	_echoT "----------  nsswitch"
+	_echoT "------------------  nsswitch"
 
 	file=/etc/nsswitch.conf
 	line="hosts: files mymachines mdns4_minimal [NOTFOUND=return] dns resolve [!UNAVAIL=return] mdns4 myhostname"
 	grep -q ^#hosts ${file} || sudo sed -i "s|^\(hosts:.*\)$|#\1\n${line}|" ${file}
 
-
-	_echoT "----------  20-rc-manager"
+	_echoT "------------------  20-rc-manager"
 
 	# load resolvconf.conf
 	#file=/etc/NetworkManager/conf.d/20-rc-manager.conf
@@ -193,11 +191,10 @@ WantedBy=sys-subsystem-net-devices-${s_inet}.device
 
 fi
 
-
 ########################  STORAGE
 
 name="stock"
-_echoT "----------  storage ${name}"
+_echoT "------------------  storage ${name}"
 
 if ! [ "`sudo lxc storage list -f json|jq -r '.[] | select(.name == "'${name}'").name'`" ]; then
 	if [ "${S_STORAGE_DRIVER}" = zfs ]; then
@@ -209,15 +206,14 @@ if ! [ "`sudo lxc storage list -f json|jq -r '.[] | select(.name == "'${name}'")
 	fi
 fi
 
-
 ########################  NETWORK
 
-_echoT "----------  network 'default'"
+_echoT "------------------  network 'default'"
 
 # get : s_inet s_cidr s_base
 eval ${S_HOST_VM_ETH[default]}
 
-_echoT "----------  network ${s_inet}"
+_echoT "------------------  network ${s_inet}"
 
 if ! [ "`sudo lxc network list -f json|jq -r '.[] | select(.name == "'${s_inet}'").name'`" ]; then
 	_evalr lxc network create ${s_inet}
@@ -225,136 +221,54 @@ fi
 _evalr lxc network set ${s_inet} ipv4.address=${s_cidr} ipv4.dhcp.ranges=${s_cidr%.*}.${_LXD_DHCP_MIN}-${s_cidr%.*}.${_LXD_DHCP_MAX} ipv4.nat=true dns.mode=managed dns.domain=lxd dns.mode=managed
 
 
-_echoT "----------  network 'stock'"
-
+_echoT "------------------  network 'stock'"
 # get : s_inet s_cidr s_base
 eval ${S_HOST_VM_ETH[stock]}
 
-_echoT "----------  network ${s_inet}"
-
+_echoT "------------------  network ${s_inet}"
 if ! [ "`sudo lxc network list -f json|jq -r '.[] | select(.name == "'${s_inet}'").name'`" ]; then
 	_evalr lxc network create "${s_inet}"
 fi
 _evalr lxc network set ${s_inet} ipv4.address=${s_cidr} ipv4.dhcp.ranges=${s_cidr%.*}.${_LXD_DHCP_MIN}-${s_cidr%.*}.${_LXD_DHCP_MAX} ipv4.nat=true dns.mode=managed dns.domain=lxd1 dns.mode=managed
 
-
 ########################  PROFILE
 
 profile="stock"
-_echoT "----------  profiles ${profile}"
-
+_echoT "------------------  profiles ${profile}"
 _evalr lxc profile list -f csv|grep -q "^${profile}," && _evalr lxc profile rename ${profile} ${profile}.${_SDATE}
 _evalr lxc profile create ${profile}
 _evalr lxc profile device add ${profile} root disk pool=stock path=/
 _evalr lxc network attach-profile lxdbr1 ${profile} eth0
 
-
 ########################  RSYSLOG
 
-_echoT "----------  rsyslog install"
-_eval yay --noconfirm -S rsyslog
+_echoT "------------------  path log lxd"
+path=${S_PATH_LOG}/lxd
+[ -d ${path} ] || _evalr mkdir -p ${path}
+grep -q syslog /etc/passwd && _evalr chown syslog ${path}
 
-_echoT "----------  rsyslog path"
-for path in /etc/rsyslog.d /var/spool/rsyslog; do
-	[ -d ${path} ] || _evalr mkdir ${path}
-done
-
-_echoT "----------  rsyslog conf"
-
-file=/etc/rsyslog.conf
-_keepcpts ${file}
-
-# udp
-if [ "${S_RSYSLOG_PTC}" = udp ]; then
-	str="\$ModLoad immark\n\$ModLoad imudp  # provides udp logging support\n\$UDPServerRun 514"
-# tcp
-elif [ "${S_RSYSLOG_PTC}" = tcp ]; then
-	str="\$ModLoad immark\n\$ModLoad imtcp  # provides udp logging support\n\$InputTCPServerRun 514"
-fi
-_evalr "sed -i 's|^\(\$ModLoad imklog.*\)$|\1\n${str}|' ${file}"
-
-
-_echoT "----------  rsyslog cron"
-file=/etc/rsyslog.d/${file_rsyslog_cron##*/}
-_evalr cp -a ${file_rsyslog_cron} ${file}
+_echoT "------------------  rsyslog client-lxd"
+file=/etc/rsyslog.d/76-${file_rsyslog_client_lxd##*/}
+_evalr cp -a ${file_rsyslog_client_lxd} ${file}
 _var_replace ${file} rsyslog
 
+########################  LOGROTATE
 
-_echoT "----------  rsyslog client-auth"
-file=/etc/rsyslog.d/${file_rsyslog_client_auth##*/}
-_evalr cp -a ${file_rsyslog_client_auth} ${file}
-_var_replace ${file} rsyslog
+_echoT "------------------  logrotate client-lxd"
+file=/etc/logrotate.d/${file_logrotate_client_lxd##*/}
+_evalr cp -a ${file_logrotate_client_lxd} ${file}
+_var_replace ${file} logrotate
 
-
-#TODO add rsyslog mail
-<<KEEP
-_echoT "----------  rsyslog mail conf"
-file="/etc/rsyslog.d/50-default.conf"
-# stop mail logs for syslog
-! grep -q "mail\.\*\s*stop" "${file}" && sed -i '/^mail\.err/ amail.*              stop' "${file}"
-KEEP
-
-
-_echoT "----------  rsyslog restart"
-_service restart rsyslog
-
-
-_echoT "----------  lxc container"
-_echoI "To install and configure container use:"
-_echoI "$(ls -1 ${S_PATH_INSTALL/-desktop/}/lxd-*)"
-
+_echoT "------------------  logrotate restart"
+_service restart logrotate
 
 ########################  REBOOT
 
-_echoT "---------- reboot"
+_echoT "------------------ reboot"
 _echoI "You have to reboot before continuing"
-
 
 ########################  END
 
 _echoT "===================== ${_PART} end"
-_partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
-
-
-<<KEEP
-########################  INSTALL
-
-_echoT "------------------ install snap jq"
-
-_evalr pacman -S snapd jq
-_evalr systemctl enable --now snapd.socket
-_evalr ln -s /var/lib/snapd/snap /snap
-
-_echoT "------------------ install lxd"
-
-_evalr snap install lxd
-
-########################  RIGHTS
-
-path="/var/snap/lxd/common/lxd"
-_echoT "----------  link ${path} to /lxd"
-
-link="/lxd"
-[ -h ${link} ] || _evalr ln -s ${path} ${link}
-
-path="${S_HOST_PATH_SHARE}"
-_echoT "----------  rights ${path}"
-
-if [ "${S_STORAGE_DRIVER}" = zfs ]; then
-	_evalr setfacl -Rm u:1000000:rwx "${path}"
-	_evalr setfacl -Rm d:u:1000000:rwx "${path}"
-elif [ "${S_STORAGE_DRIVER}" = btrfs ]; then
-	_evalr setfacl -Rm u:100000:rwx "${path}"
-	_evalr setfacl -Rm d:u:100000:rwx "${path}"
-else
-	_exite "This part have to be implemented"
-fi
-
-########################  RIGHTS
-
-path="/var/snap/lxd/common/lxd"
-_echoT "----------  link ${path} to /lxd"
-
-KEEP
-
+_partadd ${_PART} ${S_FILE_INSTALL_DONE}
 
