@@ -7,7 +7,7 @@
 
 _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
-_echoT "------------------ apt repository"
+_echot "------------------ apt repository"
 
 file=/etc/apt/sources.list
 sudo cp -a $file $file.keep$(date +%s)
@@ -42,37 +42,37 @@ ppa:nilarimogard/webupd8 # pulseaudio-equalizer
 [ "$_LAPTOP" ] && sudo apt-add-repository -yn ppa:linrunner/tlp
 KEEP
 
-_echoT "------------------ getdeb"
+_echot "------------------ getdeb"
 #sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu bionic-getdeb apps" >> /etc/apt/sources.list.d/getdeb.list'
 #wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
 
-_echoT "------------------ mkv"
+_echot "------------------ mkv"
 #echo -e "deb http://mkvtoolnix.download/ubuntu/ bionic main\ndeb-src http://mkvtoolnix.download/ubuntu/ bionic main"  | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list/etc/apt/sources.list.d/multisystem.list
 #wget -q -O - https://mkvtoolnix.download/gpg-pub-moritzbunkus.txt | sudo apt-key add -
 
-_echoT "------------------ gmusibrowser"
+_echot "------------------ gmusibrowser"
 echo 'deb http://gmusicbrowser.org/deb ./' | sudo tee /etc/apt/sources.list.d/gmusicbrowser.list
 wget http://gmusicbrowser.org/squentin.key.asc -O - | sudo apt-key add -
 
 
-_echoT "------------------ multisystem"
+_echot "------------------ multisystem"
 echo 'deb http://liveusb.info/multisystem/depot all main' | sudo tee /etc/apt/sources.list.d/multisystem.list
 wget -q http://liveusb.info/multisystem/depot/multisystem.asc -O- | sudo apt-key add -
 
-_echoT "------------------ mariadb"
+_echot "------------------ mariadb"
 echo "# MariaDB 10.4 repository list - created 2019-10-28 08:34 UTC
 # http://downloads.mariadb.org/mariadb/repositories/
 deb [arch=amd64,arm64,ppc64el] http://ftp.hosteurope.de/mirror/mariadb.org/repo/10.4/ubuntu bionic main
 deb-src http://ftp.hosteurope.de/mirror/mariadb.org/repo/10.4/ubuntu bionic main" | sudo tee /etc/apt/sources.list.d/mariadb.list
 sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
 
-#_echoT "------------------ postgresql"
+#_echot "------------------ postgresql"
 #echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
 #wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 
 
 if [ "$_DEV" ];then
-	_echoT "------------------ dev"
+	_echot "------------------ dev"
 
 	echo "# Testing & pre-release packages
 deb http://repo.percona.com/apt bionic testing
@@ -84,7 +84,7 @@ deb-src http://repo.percona.com/apt bionic testing" | sudo tee /etc/apt/sources.
 fi
 
 if [ "$_VIRTUALBOX" ];then
-	_echoT "------------------ virtualbox"
+	_echot "------------------ virtualbox"
 
 	echo 'deb http://download.virtualbox.org/virtualbox/debian bionic contrib' | sudo tee /etc/apt/sources.list.d/virtualbox.list
 	wget --quiet -O - https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo apt-key add -

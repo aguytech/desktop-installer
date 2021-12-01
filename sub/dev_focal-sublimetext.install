@@ -22,7 +22,7 @@ _require ${file_desk_conf} ${file_license}
 # xprop WM_CLASS
 ########################  MAIN
 
-_echoT "------------------ backup"
+_echot "------------------ backup"
 
 paths=
 if [ -d ${path_opt} ]; then
@@ -33,7 +33,7 @@ if [ -d ${path_opt} ]; then
 fi
 
 
-_echoT "------------------ clean instance"
+_echot "------------------ clean instance"
 
 # delete existing folder
 for path in ${path_opt} ~/${path_conf} ~/${path_proj} ${file_desk} ${file_bin}; do
@@ -54,7 +54,7 @@ elif [ "${_SUBLIMETEXT_VER}" ]; then
 
 	cd /tmp
 
-	_echoT "------------------ get"
+	_echot "------------------ get"
 	file=sublime_text_${_SUBLIMETEXT_VER}_x64.tar.gz
 	url="http://download.sublimetext.com/${file}"
 
@@ -69,18 +69,18 @@ elif [ "${_SUBLIMETEXT_VER}" ]; then
 	fi
 
 
-	_echoT "------------------ install"
+	_echot "------------------ install"
 	path=sublime_text_3
 	[ -d ${path} ] && rm -fR ${path}
 	tar xzf ${file}
 	mv ${path} ${path_opt}
 	rm ${file}
 
-	_echoT "------------------ ${file_bin} bind"
+	_echot "------------------ ${file_bin} bind"
 	sudo [ -e ${file_bin} ] || [ -h ${file_bin} ] && sudo rm ${file_bin}
 	sudo ln -s ${path_opt}/sublime_text ${file_bin}
 
-	_echoT "------------------ launcher"
+	_echot "------------------ launcher"
 	cp ${file_desk_conf} ${file_desk}
 	chmod +x ${file_desk}
 
@@ -90,7 +90,7 @@ fi
 ####################  COMMON
 
 
-_echoT "------------------ /etc/hosts hack"
+_echot "------------------ /etc/hosts hack"
 file="/etc/hosts"
 if grep -q sublimetext.com ${file}; then
 	sudo sed -i 's|^#\(.*sublimetext\.com.*\)$|\1|' ${file}
@@ -99,21 +99,21 @@ else
 fi
 
 
-_echoT "------------------ install iptables-persistent"
+_echot "------------------ install iptables-persistent"
 _evalrq apt install -y iptables-persistent
 
-_echoT "------------------ iptables add rules"
+_echot "------------------ iptables add rules"
 ips="45.55.255.55"
 for ip in ${ips}; do sudo iptables -A OUTPUT -d ${ip} -j DROP; done
 
 
-_echoT "------------------ iptables-persistent install"
+_echot "------------------ iptables-persistent install"
 path="/etc/iptables"
 [ -d "${path}" ] || sudo mkdir "${path}"
 sudo iptables-save -f /etc/iptables/rules.v4
 
 
-_echoT "------------------ autostart"
+_echot "------------------ autostart"
 path=~/.config/autostart
 file=${path}/60-sublime-text.desktop
 
@@ -138,13 +138,13 @@ X-GNOME-Autostart-enabled=false" > ${file}
 chmod +x ${file}
 
 
-_echoT "------------------ license"
+_echot "------------------ license"
 cat ${file_license}
 
 
 ########################  END
 
-_echoT "------------------ write ${_PARTDEV}"
+_echot "------------------ write ${_PARTDEV}"
 _partadd "${_PARTDEV}" "$_FILE_DEV_DONE"
 
 _echoT "#################### END ${_PARTDEV}"

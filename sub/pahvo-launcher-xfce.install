@@ -9,7 +9,7 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 
 path=~/.local/share/applications; if ! [ -d "${path}" ]; then mkdir ${path}; fi
 
-_echoT "------------------ xfce-settings-manager"
+_echot "------------------ xfce-settings-manager"
 
 name=xfce-settings-manager
 menuadd="Separator;ManjaroSettings;XfceSettings;LightdmGtk;Qt5ct;DconfSet;PlankSet;Separator;PamacManager;TaskManager;Gparted;DiskUsage;"
@@ -62,7 +62,7 @@ Exec=manjaro-settings-manager
 fi
 sed -i 's|^OnlyShowIn=XFCE;|#OnlyShowIn=XFCE;|' ${path}/${name}.desktop
 
-_echoT "------------------ thunar"
+_echot "------------------ thunar"
 
 name=thunar
 menuadd="ThunarNode1;Separator;Terminal;SshDev;SshS;SshNode1;SshLxd;"
@@ -102,7 +102,7 @@ Exec=xfce4-terminal --tab --title=LXD -x ssh-lxd
 " >> ${path}/${name}.desktop
 fi
 
-_echoT "------------------ mousepad"
+_echot "------------------ mousepad"
 
 name=org.xfce.mousepad
 menuadd="Meld;GHex;Separator;Terminal;SshDev;SshS;SshNode1;SshLxd;"
@@ -142,7 +142,7 @@ Exec=xfce4-terminal --tab --title=LXD -x ssh-server ssh-lxd
 " >> ${path}/${name}.desktop
 fi
 
-_echoT "------------------ xfce4-terminal"
+_echot "------------------ xfce4-terminal"
 
 name=xfce4-terminal
 menuadd="Separator;SshDev;SshS;SshNode1;SshLxd;Separator;Thunar;ThunarNode1;"
@@ -182,7 +182,7 @@ Exec=thunar_newtabs /usr/local/bs sftp://root@node1/
 " >> ${path}/${name}.desktop
 fi
 
-_echoT "------------------ firefox"
+_echot "------------------ firefox"
 
 name=firefox
 menuadd="Separator;ProfileUser;ProfileManager;SafeMode;Separator;FirefoxDev;Chromium;Separator;Qarte;aMule;"
@@ -238,7 +238,7 @@ Exec=pidgin
 " >> ${path}/${name}.desktop
 fi
 
-_echoT "------------------ thunderbird"
+_echot "------------------ thunderbird"
 
 name=thunderbird
 menuadd="Separator;Addressbook;ProfileManager;ProfileExtend;"
@@ -266,7 +266,7 @@ Exec=thunderbird -P extend
 " >> ${path}/${name}.desktop
 fi
 
-_echoT "------------------ gmusicbrowser"
+_echot "------------------ gmusicbrowser"
 
 name=gmusicbrowser
 menuadd="Separator;Lollypop;PulseaudioEqualizer;Separator;Audacity;Easytag;SoundJuicer;SoundConverter;"
@@ -306,7 +306,7 @@ Exec=qpaeq
 " >> ${path}/${name}.desktop
 fi
 
-_echoT "------------------ mpv"
+_echot "------------------ mpv"
 
 name=mpv
 menuadd="Separator;Celluloid;HandBrake;SubtitleEditor;MKVtoolnix;"
@@ -338,7 +338,7 @@ Exec=ghb
 " >> ${path}/${name}.desktop
 fi
 
-_echoT "------------------ gimp"
+_echot "------------------ gimp"
 
 name=gimp
 menuadd="gThumb;Inkscape;Separator;XSane;"
@@ -366,7 +366,7 @@ Exec=xsane
 " >> ${path}/${name}.desktop
 fi
 
-_echoT "------------------ libreoffice-startcenter"
+_echot "------------------ libreoffice-startcenter"
 
 name=libreoffice-startcenter
 menuadd="Separator;Archimate;Zotero;Galculator;QpdfView;Gcolor3;FontViewer;XfBurn;Brasero;"
@@ -407,7 +407,7 @@ Exec=gtk2fontsel
 fi
 
 
-_echoT "------------------ xfce4-terminal-tmux"
+_echot "------------------ xfce4-terminal-tmux"
 
 file=${path}/xfce4-terminal-tmux.desktop
 if ! [ -f "${path}/xfce4-terminal.desktop" ]; then
@@ -422,7 +422,7 @@ fi
 
 ########################  END
 
-_echoT "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
+_echot "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
 _partadd "${_PART}/${S_RELEASE_DESKTOP}" "${S_FILE_INSTALL_DONE}"
 
 _echoT "#################### END ${_PART}/${S_RELEASE_DESKTOP}"

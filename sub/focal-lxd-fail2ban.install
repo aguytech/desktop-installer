@@ -15,12 +15,12 @@ file_conf_jail_ssh=${path_install_conf}/fail2ban/jail-ssh.conf
 file_rsyslog_client_fail2ban=${path_install_conf}/rsyslog/client-fail2ban.conf
 file_logrotate_client_fail2ban=${path_install_conf}/rsyslog/client-fail2ban.conf
 
-_echoT "------------------ required files"
+_echot "------------------ required files"
 _require ${file_conf_global} ${file_conf_jail_local} ${file_conf_jail_ssh} ${file_rsyslog_client_fail2ban} ${file_logrotate_client_fail2ban}
 
 ########################  DATA
 
-_echoT "------------------  data"
+_echot "------------------  data"
 
 #  s_fqdn  s_ip  s_ip6  s_name  s_port  s_type  s_user  s_vm
 eval ${S_CLUSTER[${HOSTNAME}]}
@@ -37,46 +37,46 @@ IPS_IGNORED="${_ANSWER:-$anstmp}" && _confset IPS_IGNORED "${IPS_IGNORED}"
 
 ########################  INSTALL
 
-_echoT "------------------  install"
+_echot "------------------  install"
 _evalr apt install -y fail2ban
 
 ########################  CONF
 
-_echoT "------------------  conf global"
+_echot "------------------  conf global"
 _evalr cp ${file_conf_global} /etc/fail2ban/fail2ban.d/
 _service reload fail2ban
 _evalr fail2ban-client get loglevel
 
-_echoT "------------------  conf jail local"
+_echot "------------------  conf jail local"
 file=/etc/fail2ban/jail.d/${file_conf_jail_local##*/}
 _evalr cp ${file_conf_jail_local} ${file}
 _var_replace ${file} fail2ban
 
-_echoT "------------------  conf jail ssh"
+_echot "------------------  conf jail ssh"
 file=/etc/fail2ban/jail.d/${file_conf_jail_ssh##*/}
 _evalr cp ${file_conf_jail_ssh} ${file}
 _var_replace ${file} fail2ban
 
 ########################  RSYSLOG
 
-_echoT "------------------  path log fail2ban"
+_echot "------------------  path log fail2ban"
 path=${S_PATH_LOG}/fail2ban
 [ -d ${path} ] || _evalr mkdir -p ${path}
 grep -q syslog /etc/passwd && _evalr chown syslog ${path}
 
-_echoT "------------------  rsyslog client-fail2ban"
+_echot "------------------  rsyslog client-fail2ban"
 file=/etc/rsyslog.d/78-${file_rsyslog_client_fail2ban##*/}
 _evalr cp -a ${file_rsyslog_client_fail2ban} ${file}
 _var_replace ${file} rsyslog
 
 ########################  LOGROTATE
 
-_echoT "------------------  logrotate client-fail2ban"
+_echot "------------------  logrotate client-fail2ban"
 file=/etc/logrotate.d/${file_logrotate_client_fail2ban##*/}
 _evalr cp -a ${file_logrotate_client_fail2ban} ${file}
 _var_replace ${file} logrotate
 
-_echoT "------------------  logrotate restart"
+_echot "------------------  logrotate restart"
 _service restart logrotate
 
 ########################  END

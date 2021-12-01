@@ -12,7 +12,7 @@ path_desk=~/.local/share/applications
 file_bin="/usr/bin/squirrel-sql"
 
 
-_echoT "------------------ backup"
+_echot "------------------ backup"
 
 paths=
 if [ -d ${path_opt} ]; then
@@ -23,7 +23,7 @@ if [ -d ${path_opt} ]; then
 fi
 
 
-_echoT "------------------ clean instance"
+_echot "------------------ clean instance"
 
 # delete existing folder
 for path in ${path_opt} ~/${path_conf} ${file_desk} ${file_bin}; do
@@ -44,7 +44,7 @@ elif [ "${_SQUIRREL_VER}" ]; then
 
 	cd /tmp
 
-	_echoT "------------------ get"
+	_echot "------------------ get"
 	file="squirrel-sql_${_SQUIRREL_VER}-standard.jar"
 	url="https://newcontinuum.dl.sourceforge.net/project/squirrel-sql/1-stable/${_SQUIRREL_VER}/${file}"
 
@@ -59,16 +59,16 @@ elif [ "${_SQUIRREL_VER}" ]; then
 	fi
 
 
-	_echoT "------------------ install"
+	_echot "------------------ install"
 	_askno "Give this directory '$DIR_OPT' for installation\nConfirm"
 	java -jar ${file}
 	rm ${file}
 
-	_echoT "------------------ ${file_bin} bind"
+	_echot "------------------ ${file_bin} bind"
 	sudo [ -e ${file_bin} ] || [ -h ${file_bin} ] && sudo rm ${file_bin}
 	sudo ln -s ${path_opt}/squirrel-sql.sh ${file_bin}
 
-	_echoT "------------------ launcher"
+	_echot "------------------ launcher"
 	file="${path_desk}"/squirrel-sql.desktop
 	echo "[Desktop Entry]
 	Name=SQuirreL SQL client $_SQUIRREL_VER
@@ -89,7 +89,7 @@ fi
 
 ########################  END
 
-_echoT "------------------ write ${_PARTDEV}"
+_echot "------------------ write ${_PARTDEV}"
 _partadd "${_PARTDEV}" "$_FILE_DEV_DONE"
 
 _echoT "#################### END ${_PARTDEV}"

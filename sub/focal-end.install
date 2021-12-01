@@ -8,13 +8,13 @@ _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}
 ########################  MAIN
 
 
-_echoT "------------------ languages"
+_echot "------------------ languages"
 
 _askno "Please select 'Region & language' & 'Manage installed languages' to update required files & close windows, After you valid to continue"
 sudo gnome-control-center
 
 
-_echoT "------------------ Upgrade"
+_echot "------------------ Upgrade"
 
 upgrade
 

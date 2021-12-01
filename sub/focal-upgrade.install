@@ -8,17 +8,17 @@
 _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
 
-_echoT "------------------ update"
+_echot "------------------ update"
 
 sudo apt update
 
 
-_echoT "------------------ dist-upgrade"
+_echot "------------------ dist-upgrade"
 
 sudo apt -y dist-upgrade
 
 
-#_echoT "------------------ clean"
+#_echot "------------------ clean"
 
 #sudo apt autoremove; sudo apt clean; sudo apt autoclean
 

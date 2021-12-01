@@ -12,12 +12,12 @@ path_install_conf=${S_PATH_INSTALL_CONF/-desktop/}
 file_rsyslog_client_lxd=${path_install_conf}/rsyslog/client-lxd.conf
 file_logrotate_client_lxd=${path_install_conf}/rsyslog/client-lxd.conf
 
-_echoT "------------------ required files"
+_echot "------------------ required files"
 _require ${file_rsyslog_client_lxd} ${file_logrotate_client_lxd}
 
 ########################  DATA
 
-_echoT "------------------  data"
+_echot "------------------  data"
 
 [ -z ${_LXD_DHCP_MIN+x} ] && anstmp="20" && _askno "Give minimal range IP for DHCP container (${anstmp})" && _LXD_DHCP_MIN="${_ANSWER:-$anstmp}" && _confset _LXD_DHCP_MIN "${_LXD_DHCP_MIN}"
 [ -z ${_LXD_DHCP_MAX+x} ] && anstmp="254" && _askno "Give maximal range IP for DHCP container (${anstmp})" && _LXD_DHCP_MAX="${_ANSWER:-$anstmp}" && _confset _LXD_DHCP_MAX "${_LXD_DHCP_MAX}"
@@ -46,7 +46,7 @@ if ! _parthave ${_PART_LXD} ${S_FILE_INSTALL_DONE}; then
 	. "${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART_LXD}.install" || _exite "Wrong part: ${_PART_LXD}"
 	[ "$_STEP" ] && _askno "Valid to continue" 
 else
-	_echoW "performed *** ${_PART_LXD}"
+	_echO "performed *** ${_PART_LXD}"
 fi
 
 ########################  FAIL2BAN
@@ -56,7 +56,7 @@ if ! _parthave ${_PART_LXD} ${S_FILE_INSTALL_DONE}; then
 	. "${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART_LXD}.install" || _exite "Wrong part: ${_PART_LXD}"
 	[ "$_STEP" ] && _askno "Valid to continue" 
 else
-	_echoW "performed *** ${_PART_LXD}"
+	_echO "performed *** ${_PART_LXD}"
 fi
 
 ########################  STORAGE
@@ -64,40 +64,40 @@ fi
 if [ "${S_STORAGE_DRIVER}" = zfs ]; then
 
 	if snap list|grep -q ^lxd; then
-		_echoT "------------------  snap remove lxd"
-	 	snap remove --purge lxd
-	 fi
+		_echot "------------------  snap remove lxd"
+		snap remove --purge lxd
+	fi
 	path=${_LXD_PATH_ROOT}
-	_echoT "------------------  zfs ${path}"
+	_echot "------------------  zfs ${path}"
 	[ -d ${path} ] && mv ${path} ${path}.${_SDATE}
 	_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}/lxd
 fi
 
 ########################  INSTALL
 
-_echoT "------------------  install"
+_echot "------------------  install"
 _evalr apt install -y jq acl # criu lxd-tools
 
 # core20
 if ! snap list|grep -q ^core20; then
 	if snap list|grep -q ^lxd; then
-		_echoT "------------------  snap remove lxd"
+		_echot "------------------  snap remove lxd"
 		_evalr snap remove lxd
 	fi
 	if snap list|grep -q ^core18; then
-		_echoT "------------------  snap remove core18"
+		_echot "------------------  snap remove core18"
 		_evalr snap remove core18
 	fi
-	_echoT "------------------  snap install core20"
+	_echot "------------------  snap install core20"
 	_evalr snap install core20
 fi
 
 # lxd
 if snap list lxd|grep -q ^lxd; then
-	_echoT "------------------  snap refresh lxd"
+	_echot "------------------  snap refresh lxd"
 	_evalr snap refresh --channel=latest lxd
 else
-	_echoT "------------------  snap install lxd"
+	_echot "------------------  snap install lxd"
 	_evalr snap install --channel=latest lxd
 fi
 _evalr snap start lxd --enable
@@ -105,11 +105,11 @@ _evalr snap start lxd --enable
 ########################  RIGHTS
 
 path=${_LXD_PATH_ROOT}/common/lxd
-_echoT "------------------  link ${path} to /lxd"
+_echot "------------------  link ${path} to /lxd"
 [ -h /lxd ] || _evalr ln -s ${path} /lxd
 
 path=${S_HOST_PATH_SHARE}
-_echoT "------------------  rights ${path}"
+_echot "------------------  rights ${path}"
 _evalr setfacl -Rm u:${_LXD_UID}:rwx "${path}"
 _evalr setfacl -Rm d:u:${_LXD_UID}:rwx "${path}"
 _evalr chown ${_LXD_UID}:${_LXD_UID} -R "${path}"
@@ -118,12 +118,12 @@ _evalr chown ${_LXD_UID}:${_LXD_UID} -R "${path}"
 
 if [ "${S_STORAGE_DRIVER}" = zfs ]; then
 	for path in `_evalr zfs list -d 1 -o name -H ${_ZFS_ROOT}${S_HOST_PATH_SP}|grep -v ^${_ZFS_ROOT}${S_HOST_PATH_SP}$`; do
-		_echoI "backup ${path} to ${path}.${_SDATE}"
+		_echot "------------------  backup ${path} to ${path}.${_SDATE}"
 		_evalr zfs rename ${path} ${path}.${_SDATE}
 	done
 elif [ "${S_STORAGE_DRIVER}" = btrfs ]; then
 	for path in `ls ${S_HOST_PATH_SP}`; do
-		_echoI "backup ${path} to ${path}.${_SDATE}"
+		_echot "------------------  backup ${path} to ${path}.${_SDATE}"
 		_evalr mv ${S_HOST_PATH_SP}/${path} ${S_HOST_PATH_SP}/${path}.${_SDATE}
 	done
 else
@@ -132,17 +132,17 @@ fi
 
 ########################  INIT
 
-_echoT "------------------  lxd init"
+_echot "------------------  lxd init"
 
 if [ "${S_STORAGE_DRIVER}" = zfs ]; then
-	_echoI "Use this settings:"
-	_echoW "- Create a new ZFS pool ?: no"
-	_echoW "- Name of the existing ZFS pool or dataset: ${_ZFS_ROOT}${S_HOST_PATH_SP}/default"
+	_echoA "Use this settings:"
+	_echoa "- Create a new ZFS pool ?: no"
+	_echoa "- Name of the existing ZFS pool or dataset: ${_ZFS_ROOT}${S_HOST_PATH_SP}/default"
 elif [ "${S_STORAGE_DRIVER}" = btrfs ]; then
-	_echoI "Use this settings:"
-	_echoW "- Would you like to create a new btrfs subvolume under /var/snap/lxd/common/lxd?: no"
-	_echoW "- Create a new BTRFS pool?: no"
-	_echoW "- Name of the existing BTRFS pool or dataset: ${S_HOST_PATH_SP}/default"
+	_echoA "Use this settings:"
+	_echoa "- Would you like to create a new btrfs subvolume under /var/snap/lxd/common/lxd?: no"
+	_echoa "- Create a new BTRFS pool?: no"
+	_echoa "- Name of the existing BTRFS pool or dataset: ${S_HOST_PATH_SP}/default"
 else
 	_exite "This part have to be implemented"
 fi
@@ -157,7 +157,7 @@ if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
 	# get : s_inet s_cidr s_base
 	eval ${S_HOST_VM_ETH[default]}
 
-	_echoT "------------------  dns ovh"
+	_echot "------------------  dns ovh"
 
 	file=/etc/resolv.conf
 	_keepcpts ${file}
@@ -166,7 +166,7 @@ if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
 		sudo sh -c "echo 'nameserver 127.0.0.53\noptions edns0 trust-ad\nsearch lxd' > ${file}"
 	 fi
 
-	_echoT "------------------  dns home"
+	_echot "------------------  dns home"
 
 	service=lxd-dns-${s_inet}
 	file=/etc/systemd/system/${service}.service
@@ -193,7 +193,7 @@ fi
 ########################  STORAGE
 
 name="stock"
-_echoT "------------------  storage ${name}"
+_echot "------------------  storage ${name}"
 
 if ! [ "`lxc storage list -f json|jq -r '.[] | select(.name == "'${name}'").name'`" ]; then
 	if [ "${S_STORAGE_DRIVER}" = zfs ]; then
@@ -207,23 +207,23 @@ fi
 
 ########################  NETWORK
 
-_echoT "------------------  network 'default'"
+_echot "------------------  network 'default'"
 
 # get : s_inet s_cidr s_base
 eval ${S_HOST_VM_ETH[default]}
 
-_echoT "------------------  network ${s_inet}"
+_echot "------------------  network ${s_inet}"
 
 if ! [ "`lxc network list -f json|jq -r '.[] | select(.name == "'${s_inet}'").name'`" ]; then
 	_eval lxc network create ${s_inet}
 fi
 _eval lxc network set ${s_inet} ipv4.address=${s_cidr} ipv4.dhcp.ranges=${s_cidr%.*}.${_LXD_DHCP_MIN}-${s_cidr%.*}.${_LXD_DHCP_MAX} ipv4.nat=true dns.mode=managed dns.domain=lxd dns.mode=managed
 
-_echoT "------------------  network 'stock'"
+_echot "------------------  network 'stock'"
 # get : s_inet s_cidr s_base
 eval ${S_HOST_VM_ETH[stock]}
 
-_echoT "------------------  network ${s_inet}"
+_echot "------------------  network ${s_inet}"
 if ! [ "`lxc network list -f json|jq -r '.[] | select(.name == "'${s_inet}'").name'`" ]; then
 	_eval lxc network create "${s_inet}"
 fi
@@ -232,7 +232,7 @@ _eval lxc network set ${s_inet} ipv4.address=${s_cidr} ipv4.dhcp.ranges=${s_cidr
 ########################  PROFILE
 
 profile="stock"
-_echoT "------------------  profiles ${profile}"
+_echot "------------------  profiles ${profile}"
 lxc profile list -f csv|grep -q "^${profile}," && _evalr lxc profile rename ${profile} ${profile}.${_SDATE}
 _eval lxc profile create ${profile}
 _eval lxc profile device add ${profile} root disk pool=stock path=/
@@ -240,33 +240,38 @@ _eval lxc network attach-profile lxdbr1 ${profile} eth0
 
 ########################  RSYSLOG
 
-_echoT "------------------  path log lxd"
+_echot "------------------  path log lxd"
 path=${S_PATH_LOG}/lxd
 [ -d ${path} ] || _evalr mkdir -p ${path}
 grep -q syslog /etc/passwd && _evalr chown syslog ${path}
 
-_echoT "------------------  rsyslog client-lxd"
+_echot "------------------  rsyslog client-lxd"
 file=/etc/rsyslog.d/76-${file_rsyslog_client_lxd##*/}
 _evalr cp -a ${file_rsyslog_client_lxd} ${file}
 _var_replace ${file} rsyslog
 
 ########################  LOGROTATE
 
-_echoT "------------------  logrotate client-lxd"
+_echot "------------------  logrotate client-lxd"
 file=/etc/logrotate.d/${file_logrotate_client_lxd##*/}
 _evalr cp -a ${file_logrotate_client_lxd} ${file}
 _var_replace ${file} logrotate
 
-_echoT "------------------  logrotate restart"
+_echot "------------------  logrotate restart"
 _service restart logrotate
+
+########################  CONTAINERS
+
+_echot "------------------ lxd containers"
+_echoA "You need to launch following command to build containers:"
+_echoa ls ${_PATH_BASE}/lxd-*
 
 ########################  REBOOT
 
-_echoT "------------------ reboot"
-_echoI "You have to reboot before continuing"
+_echot "------------------ reboot"
+_echoW "You have to reboot before continuing"
 
 ########################  END
 
 _echoT "===================== ${_PART} end"
 _partadd ${_PART} ${S_FILE_INSTALL_DONE}
-

@@ -15,14 +15,14 @@ file_bin="/usr/bin/smartgit"
 
 ########################  MAIN
 
-_echoT "------------------ backup"
+_echot "------------------ backup"
 
 if [ -d ${path_opt} ] || [ -d ~/${path_conf} ]; then
 	tar czf ${_PATH_SOFT_BACKUP}/smartgit_backup_${_DATE}-$(date +%s).tar.gz ${path_opt} ~/${path_conf} ${file_desk} ${file_bin}
 fi
 
 
-_echoT "------------------ clean instance"
+_echot "------------------ clean instance"
 
 # delete existing folder
 for path in ${path_opt} ~/${path_conf} ${file_desk} ${file_bin}; do
@@ -42,7 +42,7 @@ if [ "$_SMARTGIT_DATE" ]; then
 
 elif [ "${_SMARTGIT_VER}" ]; then
 
-	_echoT "------------------ install"
+	_echot "------------------ install"
 
 	sudo pacman -S --noconfirm --needed dbeaver
 
@@ -51,7 +51,7 @@ fi
 
 ########################  END
 
-_echoT "------------------ write ${_PARTDEV}"
+_echot "------------------ write ${_PARTDEV}"
 _partadd "${_PARTDEV}" "$_FILE_DEV_DONE"
 
 _echoT "#################### END ${_PARTDEV}"

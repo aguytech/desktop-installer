@@ -7,7 +7,7 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 # xprop WM_CLASS
 ########################  MAIN
 
-_echoT "------------------ org.gnome.tweaks"
+_echot "------------------ org.gnome.tweaks"
 
 name=org.gnome.tweaks; path=~/.local/share/applications
 menuadd="ControlCenter;DconfSet;NvidiaSet;PamacManager;Separator;Gparted;DiskUtility;DiskUsage;"
@@ -55,7 +55,7 @@ Exec=dconf-editor
 " >> ${path}/${name}.desktop
 chmod +x ${path}/${name}.desktop
 
-_echoT "------------------ org.gnome.Nautilus"
+_echot "------------------ org.gnome.Nautilus"
 
 name=org.gnome.Nautilus; path=~/.local/share/applications
 menuadd="Separator;NautilusNode1;NautilusComputer;NautilusNetwork;Separator;Terminal;SshDev;SshS;SshNode1;SshLxd;"
@@ -104,7 +104,7 @@ Exec=gnome-terminal -e ssh-lxd
 sed -i 's|^\(DBusActivatable.*\)|#\1|' ${path}/${name}.desktop
 chmod +x ${path}/${name}.desktop
 
-_echoT "------------------ org.gnome.gedit"
+_echot "------------------ org.gnome.gedit"
 
 name=org.gnome.gedit; path=~/.local/share/applications
 menuadd="Meld;GHex;Separator;Terminal;SshDev;SshS;SshNode1;SshLxd;"
@@ -149,7 +149,7 @@ Exec=gnome-terminal -e ssh-lxd
 sed -i 's|^\(DBusActivatable.*\)|#\1|' ${path}/${name}.desktop
 chmod +x ${path}/${name}.desktop
 
-_echoT "------------------ org.gnome.Terminal"
+_echot "------------------ org.gnome.Terminal"
 
 name=org.gnome.Terminal; path=~/.local/share/applications
 menuadd="Separator;Terminal;SshDev;SshS;SshNode1;SshLxd;"
@@ -185,7 +185,7 @@ Exec=gnome-terminal -e ssh-lxd
 " >> ${path}/${name}.desktop
 chmod +x ${path}/${name}.desktop
 
-_echoT "------------------ firefox"
+_echot "------------------ firefox"
 
 name=firefox; path=~/.local/share/applications
 menuadd="Separator;ProfileUser;ProfileManager;SafeMode;Separator;FirefoxDev;Chromium;Separator;Qarte;aMule;"
@@ -233,7 +233,7 @@ Exec=amule
 " >> ${path}/${name}.desktop
 chmod +x ${path}/${name}.desktop
 
-_echoT "------------------ thunderbird"
+_echot "------------------ thunderbird"
 
 name=thunderbird; path=~/.local/share/applications
 menuadd="Separator;Addressbook;ProfileManager;ProfileExtend;Compose;"
@@ -265,7 +265,7 @@ Exec=thunderbird -compose
 " >> ${path}/${name}.desktop
 chmod +x ${path}/${name}.desktop
 
-_echoT "------------------ gmusicbrowser"
+_echot "------------------ gmusicbrowser"
 
 name=gmusicbrowser; path=~/.local/share/applications
 menuadd="Separator;Lollypop;PulseaudioEqualizer;Separator;Audacity;Easytag;SoundJuicer;SoundConverter;"
@@ -305,7 +305,7 @@ Exec=qpaeq
 " >> ${path}/${name}.desktop
 chmod +x ${path}/${name}.desktop
 
-_echoT "------------------ org.gnome.Lollypop"
+_echot "------------------ org.gnome.Lollypop"
 
 name=org.gnome.Lollypop; path=~/.local/share/applications
 menuadd="Separator;GMusicBrowser;PulseaudioEqualizer;Separator;Audacity;Easytag;SoundJuicer;SoundConverter"
@@ -358,7 +358,7 @@ Exec=pulseaudio-equalizer-gtk
 " >> ${path}/${name}.desktop
 chmod +x ${path}/${name}.desktop
 
-_echoT "------------------ org.gnome.Totem"
+_echot "------------------ org.gnome.Totem"
 
 name=org.gnome.Totem; path=~/.local/share/applications; if ! [ -d ${path} ]; then mkdir ${path}; fi
 cp /usr/share/applications/${name}.desktop ${path}
@@ -407,7 +407,7 @@ Exec=vlc
 " >> ${path}/${name}.desktop
 chmod +x ${path}/${name}.desktop
 
-_echoT "------------------ celluloid"
+_echot "------------------ celluloid"
 
 name=celluloid; path=~/.local/share/applications
 menuadd="Separator;Mpv;HandBrake;GnomeSubtitles;MKVtoolnix;"
@@ -439,7 +439,7 @@ Exec=ghb
 " >> ${path}/${name}.desktop
 chmod +x ${path}/${name}.desktop
 
-_echoT "------------------ gimp"
+_echot "------------------ gimp"
 
 name=gimp; path=~/.local/share/applications
 menuadd="gThumb;Inkscape;Separator;XSane;"
@@ -467,7 +467,7 @@ Exec=xsane
 " >> ${path}/${name}.desktop
 chmod +x ${path}/${name}.desktop
 
-_echoT "------------------ libreoffice-startcenter"
+_echot "------------------ libreoffice-startcenter"
 
 name=libreoffice-startcenter; path=~/.local/share/applications
 menuadd="Separator;Gcolor3;FontViewer;Calculator;Brasero;"
@@ -501,7 +501,7 @@ chmod +x ${path}/${name}.desktop
 
 ########################  END
 
-_echoT "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
+_echot "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
 _partadd "${_PART}/${S_RELEASE_DESKTOP}" "${S_FILE_INSTALL_DONE}"
 
 _echoT "#################### END ${_PART}/${S_RELEASE_DESKTOP}"

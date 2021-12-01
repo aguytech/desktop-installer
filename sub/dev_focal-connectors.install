@@ -8,7 +8,7 @@ _echoT "#################### START ${_PARTDEV}"
 
 ########################  MAIN
 
-_echoT "------------------ unpack"
+_echot "------------------ unpack"
 
 file=${_PATH_SOFT}/connectors.tar.gz
 ! [ -f "$file" ] && _exite "Unable to find file: $file"
@@ -17,7 +17,7 @@ sudo tar xzf "$file" -C /opt
 
 ########################  END
 
-_echoT "------------------ write ${_PARTDEV}"
+_echot "------------------ write ${_PARTDEV}"
 _partadd ${_PARTDEV} $_FILE_DEV_DONE
 
 _echoT "#################### END ${_PARTDEV}"

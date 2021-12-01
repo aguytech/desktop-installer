@@ -2,7 +2,6 @@
 #
 # write by Aguy
 
-
 _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
 file_install_done=${_PATH_LOG}/install.done
@@ -12,34 +11,33 @@ cmd="sudo pacman -S --noconfirm --needed"
 
 ########################  MAIN
 
-
 _echoT "================== ${_PART} / global install"
 
-_echoI "------------------"
+_echo "------------------"
 sed -n '/# install/,$ p' ${S_FILE_INSTALL_CONF}|grep -v '^# install'
-_echoI "------------------"
+_echo "------------------"
 _askyn "PLease confirm this installation options" && [ "${_ANSWER}" == n ] && return 1
 
 
-_echoT "------------------ path"
+_echot "------------------ path"
 path=~/.local/share/applications
 ! [ -d "$path" ] && mkdir -p "$path"
 
 
 part_install=system
-_echoT "------------------ ${part_install}"
-packages="yay jre-openjdk tmux most net-tools htop multipath-tools squashfs-tools unrar base-devel"
+_echot "------------------ ${part_install}"
+packages="yay jre-openjdk tmux most net-tools htop multipath-tools squashfs-tools unrar base-devel bind-tools"
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 
 
 part_install=tools
-_echoT "------------------ ${part_install}"
+_echot "------------------ ${part_install}"
 packages="meld baobab thunderbird gtk2fontsel" # fslint activity-log-manager
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 
 
 part_install=media
-_echoT "------------------ ${part_install}"
+_echot "------------------ ${part_install}"
 packages=" easytag soundconverter sound-juicer pulseaudio-equalizer simplescreenrecorder" # easymp3gain-gtk2 mp3splt-gtk lollypop
 packages+=" gimp gimp-nufraw gimp-plugin-gmic inkscape xsane" # gimp-plugin-registry gimp-plugin-satequalizer gimp-plugin-duplicate-to-another-image gimp-plugin-saveforweb gimp-plugin-fblur gimp-plugin-lqr gimp-refocus gimp-plugin-wavelet-denoise
 packages+=" mpv mkvtoolnix-gui handbrake libdvdcss libdvdnav libdvdread"
@@ -48,13 +46,13 @@ if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _pa
 
 
 part_install=languages
-_echoT "------------------ ${part_install}"
+_echot "------------------ ${part_install}"
 packages="hunspell-fr hyphen-fr mythes-fr firefox-i18n-fr thunderbird-i18n-fr"
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 
 
 part_install=libreoffice
-_echoT "------------------ ${part_install}"
+_echot "------------------ ${part_install}"
 packages="libreoffice-fresh libreoffice-fresh-fr libreoffice-extension-writer2latex" # libreoffice-extension-texmaths
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 # libreoffice-dmaths libreoffice-librelogo libreoffice-style-breeze libreoffice-style-elementary libreoffice-style-sifr
@@ -62,7 +60,7 @@ if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _pa
 
 if [ "${_LAPTOP}" ]; then
 	part_install=laptop
-	_echoT "------------------ ${part_install}"
+	_echot "------------------ ${part_install}"
 	packages="tlp tlp-rdw tlpui" # acpi
 	if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 fi
@@ -70,7 +68,7 @@ fi
 
 if [ "${_VIDEO}" ]; then
 	part_install=videos
-	_echoT "------------------ ${part_install}"
+	_echot "------------------ ${part_install}"
 	packages="kdenlive cin" # flowblade lightworks Natron shotcut DaVinci Resolve
 	if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 fi
@@ -78,7 +76,7 @@ fi
 
 if [ "${_DEV}" ]; then
 	part_install=dev
-	_echoT "------------------ ${part_install}"
+	_echot "------------------ ${part_install}"
 	packages="dstat sysstat tree jq atop ghex mariadb-clients postgresql-libs percona-toolkit gitg vim"
 	#packages+=" pgadmin4 dbeaver dia dia2code dia-shapes postgresql-autodoc mytop percona-server-clients umbrello jxplorer gitkraken"
 	#packages+=" kcachegrind pyprof2calltree graphviz xdot python-pydot"
@@ -88,7 +86,7 @@ fi
 
 if [ "${_NETWORK}" ]; then
 	part_install=network
-	_echoT "------------------ ${part_install}"
+	_echot "------------------ ${part_install}"
 	packages="wireshark-qt nmap" # wireshark-gtk
 	if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 fi
@@ -96,7 +94,7 @@ fi
 
 if [ "${_VIRTUALBOX}" ]; then
 	part_install=virtualbox
-	_echoT "------------------ ${part_install}"
+	_echot "------------------ ${part_install}"
 	packages="virtualbox"
 	if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 fi
@@ -106,7 +104,7 @@ fi
 
 file="${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}-${S_RELEASE_DESKTOP}.install"
 if [ -f "${file}" ]; then
-	_echoT "------------------ ${S_RELEASE_DESKTOP} required"
+	_echot "------------------ ${S_RELEASE_DESKTOP} required"
 	! . "${file}" && echo "wrong '${_PART}-${S_RELEASE_DESKTOP}'" && exit
 else
 	_echoE "unable to find '${file}'"

@@ -11,7 +11,7 @@ _echoT "#################### START ${_PARTDEV}"
 DIR_OPT=/opt/architect-$_ARCHITECT_VER
 #DIR_OPTlink=/opt/architect
 
-_echoT "------------------ get"
+_echot "------------------ get"
 
 cd /opt
 FILE="SQL-Power-Architect-generic-jdbc-${_ARCHITECT_VER}.tar.gz"
@@ -23,7 +23,7 @@ else
 	! wget "$URL" -O $FILEDOWN && _exite "Error during downloading 'Firefox developer' version '${_ARCHITECT_VER}' with url:\n${URL}\nPlease download it manually & place it to ${_PATH_SOFT} & restart"
 fi
 
-_echoT "------------------ conf & keep user"
+_echot "------------------ conf & keep user"
 
 if ! [ -d ~/.architect ]; then
 	mkdir ~/.architect
@@ -35,12 +35,12 @@ else
 fi
 
 
-_echoT "------------------ keep oldees"
+_echot "------------------ keep oldees"
 
 	_keepmvts ${DIR_OPT}
 
 
-_echoT "------------------ install"
+_echot "------------------ install"
 
 tar xzf $FILEDOWN -C /opt
 [ "/opt/architect-${_ARCHITECT_VER}" != "$DIR_OPT" ] && mv /opt/architect-${_ARCHITECT_VER} $DIR_OPT
@@ -49,7 +49,7 @@ rm $FILEDOWN
 #cd /opt && ln -sv ${DIR_OPT##*/} architect
 
 
-_echoT "------------------ /usr/bin/architect create"
+_echot "------------------ /usr/bin/architect create"
 
 # -Xms (min) & -Xmx (max) allocate memory for java software
 echo '#!/bin/bash
@@ -59,13 +59,13 @@ java -jar \$ARCHITECT_HOME/architect.jar \$*" | sudo tee /usr/bin/architect
 sudo chmod +x /usr/bin/architect
 
 
-_echoT "------------------ logo"
+_echot "------------------ logo"
 
 FILE=/home/shared/keep/.icons/architect.png
 [ -f $FILE ] && cp -a $FILE $DIR_OPT || _echoE "logo skipped, unable to copy file '$FILE'"
 
 
-_echoT "------------------ launcher"
+_echot "------------------ launcher"
 
 FILE=~/.local/share/applications/architect.desktop
 
@@ -85,7 +85,7 @@ chmod +x "$FILE"
 
 ########################  END
 
-_echoT "------------------ write ${_PARTDEV}"
+_echot "------------------ write ${_PARTDEV}"
 _partadd ${_PARTDEV} $_FILE_DEV_DONE
 
 _echoT "#################### END ${_PARTDEV}"

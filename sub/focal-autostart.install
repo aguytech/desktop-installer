@@ -11,14 +11,14 @@ _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}
 dir=~/.config/autostart
 ! [ -d $dir ] && mkdir $dir
 
-_echoT "------------------ remove tangerine"
+_echot "------------------ remove tangerine"
 
 files="$dir/tangerine-autostart.desktop \
 /etc/xdg/autostart/tangerine-autostart.desktop \
 /etc/xdg/autostart/gnome-do.desktop"
 for file in $files; do [ -f $file ] && (! grep -q X-GNOME-Autostart-enabled "$file" && sudo sed -i '2iX-GNOME-Autostart-enabled=false' "$file" || sudo sed -i 's|^\(X-GNOME-Autostart-enabled=\).*$|\1false|' "$file"); done
 
-_echoT "------------------ firefox add disabled"
+_echot "------------------ firefox add disabled"
 
 file=$dir/00-firefox.desktop
 echo "[Desktop Entry]
@@ -40,7 +40,7 @@ X-GNOME-Autostart-Delay=0
 X-GNOME-Autostart-enabled=false" > $file
 chmod +x "$file"
 
-_echoT "------------------ nautilus add disabled"
+_echot "------------------ nautilus add disabled"
 
 file=$dir/20-org.gnome.Nautilus.desktop
 echo "[Desktop Entry]
@@ -58,7 +58,7 @@ X-GNOME-Autostart-Delay=2
 X-GNOME-Autostart-enabled=false" > $file
 chmod +x "$file"
 
-_echoT "------------------ terminal add disabled"
+_echot "------------------ terminal add disabled"
 
 file=$dir/40-gnome-terminal.desktop
 echo "[Desktop Entry]
@@ -77,7 +77,7 @@ X-GNOME-Autostart-Delay=4
 X-GNOME-Autostart-enabled=false" > $file
 chmod +x "$file"
 
-_echoT "------------------ gedit add disabled"
+_echot "------------------ gedit add disabled"
 
 file=$dir/60-org.gnome.gedit.desktop
 echo "[Desktop Entry]

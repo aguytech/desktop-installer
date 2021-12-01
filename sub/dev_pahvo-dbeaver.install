@@ -8,13 +8,13 @@ _echoT "#################### START ${_PARTDEV}"
 
 cmd="sudo pacman -S --noconfirm --needed"
 
-_echoT "------------------ install"
+_echot "------------------ install"
 
 $cmd dbeaver
 
 ########################  END
 
-_echoT "------------------ write ${_PARTDEV}"
+_echot "------------------ write ${_PARTDEV}"
 _partadd ${_PARTDEV} $_FILE_DEV_DONE
 
 _echoT "#################### END ${_PARTDEV}"

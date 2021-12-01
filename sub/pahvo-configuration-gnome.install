@@ -8,7 +8,7 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 ########################  MAIN
 
 
-#_echoT "------------------ gnome-xcf-thumbnailer"
+#_echot "------------------ gnome-xcf-thumbnailer"
 #! [ -d /usr/share/thumbnailers ] && sudo mkdir -p /usr/share/thumbnailers
 #! [ -e /usr/share/thumbnailers/gnome-xcf.thumbnailer ] && echo -e "[Thumbnailer Entry]\nTryExec=gnome-xcf-thumbnailer\nExec=gnome-xcf-thumbnailer %i %o\nMimeType=image/x-xcf;image/x-compressed-xcf;" | sudo tee /usr/share/thumbnailers/gnome-xcf.thumbnailer
 #nautilus -q
@@ -16,7 +16,7 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 #[ -d ~/.cache/thumbnails/fail ] && rm -r ~/.cache/thumbnails/fail
 
 
-_echoT "------------------ gedit settings"
+_echot "------------------ gedit settings"
 #dconf write /org/nemo/extensions/nemo-terminal/default-visible false
 gsettings set org.gnome.gedit.preferences.ui max-recents 30
 dconf write /org/gnome/gedit/plugins/sourcecodebrowser/show-line-numbers true
@@ -26,7 +26,7 @@ pathplug=~/.local/share/gedit/plugins
 ! [ -d $pathplug ] && mkdir -p $pathplug
 
 
-_echoT "------------------ gedit / restore-tabs"
+_echot "------------------ gedit / restore-tabs"
 path=restore-tabs
 cd $pathplug
 _keepmvts "$path"
@@ -38,7 +38,7 @@ rm $path/.gitignore
 sudo cp $path/org.gnome.gedit.plugins.restoretabs.gschema.xml /usr/share/glib-2.0/schemas/
 sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
 
-_echoT "------------------ gedit / duplicate-line"
+_echot "------------------ gedit / duplicate-line"
 path=duplicate-line
 cd $pathplug
 _keepmvts "$path"
@@ -51,7 +51,7 @@ sed -i 's|^\(\s*\)\(if modifiers ==.*\)|#\1\2\n\1if event.state \& Gdk.ModifierT
 #if event.state & Gdk.ModifierType.CONTROL_MASK and event.state & Gdk.ModifierType.SHIFT_MASK:
 
 
-_echoT "------------------ gedit / gedit-markdown"
+_echot "------------------ gedit / gedit-markdown"
 path=markdown_preview
 cd $pathplug
 _keepmvts "$path"
@@ -61,12 +61,12 @@ rm master.zip
 mv gedit-plugin-markdown_preview-master $path
 
 
-_echoT "------------------ numlock-state conf"
+_echot "------------------ numlock-state conf"
 
 sudo gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
 
 
-_echoT "------------------ gstreamer preset"
+_echot "------------------ gstreamer preset"
 
 file="/usr/share/sound-juicer/rhythmbox.gep"
 sch="\[streamprofile-oggvorbis-1\]"
@@ -78,17 +78,17 @@ str="[profile-oggvorbis2]\nname = oggvorbis2\ndescription = Ogg Vorbis High\nfor
 sudo sed -i "/$sch/ i ${str}" "$file"
 
 
-_echoT "------------------ _LAPTOP"
+_echot "------------------ _LAPTOP"
 [ "$_LAPTOP" ] && _service enable tlp tlp-sleep
 
 
-_echoT "------------------ virtualbox"
+_echot "------------------ virtualbox"
 [ "$_VIRTUALBOX" ] && sudo usermod -aG vboxusers ${USER}
 
 
 ########################  END
 
-_echoT "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
+_echot "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
 _partadd "${_PART}/${S_RELEASE_DESKTOP}" "${S_FILE_INSTALL_DONE}"
 
 _echoT "#################### END ${_PART}/${S_RELEASE_DESKTOP}"

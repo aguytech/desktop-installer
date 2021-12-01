@@ -8,14 +8,14 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 ########################  MAIN
 
 
-_echoT "------------------ fix package for pacman -Qdtq"
+_echot "------------------ fix package for pacman -Qdtq"
 
 sudo pacman -S --asexplicit chrome-gnome-shell manjaro-base-skel manjaro-gdm-branding matcha-gtk-theme pkgconf ttf-hack xcursor-breeze
 
 
 ########################  END
 
-_echoT "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
+_echot "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
 _partadd "${_PART}/${S_RELEASE_DESKTOP}" "${S_FILE_INSTALL_DONE}"
 
 _echoT "#################### END ${_PART}/${S_RELEASE_DESKTOP}"

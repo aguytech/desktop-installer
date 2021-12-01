@@ -9,7 +9,7 @@ _echoT "#################### START ${_PARTDEV}"
 sudo apt-add-repository -yn ppa:serge-rider/dbeaver-ce # dbeaver
 sudo apt update
 
-_echoT "------------------ install"
+_echot "------------------ install"
 
 cmd="sudo apt install -y"
 
@@ -17,7 +17,7 @@ $cmd dbeaver-ce
 
 ########################  END
 
-_echoT "------------------ write ${_PARTDEV}"
+_echot "------------------ write ${_PARTDEV}"
 _partadd ${_PARTDEV} $_FILE_DEV_DONE
 
 _echoT "#################### END ${_PARTDEV}"

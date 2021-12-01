@@ -20,7 +20,7 @@ _require ${file_desk_conf}
 
 ########################  MAIN
 
-_echoT "------------------ backup"
+_echot "------------------ backup"
 paths=
 if [ -d ${path_opt} ] || [ -d ~/${path_conf} ] || [ -d ${path_proj} ]; then
   for path in ${path_opt} ~/${path_conf} ${path_proj} ${file_desk} ${file_bin}; do
@@ -30,7 +30,7 @@ if [ -d ${path_opt} ] || [ -d ~/${path_conf} ] || [ -d ${path_proj} ]; then
 fi
 
 
-_echoT "------------------ clean instance"
+_echot "------------------ clean instance"
 # delete existing folder
 for path in ${path_opt} ~/${path_conf} ${path_proj} ${file_desk} ${file_bin}; do
 	[ -e ${path} ] && rm -fR ${path}
@@ -51,7 +51,7 @@ elif [ "${_ECLIPSE_VER}" ]; then
 
     cd /tmp
 
-    _echoT "------------------ get"
+    _echot "------------------ get"
 
     file=eclipse-java-${_ECLIPSE_VER}-R-linux-gtk-x86_64.tar.gz
     url=http://mirror.ibcp.fr/pub/eclipse//technology/epp/downloads/release/${_ECLIPSE_VER}/R/${file}
@@ -67,18 +67,18 @@ elif [ "${_ECLIPSE_VER}" ]; then
     fi
 
 
-    _echoT "------------------ install"
+    _echot "------------------ install"
     path=eclipse
     [ -d ${path} ] && rm -fR ${path}
     tar xzf ${file}
     mv ${path} ${path_opt}
     rm ${file}
 
-	_echoT "------------------ ${file_bin} bind"
+	_echot "------------------ ${file_bin} bind"
 	sudo [ -e ${file_bin} ] && sudo rm ${file_bin}
 	sudo ln -s ${path_opt}/eclipse ${file_bin}
 
-	_echoT "------------------ launcher"
+	_echot "------------------ launcher"
 	cp ${file_desk_conf} ${file_desk}
 	chmod +x ${file_desk}
 
@@ -87,20 +87,20 @@ fi
 
 ####################  COMMON
 
-_echoT "------------------ conf"
+_echot "------------------ conf"
 file=${path_opt}/eclipse.ini
 grep -q '^-Duser' ${file} || sed -i "/^-vmargs/ a-Duser.home=${HOME}/.eclipse_${_ECLIPSE_THEME}" ${file}
 sed -i "/^-Dosgi.instance.area.default/ s|=.*|=${path_proj}/init|" ${file}
 #sed -i "/^-Dosgi.instance.area.default/ s|=.*|=${path_proj}/eclipse-workspaces-${_ECLIPSE_THEME}|" ${file}
 
 
-_echoT "------------------ jdk src doc"
+_echot "------------------ jdk src doc"
 sudo apt install -y openjdk-17-source openjdk-17-doc
 
 
 ########################  END
 
-_echoT "------------------ write ${_PARTDEV}"
+_echot "------------------ write ${_PARTDEV}"
 _partadd "${_PARTDEV}" "$_FILE_DEV_DONE"
 
 _echoT "#################### END ${_PARTDEV}"

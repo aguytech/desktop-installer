@@ -12,7 +12,7 @@ dir=~/.config/autostart
 ! [ -d $dir ] && mkdir $dir
 
 
-_echoT "------------------ clip disabled"
+_echot "------------------ clip disabled"
 
 file=${dir}/xfce4-clipman-plugin-autostart.desktop
 
@@ -20,7 +20,7 @@ sed -i '/^TryExec/ s|^|#|' $file
 sed -i '/^Exec/ s|^|#|' $file
 
 
-_echoT "------------------ plank add enabled"
+_echot "------------------ plank add enabled"
 
 file=${dir}/plank.desktop
 echo "[Desktop Entry]
@@ -35,7 +35,7 @@ Hidden=false
 " > $file
 
 
-_echoT "------------------ firefox add disabled"
+_echot "------------------ firefox add disabled"
 
 file=${dir}/00-firefox.desktop
 echo "[Desktop Entry]
@@ -56,7 +56,7 @@ Categories=Network;WebBrowser;
 " > $file
 
 
-_echoT "------------------ thunar add disabled"
+_echot "------------------ thunar add disabled"
 
 file=${dir}/20-thunar.desktop
 echo "[Desktop Entry]
@@ -73,7 +73,7 @@ MimeType=inode/directory;
 " > $file
 
 
-_echoT "------------------ xfce4-terminal add disabled"
+_echot "------------------ xfce4-terminal add disabled"
 
 file=${dir}/40-xfce4-terminal.desktop
 echo "[Desktop Entry]
@@ -90,7 +90,7 @@ StartupNotify=true
 " > $file
 
 
-_echoT "------------------ sublime-text add disabled"
+_echot "------------------ sublime-text add disabled"
 
 file=${dir}/60-sublime-text.desktop
 echo "[Desktop Entry]
@@ -110,7 +110,7 @@ StartupNotify=true
 
 ########################  END
 
-_echoT "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
+_echot "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
 _partadd "${_PART}/${S_RELEASE_DESKTOP}" "${S_FILE_INSTALL_DONE}"
 
 

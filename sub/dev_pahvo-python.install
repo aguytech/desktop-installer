@@ -11,7 +11,7 @@ _echoT "#################### START ${_PARTDEV}"
 cmd="sudo pacman -S --noconfirm --needed"
 
 
-_echoT "------------------ base install"
+_echot "------------------ base install"
 
 packages="cython python-pip"
 
@@ -20,7 +20,7 @@ $cmd $packages
 
 ########################  END
 
-_echoT "------------------ write ${_PARTDEV}"
+_echot "------------------ write ${_PARTDEV}"
 _partadd ${_PARTDEV} $_FILE_DEV_DONE
 
 _echoT "#################### END ${_PARTDEV}"

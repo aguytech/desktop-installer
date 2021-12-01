@@ -8,17 +8,17 @@
 _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
 
-_echoT "------------------ update"
+_echot "------------------ update"
 
 sudo pacman -Syy --noconfirm
 
 
-_echoT "------------------ upgrade & downgrade"
+_echot "------------------ upgrade & downgrade"
 
 sudo pacman -Suu --noconfirm
 
 
-#_echoT "------------------ clean"
+#_echot "------------------ clean"
 
 #sudo pacman -Sc --noconfirm
 

@@ -16,13 +16,14 @@ _FILE_INSTALL_DONE=${_PATH_CONF}/install.done
 ########################  FUNCTIONS
 
 # colors
-white='\e[0;0m'; red='\e[0;31m'; green='\e[0;32m'; blue='\e[0;34m'; magenta='\e[0;35m'; yellow='\e[0;33m'
-whiteb='\e[1;1m'; redb='\e[1;31m'; greenb='\e[1;32m'; blueb='\e[1;34m'; magentab='\e[1;35m'; yellowb='\e[1;33m'; cclear='\e[0;0m'
+white='\e[0;0m'; red='\e[0;31m'; green='\e[0;32m'; blue='\e[0;34m'; magenta='\e[0;95m'; yellow='\e[0;93m'; cyan='\e[0;96m';
+whiteb='\e[1;1m'; redb='\e[1;31m'; greenb='\e[1;32m'; blueb='\e[1;34m'; magentab='\e[1;95m'; yellowb='\e[1;93m'; cyanb='\e[1;96m'; cclear='\e[0;0m';
 sdate=$(date +%s)
 
-_echoI() { echo -e "${yellow}${*}${cclear}"; }
-_echoI() { echo -e "${yellowb}${*}${cclear}"; }
-_echoT() { echo -e "${blueb}${*}${cclear}"; }
+_echoa() { echo -e "${yellow}${*}${cclear}"; }
+_echoA() { echo -e "${yellowb}${*}${cclear}"; }
+_echot() { echo -e "${blue}${*}${cclear}"; }
+_echoE() { echo -e "${redb}${*}${cclear}"; }
 _askno() { _ANSWER=; echo -en "$*: "; read _ANSWER; }
 _askyn() {
 	_ANSWER=
@@ -63,16 +64,16 @@ _confset() {
 
 # exit
 [ "${USER}" != root ] && _echoE "You have to run this script under root privileges" && exit 1
-_parthave ${_PART} ${_FILE_INSTALL_DONE} && _echoI "performed *** ${_PART}" && exit 0
+_parthave ${_PART} ${_FILE_INSTALL_DONE} && _echO "performed *** ${_PART}" && exit 0
 
-_echoT "btrfs configuration: AFTER installation & BEFORE reboot"
+_echoA "btrfs configuration: AFTER installation & BEFORE reboot"
 _askyn "This part have to be launched after installation and BEFORE reboot\nConfirm" && [ "$_ANSWER" == "n" ] && exit 0
 
-#_echoT "------------------ root user"
+#_echot "------------------ root user"
 #echo -e "ct\nct" | sudo passwd root
 #echo "give 'ct' for password :" && su -
 
-_echoT "------------------ Data"
+_echot "------------------ Data"
 
 lsblk -e 11,7 -o name,size,mountpoint
 blkid|grep -v /loop
@@ -89,15 +90,15 @@ blkid|grep -v /loop
 
 [ -z ${_DEVICE_GRUB+x} ] && _askno "Give a device for grub installation": "$(blkid -o device|grep -v '/loop'|xargs) (${anstmp})" && _DEVICE_GRUB=${_ANSWER:-${anstmp}} && _confset _DEVICE_GRUB "$_DEVICE_GRUB"
 
-_echoI "--------------------------"
+_echot "--------------------------"
 cat "${_FILE_INSTALL_CONF}"
-_echoI "--------------------------"
+_echot "--------------------------"
 _askyn "PLease confirm installation" && [ "$_ANSWER" == n ] && exit 1
 
 
 ############ btrfs volumes & dirs
 
-_echoT "------------------ btrfs volumes && dirs"
+_echot "------------------ btrfs volumes && dirs"
 
 mount "${_DEVICE_SYS}" /mnt
 cd /mnt
@@ -119,7 +120,7 @@ btrfs subvolume create user-${_SYSNAME}
 [ -d home/${_USERNAME} ] || mkdir home/${_USERNAME}
 chown 1000.1000 -R home/${_USERNAME} user-${_SYSNAME}
 
-_echoT "------------------ btrfs & path delete"
+_echot "------------------ btrfs & path delete"
 
 for sub in @home @cache @log; do
 	[ "$(btrfs subvolume show ${sub} 2>/dev/null)" ] && btrfs subvolume delete ${sub}
@@ -128,7 +129,7 @@ done
 paths="create ubiquity-apt-clone var"
 for path in ${paths}; do rm -fR "${path}"; done
 
-_echoT "------------------ btrfs subvolume list ${PWD}"
+_echot "------------------ btrfs subvolume list ${PWD}"
 
 btrfs subvolume list .
 
@@ -150,22 +151,22 @@ echo "
 # bind
 /home/shared/dev/bs   /usr/local/bs    none    bind                    0    0" >> ${file}
 
-_echoT "------------------ ${file}"
-_echoI "$(cat ${file})"
+_echot "------------------ ${file}"
+echo "$(cat ${file})"
 
-_askyn "Check above file '/etc/fstab' & confirm to continue" && [ "$_ANSWER" == n ] && exit 1
+_echoA "Check above file: /etc/fstab"
+_askno "Confirm to continue" && [ "$_ANSWER" == n ] && exit 1
 
-_echoT "------------------ umount /mnt"
+_echot "------------------ umount /mnt"
 cd
 umount /mnt
 
-
 ############  GRUB
 
-_echoT "------------------ chroot && prepare grub"
+_echot "------------------ chroot && prepare grub"
 
 # grub
-_echoT "Mount devices"
+_echot "------------------ mount devices"
 cd /
 mount -o subvol="${_SYSNAME}" "${_DEVICE_SYS}" /mnt
 for i in dev dev/pts sys proc run; do mount --bind /$i mnt/$i; done
@@ -173,35 +174,30 @@ for i in dev dev/pts sys proc run; do mount --bind /$i mnt/$i; done
 # uefi
 [ "${_UEFI}" ] && mount "${_UEFI}" /mnt/boot/efi
 
-_echoT "Grub install"
-_echoI "after you are 'chrooted' please enter this line :"
-echo "grub-install --recheck ${_DEVICE_GRUB}"
-echo "update-grub"
-echo "exit"
+_echot "------------------ Grub install"
+_echoA "after you are 'chrooted' please enter this line :"
+echoa "grub-install --recheck ${_DEVICE_GRUB}"
+echoa "update-grub"
+echoa "exit"
 chroot mnt
 
 # uefi
 [ "$_UEFI" ] && umount mnt/boot/efi
 
-_echoT "umount devices"
+_echot "------------------ umount devices"
 for i in run proc sys dev/pts dev; do umount mnt/${i}; done
 umount /mnt
 
-
 ########################  END
 
-_echoT "===================== ${_PART} end"
 _partadd ${_PART} ${_FILE_INSTALL_DONE}
-
 
 ########################  EXPORT
 
-_echoT "------------------ mount $_DEVICE_SYS"
-
+_echot "------------------ mount $_DEVICE_SYS"
 mount "${_DEVICE_SYS}" /mnt
 
-_echoT "------------------ copy conf & done"
-
+_echot "------------------ copy conf & done"
 path="/mnt/${_SYSNAME}/etc/server"
 [ -d "${path}" ] && mv ${path} ${path}.${sdate}
 
@@ -211,14 +207,12 @@ chmod g+rw "${path}"
 chown 0.0 "${path}/ssl"
 chmod 750 "${path}/ssl"
 
-
-_echoT "------------------ umount $_DEVICE_SYS"
-
+_echot "------------------ umount $_DEVICE_SYS"
 umount /mnt
 
-_echoI "You have to start the global installation script after the reboot"
-_askyn "The computer now will reboot, please confirm"
-
-[ "$_ANSWER" == y ] && reboot
-
+_echot "------------------ reboot $_DEVICE_SYS"
+_echoA "You have to start the global installation script after the reboot"
+_echoa "The computer now will reboot"
+_askno "Valid to continue"
+reboot
 exit

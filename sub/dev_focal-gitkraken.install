@@ -6,7 +6,7 @@ _echoT "#################### START ${_PARTDEV}"
 
 ########################  MAIN
 
-_echoT "------------------ get"
+_echot "------------------ get"
 
 file="gitkraken-amd64.deb"
 url="https://release.gitkraken.com/linux/${file}"
@@ -18,12 +18,12 @@ else
 fi
 
 
-_echoT "------------------ keep oldees"
+_echot "------------------ keep oldees"
 
 _keepcpts ~/.gitkraken
 
 
-_echoT "------------------ install"
+_echot "------------------ install"
 
 sudo dpkg -i "$filedown"
 rm "$filedown"
@@ -31,7 +31,7 @@ rm "$filedown"
 
 ########################  END
 
-_echoT "------------------ write ${_PARTDEV}"
+_echot "------------------ write ${_PARTDEV}"
 _partadd "${_PARTDEV}" "$_FILE_DEV_DONE"
 
 _echoT "#################### END ${_PARTDEV}"

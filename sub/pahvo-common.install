@@ -13,20 +13,22 @@ file_bash_functions=${S_PATH_SCRIPT_CONF}/.bash_functions
 path_install_bash_completion=${S_PATH_INSTALL_CONF}/bash-completion
 file_bashrc=${S_PATH_SCRIPT_CONF}/.bashrc-manjaro
 
-_echoT "------------------  required files"
+_echot "------------------  required files"
 _require ${file_env} ${file_bash_aliases} ${file_bash_functions} ${file_bashrc}
 _requirep ${path_install_bash_completion}
 
 ########################  DATA
 
 if [ "${S_STORAGE_DRIVER}" = zfs ]; then
-	_echoT "------------------  data zfs"
+	_echot "------------------  data zfs"
 	anstmp="root"
 	_askno "Give the name of zfs root for device ${S_STORAGE_DEVICE} (${anstmp})"
 	_ZFS_ROOT=${_ANSWER:-$anstmp} && _confset _ZFS_ROOT "${_ZFS_ROOT}"
 fi
 
-_echoT "------------------  data sysctl.conf"
+_echot "------------------  data sysctl.conf"
+
+_SYS_FILE=/etc/sysctl.d/20-server.conf && _confset _SYS_FILE "${_SYS_FILE}"
 
 # host
 [ -z ${_SOMAXCONN+x} ] && anstmp="4096" && _askno "Set $(sysctl net.core.somaxconn) - (${anstmp})" && _SOMAXCONN="${_ANSWER:-$anstmp}" && _confset _SOMAXCONN "${_SOMAXCONN}"
@@ -46,14 +48,13 @@ _echoT "------------------  data sysctl.conf"
 
 ########################  MAIN
 
-_echoT "------------------ timeshift"
+_echot "------------------ timeshift"
 
 sudo pacman --noconfirm -R timeshift timeshift-autosnap-manjaro
 
 
-_echoT "------------------  sysctl conf"
-file=/etc/sysctl.d/20-server.conf
-_keepcpts ${file}
+_echot "------------------  sysctl conf"
+_keepcpts ${_SYS_FILE}
 echo "# server configuration
 net.ipv4.ip_forward = 1
 net.core.somaxconn = ${_SOMAXCONN}
@@ -63,33 +64,33 @@ net.ipv4.tcp_max_tw_buckets = ${_MAX_TW_BUCKETS}
 net.ipv4.tcp_fin_timeout = ${_FIN_TIMEOUT}
 net.ipv4.tcp_keepalive_time = ${_KEEPALIVE_TIME}
 net.ipv4.tcp_keepalive_intvl = ${_KEEPALIVE_INTVL}
-net.ipv4.tcp_keepalive_probes = ${_KEEPALIVE_PROBES}" > ${file}
+net.ipv4.tcp_keepalive_probes = ${_KEEPALIVE_PROBES}" > ${_SYS_FILE}
 
-_echoT "------------------  sysctl restart"
+_echot "------------------  sysctl restart"
 _service restart systemd-sysctl
 
-_echoT "------------------ bs link"
+_echot "------------------ bs link"
 ! [ -e /bs ] && sudo ln -s /usr/local/bs /bs
 
-_echoT "------------------ conf mirror sources"
+_echot "------------------ conf mirror sources"
 # Change the mirror of software sources
 _evalr pacman-mirrors --country-list
 _evalr pacman-mirrors -c France
 
-_echoT "------------------  .bash_aliases"
+_echot "------------------  .bash_aliases"
 file=~/.bash_aliases
 [ -e ${file} ] && _eval rm ${file}
 _eval ln -s ${file_bash_aliases} ${file}
 
-_echoT "------------------  .bash_functions"
+_echot "------------------  .bash_functions"
 file=~/.bash_functions
 [ -e ${file} ] && _eval rm ${file}
 _eval ln -s ${file_bash_functions} ${file}
 
-_echoT "------------------  bash-completion"
+_echot "------------------  bash-completion"
 _evalr "cp -a ${S_PATH_INSTALL_CONF}/bash-completion/* /usr/share/bash-completion/completions/"
 
-_echoT "------------------ conf bash"
+_echot "------------------ conf bash"
 file=~/.bashrc
 _keepmvts ${file}
 ln -s ${file_bashrc} ${file}
@@ -97,7 +98,7 @@ ln -s ${file_bashrc} ${file}
 
 ###################  CLUSTER
 
-_echoT "------------------  hosts S_CLUSTER"
+_echot "------------------  hosts S_CLUSTER"
 
 file=/etc/hosts
 _keepcpts "${file}"
@@ -115,7 +116,7 @@ done
 _eval "sed -i 's|^\(${_IPTHIS}.*\)$|#\1|' ${file}"
 
 if ! grep -q '^# services' ${file}; then
-	_echoT "------------------  hosts S_SERVICE_BITS"
+	_echot "------------------  hosts S_SERVICE_BITS"
 	_keepcpts $file
 	echo -e "\n# services" >> ${file}
 	for str in ${!S_SERVICE_BITS[*]}; do
@@ -130,56 +131,56 @@ if [[ " ${str} " = *" ${S_SERVER_TYPE} "* ]]; then
 
 	if [ "${S_STORAGE_DRIVER}" = zfs ]; then
 
-		_echoT "------------------  zfs install"
+		_echot "------------------  zfs install"
 		_eval apt install -y zfsutils-linux
 
 		path=/zroot
-		_echoT "------------------  zfs zpool ${path}"
+		_echot "------------------  zfs zpool ${path}"
 		[ -d ${path} ] && rm -fR ${path}
 		_evalq zpool create root ${S_STORAGE_DEVICE} -m ${path}
 
 		path=${S_PATH_SAVE}
-		_echoT "------------------  zfs ${path}"
+		_echot "------------------  zfs ${path}"
 		[ -d ${path} ] && rm -fR ${path}
 		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_PATH_SAVE}
 
 		path=${S_HOST_PATH}
-		_echoT "------------------  zfs ${path}"
+		_echot "------------------  zfs ${path}"
 		[ -d ${path} ] && rm -fR ${path}
 		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH}
 
 		path=${S_HOST_PATH_SP}
-		_echoT "------------------  zfs ${path}"
+		_echot "------------------  zfs ${path}"
 		[ -d ${path} ] && rm -fR ${path}
 		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH_SP}
 
 		path=${S_HOST_PATH_SHARE}
-		_echoT "------------------  zfs ${path}"
+		_echot "------------------  zfs ${path}"
 		[ -d ${path} ] && rm -fR ${path}
 		_eval zfs create -o mountpoint=${path} -o compression=lz4 -o  acltype=posixacl ${_ZFS_ROOT}${S_HOST_PATH_SHARE}
 
 		path=${S_HOST_PATH_SAVE}
-		_echoT "------------------  zfs ${path}"
+		_echot "------------------  zfs ${path}"
 		[ -d ${path} ] && rm -fR ${path}
 		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH_SAVE}
 
-		_echoT "------------------  zfs zpool list"
+		_echot "------------------  zfs zpool list"
 		zpool list -v
 
-		_echoT "------------------  zfs list"
+		_echot "------------------  zfs list"
 		zfs list
 
 	elif [ "${S_STORAGE_DRIVER}" = btrfs ]; then
 
-		_echoT "------------------  btrfs storage"
+		_echot "------------------  btrfs storage"
 		path=${S_HOST_PATH}
-		_echoI "Create a btrfs subvolume: /lxd-${S_RELEASE_NAME} and mount it in ${path}"
-		_echo "Continue after that: " && read str
+		_echoA "Create a btrfs subvolume: /lxd-${S_RELEASE_NAME} and mount it in ${path}"
+		_askno "Continue after that:"
 		[ -d ${path} ] || _exite "Unable to find path: ${path}"
 
 		btrfs subvolume list .
 
-		_echoT "------------------  btrfs paths"
+		_echot "------------------  btrfs paths"
 		paths="${S_HOST_PATH_SP} ${S_HOST_PATH_SHARE} ${S_HOST_PATH_SAVE} ${S_HOST_PATH_LOG} "
 		for path in ${paths}; do
 			[ -d ${path} ] || _eval mkdir /vm/${path}
@@ -197,7 +198,7 @@ str=" ovh home "
 if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
 
 	paths="${S_HOST_PATH} ${S_HOST_PATH_SP} ${S_HOST_PATH_SHARE} ${S_HOST_PATH_LOG} ${S_HOST_PATH_SAVE}"
-	_echoT "------------------  create ${paths}"
+	_echot "------------------  create ${paths}"
 	for path in ${paths}; do
 		[ -d "${path}" ] || _evalq mkdir -p "${path}"
 	done

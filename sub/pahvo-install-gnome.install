@@ -8,7 +8,7 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 ########################  MAIN
 
 
-_echoT "------------------ remove ${S_RELEASE_DESKTOP} pre-installed"
+_echot "------------------ remove ${S_RELEASE_DESKTOP} pre-installed"
 sudo pacman -Rs --noconfirm evolution caffeine-ng manjaro-gnome-assets gnome-shell-extension-arc-menu gnome-shell-extension-appfolders-manager gnome-shell-extension-appindicator gnome-shell-extension-dash-to-panel gnome-shell-extension-desktop-icons gnome-shell-extension-openweather
 
 packages="apps-menu@gnome-shell-extensions.gcampax.github.com
@@ -29,7 +29,7 @@ native-window-placement@gnome-shell-extensions.gcampax.github.com
 for PCK in $(echo $packages); do sudo rm -fR "/usr/share/gnome-shell/extensions/${PCK}"; done
 
 
-_echoT "------------------ tools"
+_echot "------------------ tools"
 part_install=${S_RELEASE_DESKTOP}-tools
 
 packages="gedit-plugins gcolor3"
@@ -39,7 +39,7 @@ packages+="nautilus-sendto seahorse-nautilus gtkhash-nautilus nautilus-admin nau
 if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$packages" $_FILE_INSTALL_PCK; else _echoE "Error on part:${_PART} line:$LINENO function:$FUNCNAME"; return 1; fi
 
 
-_echoT "------------------ media"
+_echot "------------------ media"
 part_install=${S_RELEASE_DESKTOP}-media
 
 packages="brasero gnome-subtitles"
@@ -49,7 +49,7 @@ if $cmd $packages; then _partadd $part_install $FILE_INSTALL_DONE && _partadd "$
 
 ########################  END
 
-_echoT "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
+_echot "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
 _partadd "${_PART}/${S_RELEASE_DESKTOP}" "${S_FILE_INSTALL_DONE}"
 
 _echoT "#################### END ${_PART}/${S_RELEASE_DESKTOP}"

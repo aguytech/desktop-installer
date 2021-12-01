@@ -16,13 +16,13 @@ file_service_test_iptables=${path_install_conf}/iptables/iptables-firewall-test.
 file_rsyslog_client_iptables=${path_install_conf}/rsyslog/client-iptables.conf
 file_logrotate_client_iptables=${path_install_conf}/rsyslog/client-iptables.conf
 
-_echoT "------------------ required files"
+_echot "------------------ required files"
 _require ${file_service_iptables} ${file_service_test_iptables} ${file_script_iptables} ${file_conf_iptables} 
 _require ${file_rsyslog_client_iptables} ${file_logrotate_client_iptables}
 
 ########################  DATA
 
-_echoT "------------------  data"
+_echot "------------------  data"
 
 # host
 _IPT_SERVICE=iptables-firewall && _confset _IPT_SERVICE "${_IPT_SERVICE}"
@@ -39,7 +39,7 @@ _IPT_PRE_HTTPS="${_ANSWER:-$anstmp}" && _confset _IPT_PRE_HTTPS "${_IPT_PRE_HTTP
 
 ########################  SYSCTL
 
-_echoT "------------------  sysctl conf"
+_echot "------------------  sysctl conf"
 file=/etc/sysctl.conf
 echo "
 # iptables
@@ -51,38 +51,38 @@ net.ipv4.tcp_keepalive_time= ${_KEEPALIVE_TIME}
 net.ipv4.tcp_keepalive_intvl= ${_KEEPALIVE_INTVL}
 net.ipv4.tcp_keepalive_probes = ${_KEEPALIVE_PROBES}" >> ${file}
 
-_echoT "------------------  sysctl restart"
+_echot "------------------  sysctl restart"
 _service restart systemd-sysctl
 
 ########################  FIREWALL
 
-_echoT "------------------  ${_IPT_SERVICE} conf"
+_echot "------------------  ${_IPT_SERVICE} conf"
 _keepcpts ${file}
 _evalr cp ${file_conf_iptables} ${_IPT_FILE_CONF}
 
-_echoT "------------------  ${_IPT_SERVICE} bin"
+_echot "------------------  ${_IPT_SERVICE} bin"
 file=/usr/sbin/${_IPT_SERVICE}
 _evalr cp ${file_script_iptables} ${file}
 _evalr "chown root:root ${file} && chmod 750 ${file}"
 
-_echoT "------------------  systemd add service"
+_echot "------------------  systemd add service"
 file=/etc/systemd/system/${file_service_iptables##*/}
 _evalr cp ${file_service_iptables} ${file}
 _evalr "chown root:root ${file} && chmod 644 ${file}"
 
-_echoT "------------------  systemd add service-test"
+_echot "------------------  systemd add service-test"
 file=/etc/systemd/system/${file_service_test_iptables##*/}
 _evalr cp ${file_service_test_iptables} ${file}
 _evalr "chown root:root ${file} && chmod 644 ${file}"
 
-_echoT "------------------  systemd reload daemon"
+_echot "------------------  systemd reload daemon"
 _evalr systemctl daemon-reload
 
-_echoT "------------------  ${_IPT_SERVICE}-test"
-_echoI "To launch iptables rules for TEST, run: systemctl start ${_IPT_SERVICE}-test"
-_echoI "You have 2 minutes after to verify iptables rules"
+_echot "------------------  ${_IPT_SERVICE}-test"
+_echoA "To launch iptables rules for TEST, run: systemctl start ${_IPT_SERVICE}-test"
+_echoa "You have 2 minutes after to verify iptables rules"
 
-_echoT "------------------  systemd ${_IPT_SERVICE}"
+_echot "------------------  systemd ${_IPT_SERVICE}"
 _askno "To START the service: ${_IPT_SERVICE}, valid"
 _service start ${_IPT_SERVICE}
 _askno "To ENABLE the service: ${_IPT_SERVICE}, valid"
@@ -90,24 +90,24 @@ _service enable ${_IPT_SERVICE}
 
 ########################  RSYSLOG
 
-_echoT "------------------  path log iptables"
+_echot "------------------  path log iptables"
 path=${S_PATH_LOG}/iptables
 [ -d ${path} ] || _evalr mkdir -p ${path}
 grep -q syslog /etc/passwd && _evalr chown syslog ${path}
 
-_echoT "------------------  rsyslog client-iptables"
+_echot "------------------  rsyslog client-iptables"
 file=/etc/rsyslog.d/${file_rsyslog_client_iptables##*/}
 _evalr cp -a ${file_rsyslog_client_iptables} ${file}
 _var_replace ${file} rsyslog
 
 ########################  LOGROTATE
 
-_echoT "------------------  logrotate client-iptables"
+_echot "------------------  logrotate client-iptables"
 file=/etc/logrotate.d/${file_logrotate_client_iptables##*/}
 _evalr cp -a ${file_logrotate_client_iptables} ${file}
 _var_replace ${file} logrotate
 
-_echoT "------------------  logrotate restart"
+_echot "------------------  logrotate restart"
 _service restart logrotate
 
 ########################  END

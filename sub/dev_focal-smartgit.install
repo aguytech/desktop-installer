@@ -15,14 +15,14 @@ file_bin="/usr/bin/smartgit"
 
 ########################  MAIN
 
-_echoT "------------------ backup"
+_echot "------------------ backup"
 
 if [ -d ${path_opt} ] || [ -d ~/${path_conf} ]; then
 	tar czf ${_PATH_SOFT_BACKUP}/smartgit_backup_${_DATE}-$(date +%s).tar.gz ${path_opt} ~/${path_conf} ${file_desk} ${file_bin}
 fi
 
 
-_echoT "------------------ clean instance"
+_echot "------------------ clean instance"
 
 # delete existing folder
 for path in ${path_opt} ~/${path_conf} ${file_desk} ${file_bin}; do
@@ -44,7 +44,7 @@ elif [ "${_SMARTGIT_VER}" ]; then
 
 	cd /tmp
 
-	_echoT "------------------ get"
+	_echot "------------------ get"
 
 	file="smartgit-linux-${_SMARTGIT_VER}.tar.gz"
 	url="https://www.syntevo.com/downloads/smartgit/${file}"
@@ -63,7 +63,7 @@ elif [ "${_SMARTGIT_VER}" ]; then
 	fi
 
 
-	_echoT "------------------ install"
+	_echot "------------------ install"
 
 	path="smartgit"
 	[ -d "$path" ] && rm -fR "$path"
@@ -76,13 +76,13 @@ fi
 
 ####################  COMMON
 
-_echoT "------------------ $file_bin bind"
+_echot "------------------ $file_bin bind"
 
 [ -e "$file_bin" ] || [ -h "$file_bin" ] && sudo rm "$file_bin"
 sudo ln -s "${path_opt}/squirrel-sql.sh" "$file_bin"
 
 
-_echoT "------------------ launcher"
+_echot "------------------ launcher"
 
 file="${path_desk}"/smartgit.desktop
 echo "[Desktop Entry]
@@ -104,14 +104,14 @@ chmod +x "$file"
 
 ########################  END
 
-_echoT "------------------ write ${_PARTDEV}"
+_echot "------------------ write ${_PARTDEV}"
 _partadd "${_PARTDEV}" "$_FILE_DEV_DONE"
 
 _echoT "#################### END ${_PARTDEV}"
 
 <<KEEP
 
-_echoT "------------------ get deb"
+_echot "------------------ get deb"
 
 file="smartgit-${_SMARTGIT_VER}.deb"
 url="https://www.syntevo.com/downloads/smartgit/${file}"
@@ -122,7 +122,7 @@ else
 	! wget "$url" -O $filedown && _exite "Error during downloading 'smartgit' with url:\n$url"
 fi
 
-_echoT "------------------ logs"
+_echot "------------------ logs"
 
 userconfver="${_SMARTGIT_VER//_/.}" && userconfver="${userconfver%.*}" && userconfver="${userconf}/${userconfver}"
 [ -f "$userconfver/log.txt" ] && mv "$userconfver/log.txt" "$diropt"

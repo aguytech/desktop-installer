@@ -11,7 +11,7 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 dir=~/.config/autostart
 ! [ -d $dir ] && mkdir $dir
 
-_echoT "------------------ remove autostart"
+_echot "------------------ remove autostart"
 
 if [ "$_LAPTOP" ]; then
 	echo "X-GNOME-Autostart-enabled=false" >> $dir/ignore-lid-switch-tweak.desktop
@@ -23,7 +23,7 @@ files="$dir/tangerine-autostart.desktop \
 /etc/xdg/autostart/gnome-do.desktop"
 for file in $files; do [ -f $file ] && (! grep -q X-GNOME-Autostart-enabled "$file" && sudo sed -i '2iX-GNOME-Autostart-enabled=false' "$file" || sudo sed -i 's|^\(X-GNOME-Autostart-enabled=\).*$|\1false|' "$file"); done
 
-_echoT "------------------ firefox add enabled"
+_echot "------------------ firefox add enabled"
 
 file=$dir/00-firefox.desktop
 echo "[Desktop Entry]
@@ -44,7 +44,7 @@ DBusActivatable=true
 X-GNOME-Autostart-Delay=0
 X-GNOME-Autostart-enabled=true" > $file
 
-_echoT "------------------ nautilus add enabled"
+_echot "------------------ nautilus add enabled"
 
 file=$dir/20-org.gnome.Nautilus.desktop
 echo "[Desktop Entry]
@@ -61,7 +61,7 @@ DBusActivatable=true
 X-GNOME-Autostart-Delay=2
 X-GNOME-Autostart-enabled=true" > $file
 
-_echoT "------------------ gnome-terminal add enabled"
+_echot "------------------ gnome-terminal add enabled"
 
 file=$dir/40-gnome-terminal.desktop
 echo "[Desktop Entry]
@@ -79,7 +79,7 @@ DBusActivatable=true
 X-GNOME-Autostart-Delay=4
 X-GNOME-Autostart-enabled=true" > $file
 
-_echoT "------------------ gedit add enabled"
+_echot "------------------ gedit add enabled"
 
 file=$dir/60-org.gnome.gedit.desktop
 echo "[Desktop Entry]
@@ -96,18 +96,18 @@ DBusActivatable=true
 X-GNOME-Autostart-Delay=6
 X-GNOME-Autostart-enabled=true" > $file
 
-_echoT "------------------ executable"
+_echot "------------------ executable"
 
 chmod +x $dir/*.desktop
 
-_echoT "------------------ autostart disabled"
+_echot "------------------ autostart disabled"
 
 sed -i 's|^\(X-GNOME-Autostart-enabled=\).*$|\1false|' $dir/*.desktop
 
 
 ########################  END
 
-_echoT "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
+_echot "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
 _partadd "${_PART}/${S_RELEASE_DESKTOP}" "${S_FILE_INSTALL_DONE}"
 
 

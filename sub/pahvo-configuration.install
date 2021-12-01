@@ -25,17 +25,17 @@ _requirep ${path_vim}
 _echoT "================== ${_PART} / global configuration"
 
 if [ "${_LAPTOP}" ]; then
-	_echoT "------------------ enable acpid"
+	_echot "------------------ enable acpid"
 	service=acpid
 	systemctl is-enabled ${service}|grep -q ^disabled && _service enable ${service}
 	systemctl is-active ${service}|grep -q ^inactive && _service start ${service}
 
-	_echoT "------------------ grub timeout"
+	_echot "------------------ grub timeout"
 	systemctl is-enabled ${service}|grep -q ^disabled && _service enable tlp
 fi
 
 
-_echoT "------------------ reduce swapiness"
+_echot "------------------ reduce swapiness"
 echo "vm.swappiness=10" |sudo tee -a /etc/sysctl.d/99-swappiness.conf
 
 
@@ -46,7 +46,7 @@ sudo sed -i "/^GRUB_TIMEOUT=/ s|=.*|=2|" ${file}
 #sudo sed -i "/^GRUB_TIMEOUT_STYLE=/ s|=hidden|menu|" ${file}
 sudo sed -i "/^GRUB_SAVEDEFAULT=/ s|=.*|=false|" ${file}
 
-_echoT "------------------ grub os-prober"
+_echot "------------------ grub os-prober"
 # add identifier to menuentry
 file=/etc/grub.d/30_os-prober
 if ! grep -q 'LONGNAME="${LONGNAME} ${BTRFSsubvol/#subvol=/}"' ${file}; then
@@ -54,7 +54,7 @@ if ! grep -q 'LONGNAME="${LONGNAME} ${BTRFSsubvol/#subvol=/}"' ${file}; then
 	sudo sed -i "/LONGNAME=\"\${LABEL}\"/ a\  else\n    LONGNAME=\"\${LONGNAME} \${BTRFSsubvol/#subvol=/}\"" ${file}
 fi
 
-_echoT "------------------ grub cmdline"
+_echot "------------------ grub cmdline"
 str=
 #[ "${_LAPTOP}" ] && str+=" acpi_backlight=vendor" # just try
 #[ "${_LAPTOP}" ] && str+=" fbcon=nodefer" # just try
@@ -66,7 +66,7 @@ fi
 sudo update-grub
 
 
-_echoT "------------------ numlock tty service"
+_echot "------------------ numlock tty service"
 
 file_exec="/usr/local/bin/numlock"
 echo '#!/bin/bash
@@ -92,17 +92,17 @@ _service enable numlock
 
 
 if type vim >/dev/null 2>&1 ; then
-	_echoT "------------------  vim links edit"
+	_echot "------------------  vim links edit"
 
 	for file in /usr/bin/edit /usr/bin/editor; do
 		[ -e ${file} ] && _evalr rm ${file}
 		_evalr ln -sv /usr/bin/vim ${file}
 	done
 
-	_echoT "------------------ dev vim"
+	_echot "------------------ dev vim"
 	sudo cp ${path_vim}/* /usr/share/vim/vim*/colors/
 
-	_echoT "----------  conf vim"
+	_echot "----------  conf vim"
 	file=/etc/vimrc
 	sudo sed -i "s|^\"\(syntax\).*|\1 on|" ${file}
 
@@ -114,7 +114,7 @@ if type vim >/dev/null 2>&1 ; then
 fi
 
 
-_echoT "------------------  /usr/local/bs/conf links"
+_echot "------------------  /usr/local/bs/conf links"
 
 for file in .nanorc .tmux.conf .vimrc; do
 	path_from="${S_PATH_SCRIPT_CONF}/${file}"
@@ -123,7 +123,7 @@ for file in .nanorc .tmux.conf .vimrc; do
 	ln -s "${path_from}" "${path}"
 done
 
-_echoT "------------------ gstreamer preset"
+_echot "------------------ gstreamer preset"
 path=~/.local/share/gstreamer-1.0/presets
 ! [ -d "${path}" ] && mkdir -p ${path}
 
@@ -149,7 +149,7 @@ tolerance=40000000
 quality=0.9
 managed=false" > ${file}
 
-_echoT "------------------ git config"
+_echot "------------------ git config"
 
 git config --global user.name "aguy tech"
 git config --global user.email aguytech@free.fr
@@ -163,10 +163,10 @@ echo -e "[alias]
 \tbr = branch
 " >> ~/.gitconfig
 
-_echoT "------------------ meld style"
+_echot "------------------ meld style"
 sudo cp ${file_meld_conf} /usr/share/meld/styles/meld-dark.xml
 
-_echoT "------------------ nano"
+_echot "------------------ nano"
 
 for str in conf install; do
 	sudo cp -a /usr/share/nano/sh.nanorc /usr/share/nano/${str}.nanorc
@@ -189,21 +189,21 @@ for opt in ${opts}; do
 	sudo sed -i "s|^.*\(set $opt .*\)$|\1|"  ${file}
 done
 
-_echoT "------------------ language-specs conf"
+_echot "------------------ language-specs conf"
 sudo cp -a ${S_PATH_INSTALL_CONF}/gtk/conf.lang /usr/share/gtksourceview-3.0/language-specs/
 sudo cp -a ${S_PATH_INSTALL_CONF}/gtk/install.lang /usr/share/gtksourceview-3.0/language-specs/
 
-_echoT "------------------ firefox tweaks"
+_echot "------------------ firefox tweaks"
 path=~/.mozilla/firefox/${USER}
 if [ -d "${path}" ]; then
 	ln -sv "${S_PATH_SCRIPT_CONF}/user.js" ${path}
 	chown 1000:1000 ${path}
 else
-	_echoI "please link '${S_PATH_INSTALL_CONF}/firefox/user.js'\nto your firefox path of profile: ${path}"
+	_echoA "please link '${S_PATH_INSTALL_CONF}/firefox/user.js'\nto your firefox path of profile: ${path}"
 	_askno "Confirm"
 fi
 
-_echoT "------------------ tmux"
+_echot "------------------ tmux"
 
 file=~/.tmux.conf
 
@@ -216,7 +216,7 @@ grep -q resurrect.tmux ${file} || echo -e "# resurect plugin\nrun-shell ${path}/
 # set conf file
 tmux source-file ${file} 2>/dev/null
 
-_echoT "------------------  logrotate server"
+_echot "------------------  logrotate server"
 # logrotate
 sudo sh -c "echo '# Logrotate file for server functions logs
 #$S_PATH_LOG_INSTALL/*.log
@@ -234,12 +234,12 @@ $S_PATH_LOG_SERVER/*.debug
 }
 ' > /etc/logrotate.d/server"
 
-_echoT "------------------ launcher clean"
+_echot "------------------ launcher clean"
 sudo sed -i 's|;;|;|' /usr/share/applications/*.desktop
 
 ########################  CRON
 
-_echoT "------------------  cron conf"
+_echot "------------------  cron conf"
 
 file=/etc/crontab
 _keepcpts ${file}
@@ -248,7 +248,7 @@ grep -q '^MAILTO' "${file}" || _eval "sed -i '/^PATH=.*/ a ${str}' ${file}"
 
 ########################  RSYSLOG
 
-_echoT "------------------  rsyslog conf"
+_echot "------------------  rsyslog conf"
 
 file="/etc/rsyslog.conf"
 _keepcpts "${file}"
@@ -263,26 +263,26 @@ elif [ "${S_RSYSLOG_PTC}" = tcp ]; then
 	_eval "sed -i 's|^#\?\(input(type=\"imtcp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
 fi
 
-_echoT "------------------  rsyslog restart"
+_echot "------------------  rsyslog restart"
 _service restart rsyslog
 
-_echoT "------------------  rsyslog conf"
+_echot "------------------  rsyslog conf"
 sed -i '/^auth.*/ s|^|#|' /etc/rsyslog.d/50-default.conf
 sed -i '/^cron.*/ s|^|#|' /etc/rsyslog.d/50-default.conf
 
-_echoT "------------------  rsyslog cron"
+_echot "------------------  rsyslog cron"
 file=/etc/rsyslog.d/70-${file_rsyslog_cron##*/}
 _evalq cp -a ${file_rsyslog_cron} ${file}
 _var_replace ${file} rsyslog
 
-_echoT "------------------  rsyslog client-auth"
+_echot "------------------  rsyslog client-auth"
 file=/etc/rsyslog.d/72-${file_rsyslog_client_auth##*/}
 _evalq cp -a ${file_rsyslog_client_auth} ${file}
 _var_replace ${file} rsyslog
 
 #TODO add rsyslog mail
 <<KEEP
-_echoT "------------------  rsyslog client-mail conf"
+_echot "------------------  rsyslog client-mail conf"
 file="/etc/rsyslog.d/70-default.conf"
 # stop mail logs for syslog
 ! grep -q "mail\.\*\s*stop" "${file}" && sed -i '/^mail\.err/ amail.*              stop' "${file}"
@@ -290,11 +290,11 @@ KEEP
 
 ########################  LOGROTATE
 
-_echoT "------------------  logrotate global"
+_echot "------------------  logrotate global"
 file=/etc/logrotate.conf
 _eval  "sed -i '/^#dateext/ s|^#||' ${file}"
 
-_echoT "------------------  logrotate server"
+_echot "------------------  logrotate server"
 file=/etc/logrotate.d/${file_logrotate_server##*/}
 _eval cp -a ${file_logrotate_server} ${file}
 _var_replace ${file} logrotate
@@ -303,7 +303,7 @@ _var_replace ${file} logrotate
 
 file=${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}-${S_RELEASE_DESKTOP}.install
 if [ -f "${file}" ]; then
-	_echoT "------------------ ${S_RELEASE_DESKTOP} required"
+	_echot "------------------ ${S_RELEASE_DESKTOP} required"
 	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}-${S_RELEASE_DESKTOP}.install && echo "wrong '${_PART}'" && exit
 fi
 

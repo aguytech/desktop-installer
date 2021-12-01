@@ -7,7 +7,7 @@ _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}
 # xprop WM_CLASS
 ########################  MAIN
 
-_echoT "------------------ nautilus"
+_echot "------------------ nautilus"
 
 name=org.gnome.Nautilus; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
@@ -52,7 +52,7 @@ Exec=gnome-terminal -e /home/shared/dev/bs/ssh-lxd
 fi
 
 
-_echoT "------------------ gedit"
+_echot "------------------ gedit"
 
 name=org.gnome.gedit; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
@@ -96,7 +96,7 @@ Exec=gnome-terminal -e ssh-lxd
 	chmod +x ${path}/${name}.desktop
 fi
 
-_echoT "------------------ org.gnome.Terminal"
+_echot "------------------ org.gnome.Terminal"
 
 name=org.gnome.Terminal; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
@@ -135,7 +135,7 @@ Exec=nautilus --new-window network:///
 	chmod +x ${path}/${name}.desktop
 fi
 
-_echoT "------------------ firefox"
+_echot "------------------ firefox"
 
 name=firefox; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
@@ -191,7 +191,7 @@ Exec=pidgin
 	chmod +x ${path}/${name}.desktop
 fi
 
-_echoT "------------------ thunderbird"
+_echot "------------------ thunderbird"
 
 name=thunderbird; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
@@ -222,7 +222,7 @@ Exec=thunderbird -compose
 	chmod +x ${path}/${name}.desktop
 fi
 
-_echoT "------------------ org.gnome.Totem"
+_echot "------------------ org.gnome.Totem"
 
 name=org.gnome.Totem; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
@@ -261,7 +261,7 @@ Exec=mpv --player-operation-mode=pseudo-gui
 	chmod +x ${path}/${name}.desktop
 fi
 
-_echoT "------------------ mpv"
+_echot "------------------ mpv"
 
 name=mpv; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
@@ -299,7 +299,7 @@ Exec=totem
 	chmod +x ${path}/${name}.desktop
 fi
 
-_echoT "------------------ gmusicbrowser"
+_echot "------------------ gmusicbrowser"
 
 name=gmusicbrowser; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
@@ -338,7 +338,7 @@ Exec=qpaeq
 	chmod +x ${path}/${name}.desktop
 fi
 
-_echoT "------------------ gimp"
+_echot "------------------ gimp"
 
 name=gimp; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
@@ -368,7 +368,7 @@ Exec=xsane
 	chmod +x ${path}/${name}.desktop
 fi
 
-_echoT "------------------ libreoffice-startcenter"
+_echot "------------------ libreoffice-startcenter"
 
 name=libreoffice-startcenter; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
@@ -399,7 +399,7 @@ Exec=gcolor3
 	chmod +x ${path}/${name}.desktop
 fi
 
-_echoT "------------------ gnome-tweak-tool"
+_echot "------------------ gnome-tweak-tool"
 
 name=org.gnome.tweaks; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 cp /usr/share/applications/${name}.desktop ${path}
@@ -445,7 +445,7 @@ fi
 ########################  FULL
 
 
-_echoT "------------------ org.gnome.Terminal-tmux"
+_echot "------------------ org.gnome.Terminal-tmux"
 
 name=org.gnome.Terminal-tmux; path=~/.local/share/applications; [ -d ${path} ] || mkdir ${path}
 echo "

@@ -7,18 +7,18 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 
 ########################  MAIN
 
-_echoT "------------------ wallpapers"
+_echot "------------------ wallpapers"
 path=${S_PATH_INSTALL_CONF}/wp
 [ -d "${path}" ] && _evalr cp ${path}/* /usr/share/backgrounds/xfce/
 
-_echoT "------------------ acpi enable"
+_echot "------------------ acpi enable"
 systemctl is-enabled acpid|grep -q ^disabled && _service enable acpid
 systemctl is-active acpid|grep -q ^inactive && _service start acpid
 
 file=/etc/lightdm/lightdm-gtk-greeter.conf
 cmd="/usr/bin/numlockx on"
 
-_echoT "------------------ numlockx in tty"
+_echot "------------------ numlockx in tty"
 # ally-states
 if grep -q "^a11y-states *=" ${file}; then
 	sudo sed -i "s|\(^a11y-states.*\)$|\1;+keyboard|" ${file}
@@ -26,7 +26,7 @@ else
 	sudo sh -c "echo 'a11y-states = +keyboard' >> ${file}"
 fi
 
-_echoT "------------------ numlockx in ldm"
+_echot "------------------ numlockx in ldm"
 # keyboard
 if grep -q "^keyboard *=" ${file}; then
 	sudo sed -i "s|\(^keyboard *=\)|\1 $cmd|" ${file}
@@ -36,7 +36,7 @@ fi
 
 
 if ! [ "${_LAPTOP}" ]; then
-	_echoT "------------------ No beep"
+	_echot "------------------ No beep"
 	echo 'xset -b' >> ~/.xprofile
 	#echo "blacklist pcspkr" | sudo tee -a /etc/modprobe.d/nobeep.conf
 fi
@@ -44,7 +44,7 @@ fi
 
 ########################  END
 
-_echoT "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
+_echot "------------------ write ${_PART}/${S_RELEASE_DESKTOP}"
 _partadd "${_PART}/${S_RELEASE_DESKTOP}" "${S_FILE_INSTALL_DONE}"
 
 _echoT "#################### END ${_PART}/${S_RELEASE_DESKTOP}"

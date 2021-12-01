@@ -14,7 +14,7 @@ _require ${file_bash_aliases} ${file_bash_functions} ${file_vimrc}
 
 ########################  MAIN
 
-_echoT "------------------ .bashrc"
+_echot "------------------ .bashrc"
 
 file="/root/.bashrc"
 _keepcpts ${file}
@@ -51,21 +51,21 @@ sudo sed -i "\|if \[ \"\$color_prompt\" = yes \]|{n;s|=.*|='$ps1'|}" ${file}
 ' >> ${file}"
 
 
-_echoT "------------------  .bash_aliases"
+_echot "------------------  .bash_aliases"
 
 file=/root/.bash_aliases
 sudo [ -f ${file} ] && sudo rm ${file}
 sudo ln -s "$file_bash_aliases" ${file}
 
 
-_echoT "------------------  .bash_functions"
+_echot "------------------  .bash_functions"
 
 file=/root/.bash_functions
 sudo [ -f ${file} ] && sudo rm ${file}
 sudo ln -s "$file_bash_functions" ${file}
 
 
-_echoT "------------------  .vimrc"
+_echot "------------------  .vimrc"
 
 file=/root/.vimrc
 sudo [ -f ${file} ] && sudo rm ${file}
@@ -73,7 +73,7 @@ sudo ln -s "$file_vimrc" ${file}
 
 
 if [ "$_SSH_BACK_ROOT" ]; then
-	_echoT "------------------ ssh back"
+	_echot "------------------ ssh back"
 
 	sudo [ -d /root/.ssh ] && sudo rm -fR /root/.ssh
 	sudo tar xzf "${_PATH_SSH_KEEP}/${_SSH_BACK_ROOT}" -C /root
@@ -94,7 +94,7 @@ _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
 
 
 <<KEEP
-_echoT "------------------ .themes"
+_echot "------------------ .themes"
 
 ! sudo [ -d /root/.themes ] && sudo mkdir -p /root/.themes
 sudo cp -a /home/shared/.themes/NA-dark/ /root/.themes/
