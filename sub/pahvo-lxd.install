@@ -4,13 +4,13 @@
 
 _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
-grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_FILE_INSTALL_CONF}"
+grep -q "^# ${_PART}" ${S_FILE_INSTALL_CONF} || echo "# ${_PART}" >> ${S_FILE_INSTALL_CONF}
 
 ########################  REQUIRED
 
 path_install_conf=${S_PATH_INSTALL_CONF/-desktop/}
 file_rsyslog_client_lxd=${path_install_conf}/rsyslog/client-lxd.conf
-file_logrotate_client_lxd=${path_install_conf}/rsyslog/client-lxd.conf
+file_logrotate_client_lxd=${path_install_conf}/logrotate/client-lxd
 
 _echot "------------------ required files"
 _require ${file_rsyslog_client_lxd} ${file_logrotate_client_lxd}
@@ -61,7 +61,12 @@ fi
 
 ########################  STORAGE
 
-if [ "${S_STORAGE_DRIVER}" = zfs ]; then
+if [ "${_DEV_DRIVER}" = zfs ]; then
+
+	if snap list|grep -q ^lxd; then
+		_echot "------------------  snap remove lxd"
+		snap remove --purge lxd
+	fi
 	path=${_LXD_PATH_ROOT}
 	_echot "------------------  zfs ${path}"
 	[ -d ${path} ] && mv ${path} ${path}.${_SDATE}
@@ -90,18 +95,18 @@ _echot "------------------  link ${path} to /lxd"
 
 path=${S_HOST_PATH_SHARE}
 _echot "------------------  rights ${path}"
-_evalr setfacl -Rm u:${_LXD_UID}:rwx "${path}"
-_evalr setfacl -Rm d:u:${_LXD_UID}:rwx "${path}"
-_evalr chown ${_LXD_UID}:${_LXD_UID} -R "${path}"
+_evalr setfacl -Rm u:${_LXD_UID}:rwx ${path}
+_evalr setfacl -Rm d:u:${_LXD_UID}:rwx ${path}
+_evalr chown -R ${_LXD_UID}:${_LXD_UID} ${path}
 
 ########################  CLEAN STORAGE
 
-if [ "${S_STORAGE_DRIVER}" = zfs ]; then
+if [ "${_DEV_DRIVER}" = zfs ]; then
 	for path in `_evalr zfs list -d 1 -o name -H ${_ZFS_ROOT}${S_HOST_PATH_SP}|grep -v ^${_ZFS_ROOT}${S_HOST_PATH_SP}$`; do
 		_echot "------------------  backup ${path} to ${path}.${_SDATE}"
 		_evalr zfs rename ${path} ${path}.${_SDATE}
 	done
-elif [ "${S_STORAGE_DRIVER}" = btrfs ]; then
+elif [ "${_DEV_DRIVER}" = btrfs ]; then
 	for path in `ls ${S_HOST_PATH_SP}`; do
 		_echot "------------------  backup ${path} to ${path}.${_SDATE}"
 		_evalr mv ${S_HOST_PATH_SP}/${path} ${S_HOST_PATH_SP}/${path}.${_SDATE}
@@ -114,11 +119,11 @@ fi
 
 _echot "------------------  lxd init"
 
-if [ "${S_STORAGE_DRIVER}" = zfs ]; then
+if [ "${_DEV_DRIVER}" = zfs ]; then
 	_echoA "Use this settings:"
 	_echoa "- Create a new ZFS pool ?: no"
 	_echoa "- Name of the existing ZFS pool or dataset: ${_ZFS_ROOT}${S_HOST_PATH_SP}/default"
-elif [ "${S_STORAGE_DRIVER}" = btrfs ]; then
+elif [ "${_DEV_DRIVER}" = btrfs ]; then
 	_echoA "Use this settings:"
 	_echoa "- Would you like to create a new btrfs subvolume under /var/snap/lxd/common/lxd?: no"
 	_echoa "- Create a new BTRFS pool?: no"
@@ -197,9 +202,9 @@ name="stock"
 _echot "------------------  storage ${name}"
 
 if ! [ "`sudo lxc storage list -f json|jq -r '.[] | select(.name == "'${name}'").name'`" ]; then
-	if [ "${S_STORAGE_DRIVER}" = zfs ]; then
+	if [ "${_DEV_DRIVER}" = zfs ]; then
 		_evalr lxc storage create ${name} zfs source=${_ZFS_ROOT}${S_HOST_PATH_SP}/${name}
-	elif [ "${S_STORAGE_DRIVER}" = btrfs ]; then
+	elif [ "${_DEV_DRIVER}" = btrfs ]; then
 		_evalr lxc storage create ${name} btrfs source=${S_HOST_PATH_SP}/${name}
 	else
 		_exite "This part have to be implemented"
@@ -258,6 +263,8 @@ _echot "------------------  logrotate client-lxd"
 file=/etc/logrotate.d/${file_logrotate_client_lxd##*/}
 _evalr cp -a ${file_logrotate_client_lxd} ${file}
 _var_replace ${file} logrotate
+_evalr chmod g-w /etc/logrotate.d/*
+_service restart logrotate
 
 _echot "------------------  logrotate restart"
 _service restart logrotate
@@ -266,7 +273,7 @@ _service restart logrotate
 
 _echot "------------------ lxd containers"
 _echoA "You need to launch following command to build containers:"
-_echoa ls ${_PATH_BASE}/lxd-*
+_echoa `ls ${_PATH_BASE}/lxd-*`
 
 ########################  REBOOT
 

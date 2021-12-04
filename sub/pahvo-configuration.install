@@ -9,13 +9,7 @@ grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_F
 ########################  REQUIRED
 
 file_meld_conf=${S_PATH_INSTALL_CONF}/soft/meld-dark.xml
-
-file_rsyslog_cron=${S_PATH_INSTALL_CONF}/rsyslog/cron.conf
-file_rsyslog_client_auth=${S_PATH_INSTALL_CONF}/rsyslog/client-auth.conf
-file_logrotate_server=${S_PATH_INSTALL_CONF}/logrotate/server
-
 _require ${file_meld_conf}
-_require ${file_rsyslog_cron} ${file_rsyslog_client_auth} ${file_logrotate_server}
 
 path_vim=${S_PATH_INSTALL_CONF/-desktop/}/vim
 _requirep ${path_vim}
@@ -34,15 +28,15 @@ if [ "${_LAPTOP}" ]; then
 	systemctl is-enabled ${service}|grep -q ^disabled && _service enable tlp
 fi
 
-
 _echot "------------------ reduce swapiness"
 echo "vm.swappiness=10" |sudo tee -a /etc/sysctl.d/99-swappiness.conf
 
+_echot "------------------ grub"
 
 file=/etc/default/grub
 _keepcpts ${file}
-sudo sed -i "/^GRUB_DEFAULT=/ s|=.*|=0|" ${file}
 sudo sed -i "/^GRUB_TIMEOUT=/ s|=.*|=2|" ${file}
+sudo sed -i "/^GRUB_DEFAULT=/ s|=.*|=0|" ${file}
 #sudo sed -i "/^GRUB_TIMEOUT_STYLE=/ s|=hidden|menu|" ${file}
 sudo sed -i "/^GRUB_SAVEDEFAULT=/ s|=.*|=false|" ${file}
 
@@ -216,96 +210,8 @@ grep -q resurrect.tmux ${file} || echo -e "# resurect plugin\nrun-shell ${path}/
 # set conf file
 tmux source-file ${file} 2>/dev/null
 
-_echot "------------------  logrotate server"
-# logrotate
-sudo sh -c "echo '# Logrotate file for server functions logs
-#$S_PATH_LOG_INSTALL/*.log
-$S_PATH_LOG_SERVER/*.log
-$S_PATH_LOG_SERVER/*.err
-$S_PATH_LOG_SERVER/*.debug
-{
-	su 0 1000
-	missingok
-	compress
-	delaycompress
-	notifempty
-	weekly
-	rotate 8
-}
-' > /etc/logrotate.d/server"
-
 _echot "------------------ launcher clean"
 sudo sed -i 's|;;|;|' /usr/share/applications/*.desktop
-
-########################  CRON
-
-_echot "------------------  cron conf"
-
-file=/etc/crontab
-_keepcpts ${file}
-str="MAILTO=${S_DOMAIN_EMAIL_TECH}"
-grep -q '^MAILTO' "${file}" || _eval "sed -i '/^PATH=.*/ a ${str}' ${file}"
-
-########################  RSYSLOG
-
-_echot "------------------  rsyslog conf"
-
-file="/etc/rsyslog.conf"
-_keepcpts "${file}"
-
-# udp
-if [ "${S_RSYSLOG_PTC}" = udp ]; then
-	_eval "sed -i 's|^#\?\(module(load=\"imudp.*\)$|\1|' ${file}"
-	_eval "sed -i 's|^#\?\(input(type=\"imudp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
-# tcp
-elif [ "${S_RSYSLOG_PTC}" = tcp ]; then
-	_eval "sed -i 's|^#\?\(module(load=\"imtcp.*\)$|\1|' ${file}"
-	_eval "sed -i 's|^#\?\(input(type=\"imtcp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
-fi
-
-_echot "------------------  rsyslog restart"
-_service restart rsyslog
-
-_echot "------------------  rsyslog conf"
-sed -i '/^auth.*/ s|^|#|' /etc/rsyslog.d/50-default.conf
-sed -i '/^cron.*/ s|^|#|' /etc/rsyslog.d/50-default.conf
-
-_echot "------------------  rsyslog cron"
-file=/etc/rsyslog.d/70-${file_rsyslog_cron##*/}
-_evalq cp -a ${file_rsyslog_cron} ${file}
-_var_replace ${file} rsyslog
-
-_echot "------------------  rsyslog client-auth"
-file=/etc/rsyslog.d/72-${file_rsyslog_client_auth##*/}
-_evalq cp -a ${file_rsyslog_client_auth} ${file}
-_var_replace ${file} rsyslog
-
-#TODO add rsyslog mail
-<<KEEP
-_echot "------------------  rsyslog client-mail conf"
-file="/etc/rsyslog.d/70-default.conf"
-# stop mail logs for syslog
-! grep -q "mail\.\*\s*stop" "${file}" && sed -i '/^mail\.err/ amail.*              stop' "${file}"
-KEEP
-
-########################  LOGROTATE
-
-_echot "------------------  logrotate global"
-file=/etc/logrotate.conf
-_eval  "sed -i '/^#dateext/ s|^#||' ${file}"
-
-_echot "------------------  logrotate server"
-file=/etc/logrotate.d/${file_logrotate_server##*/}
-_eval cp -a ${file_logrotate_server} ${file}
-_var_replace ${file} logrotate
-
-######################## required ${S_RELEASE_DESKTOP}
-
-file=${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}-${S_RELEASE_DESKTOP}.install
-if [ -f "${file}" ]; then
-	_echot "------------------ ${S_RELEASE_DESKTOP} required"
-	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}-${S_RELEASE_DESKTOP}.install && echo "wrong '${_PART}'" && exit
-fi
 
 ########################  END
 

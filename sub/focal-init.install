@@ -2,37 +2,77 @@
 #
 # write by Aguy
 
-
 _echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
 
-grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_FILE_INSTALL_CONF}"
+grep -q "^# ${_PART}" ${S_FILE_INSTALL_CONF} || echo "# ${_PART}" >> ${S_FILE_INSTALL_CONF}
+
+########################  REQUIRED
 
 file_env=${S_PATH_SCRIPT_CONF}/env
 file_bash_aliases=${S_PATH_SCRIPT_CONF}/.bash_aliases
 file_bash_functions=${S_PATH_SCRIPT_CONF}/.bash_functions
 path_install_bash_completion=${S_PATH_INSTALL_CONF}/bash-completion
 
+file_rsyslog_cron=${S_PATH_INSTALL_CONF}/rsyslog/cron.conf
+file_rsyslog_client_auth=${S_PATH_INSTALL_CONF}/rsyslog/client-auth.conf
+file_logrotate_server=${S_PATH_INSTALL_CONF}/logrotate/server
+
 _echot "------------------  required files"
 _require ${file_env} ${file_bash_aliases} ${file_bash_functions}
+_require ${file_rsyslog_cron} ${file_rsyslog_client_auth} ${file_logrotate_server}
 _requirep ${path_install_bash_completion}
 
 ########################  DATA
 
-if [ "${S_STORAGE_DRIVER}" = zfs ]; then
+_echot "-------------------  conf server"
+_echoA "Here is the servers list actually declared:"
+for i in `echo ${!S_CLUSTER[*]}|tr ' ' '\n'|sort`; do
+	_echo "${whiteb}${i}${cclear} ${S_CLUSTER[${i}]}"
+done
+_echoa "You can modify file: ${S_GLOBAL_CONF}"
+_askno "Valid to continue"
+_source ${S_GLOBAL_CONF}
+
+_echot "-------------------  data"
+
+anstmp= && _askno "Give a passwd for root or leave blank to let unset - (${anstmp})"
+root_pwd="${_ANSWER:-$anstmp}"
+
+_echot "------------------  data storage"
+
+anstmp=zfs
+_menu "Select a driver for storage (${anstmp})" zfs btrfs
+_DEV_DRIVER=${_ANSWER} && _confset _DEV_DRIVER "${_DEV_DRIVER}" "${S_GLOBAL_CONF}"
+
+_echoa "State of available disk devices:"
+#lsblk -ro NAME|grep -v [0-9]$|grep -v NAME # shortly list of devices
+lsblk -o NAME,PATH,FSTYPE,FSUSED,SIZE,STATE,TYPE,MOUNTPOINT|grep -v ^loop
+
+if [ "${_DEV_DRIVER}" = zfs ]; then
 	_echot "------------------  data zfs"
-	anstmp="root"
-	_askno "Give the name of zfs root for device ${S_STORAGE_DEVICE} (${anstmp})"
-	_ZFS_ROOT=${_ANSWER:-$anstmp} && _confset _ZFS_ROOT "${_ZFS_ROOT}"
+
+	anstmp="/dev/sdb /dev/sdc" && 	_askno "Give devices for pool 'root' (${anstmp})"
+	_DEV_ROOT=${_ANSWER:-${anstmp}} && _confset _DEV_ROOT "${_DEV_ROOT}"
+
+	anstmp=root && 	_askno "Give the name for pool 'root' using ${_DEV_ROOT} (${anstmp})"
+	_ZFS_ROOT=${_ANSWER:-${anstmp}} && _confset _ZFS_ROOT "${_ZFS_ROOT}"
+
+	anstmp= && _askno "Give the type of vdev (mirror/raidz/...) for ${_ZFS_ROOT} (${anstmp})"
+	_ZFS_ROOT_TYPE=${_ANSWER:-${anstmp}} && _confset _ZFS_ROOT_TYPE "${_ZFS_ROOT_TYPE}"
 fi
 
-_echot "------------------  data sysctl.conf"
+anstmp= && _askno "Give devices for pool 'ext' (${anstmp})"
+_DEV_EXT=${_ANSWER:-${anstmp}} && _confset _DEV_EXT "${_DEV_EXT}"
 
-_SYS_FILE=/etc/sysctl.d/20-server.conf && _confset _SYS_FILE "${_SYS_FILE}"
+if [ "${_DEV_EXT}" ] && [ "${_DEV_DRIVER}" = zfs ]; then
+	anstmp=ext && _askno "Give the name for pool 'ext' using ${_DEV_EXT} (${anstmp})"
+	_ZFS_EXT=${_ANSWER:-${anstmp}} && _confset _ZFS_EXT "${_ZFS_EXT}"
+fi
 
+_echot "------------------  data sysctl"
 # host
 [ -z ${_SOMAXCONN+x} ] && anstmp="4096" && _askno "Set $(sysctl net.core.somaxconn) - (${anstmp})" && _SOMAXCONN="${_ANSWER:-$anstmp}" && _confset _SOMAXCONN "${_SOMAXCONN}"
 [ -z ${_MAX_BACKLOG+x} ] && anstmp="1000" && _askno "Set $(sysctl net.core.netdev_max_backlog) - (${anstmp})" && _MAX_BACKLOG="${_ANSWER:-$anstmp}" && _confset _MAX_BACKLOG "${_MAX_BACKLOG}"
-
 # host & vm
 [ -z ${_MAX_SYN_BACKLOG+x} ] && anstmp="1024" && _askno "Set $(sysctl net.ipv4.tcp_max_syn_backlog) - (${anstmp})" && _MAX_SYN_BACKLOG="${_ANSWER:-$anstmp}" && _confset _MAX_SYN_BACKLOG "${_MAX_SYN_BACKLOG}"
 [ -z ${_MAX_TW_BUCKETS+x} ] && anstmp="65536" && _askno "Set $(sysctl net.ipv4.tcp_max_tw_buckets) - (${anstmp})" && _MAX_TW_BUCKETS="${_ANSWER:-$anstmp}" && _confset _MAX_TW_BUCKETS "${_MAX_TW_BUCKETS}"
@@ -40,10 +80,10 @@ _SYS_FILE=/etc/sysctl.d/20-server.conf && _confset _SYS_FILE "${_SYS_FILE}"
 [ -z ${_KEEPALIVE_TIME+x} ] && anstmp="7200" && _askno "Set $(sysctl net.ipv4.tcp_keepalive_time) - (${anstmp})" && _KEEPALIVE_TIME="${_ANSWER:-$anstmp}" && _confset _KEEPALIVE_TIME "${_KEEPALIVE_TIME}"
 [ -z ${_KEEPALIVE_INTVL+x} ] && anstmp="75" && _askno "Set $(sysctl net.ipv4.tcp_keepalive_intvl) - (${anstmp})" && _KEEPALIVE_INTVL="${_ANSWER:-$anstmp}" && _confset _KEEPALIVE_INTVL "${_KEEPALIVE_INTVL}"
 [ -z ${_KEEPALIVE_PROBES+x} ] && anstmp="9" && _askno "Set $(sysctl net.ipv4.tcp_keepalive_probes) - (${anstmp})" && _KEEPALIVE_PROBES="${_ANSWER:-$anstmp}" && _confset _KEEPALIVE_PROBES "${_KEEPALIVE_PROBES}"
-
 # sysctl net.core.somaxconn net.core.netdev_max_backlog
 # sysctl net.ipv4.tcp_max_syn_backlog net.ipv4.tcp_max_tw_buckets
 # sysctl net.ipv4.tcp_fin_timeout net.ipv4.tcp_keepalive_time net.ipv4.tcp_keepalive_intvl net.ipv4.tcp_keepalive_probes
+_SYS_FILE=/etc/sysctl.d/20-server.conf && _confset _SYS_FILE "${_SYS_FILE}"
 
 ########################  MAIN
 
@@ -87,7 +127,8 @@ _eval ln -s ${file_bash_functions} ${file}
 _echot "------------------  bash-completion"
 _evalr "cp -a ${S_PATH_INSTALL_CONF}/bash-completion/* /usr/share/bash-completion/completions/"
 
-_echot "------------------ conf bash"
+_echot "------------------  .bashrc"
+
 file=~/.bashrc
 _keepcpts ${file}
 _eval "sed -i 's|^\(HISTSIZE\)=.*$|\1=4000|' ${file}"
@@ -104,7 +145,7 @@ case "${S_SERVER_TYPE}" in
 esac
 colorRoot=${color}
 # PS1
-sed -i 's|^\( *\)\(PS1.*033.*32m.*\)$|\1PS1="\${debian_chroot:+(\$debian_chroot)}\\['${color}Root'\\]\\u\\[\\e[1;37m\\]@\\['${color}'\\]\\h\\[\\e[1;37m\\]:\\W\\['${color}Root'\\]\$\\[\\e[0;0m\\]\"|' ${file}
+sed -i 's|^\( *\)\(PS1.*033.*32m.*\)$|\1PS1="\${debian_chroot:+(\$debian_chroot)}\\['${colorRoot}'\\]\\u\\[\\e[1;37m\\]@\\['${color}'\\]\\h\\[\\e[1;37m\\]:\\W\\['${colorRoot}'\\]\$\\[\\e[0;0m\\]\"|' ${file}
 sed -i 's|^#\?\(force_color_prompt\).*$|\1=yes|' ${file}
 
 # env
@@ -116,29 +157,25 @@ grep -q "${file_env}" ${file} || echo "
 [ -f ~/.bash_functions ] && . ~/.bash_functions
 " >> ${file}
 # aliases
-grep -q '. ~/.bash_aliases' || echo "[ -f ~/.bash_aliases ] && . ~/.bash_aliases
+grep -q '. ~/.bash_aliases' ${file} || echo "[ -f ~/.bash_aliases ] && . ~/.bash_aliases
 "  >> ${file}
 
 _source ${file}
 
-###################  CLUSTER
+########################  CLUSTER
 
 _echot "------------------  hosts S_CLUSTER"
 
 file=/etc/hosts
 _keepcpts "${file}"
 
-_echo "Here is the servers list actually declared :\n${!S_CLUSTER[*]}"
-_askyn "y to continue or modify file:${S_GLOBAL_CONF}"
-_source ${S_GLOBAL_CONF}
-
 ! sudo grep -q "# ${S_DOMAIN_NAME} cluster" ${file} && sudo sh -c "echo '\n# ${S_DOMAIN_NAME} cluster' >> ${file}"
 for host in ${servers_list}; do
 	eval ${S_CLUSTER[${host}]}
 	[ "${s_ip}" ] && sudo sed -i "/${s_ip}/d" ${file}
-	! grep -q "${host}" ${file} && [ "${s_ip}" ] && sudo sh -c "echo '${s_ip}\t${host}\t${s_name}' >> ${file}"
+	[ "${s_ip}" ] && sudo sh -c "echo '${s_ip}\t${host}\t${s_name}' >> ${file}"
 done
-_eval "sed -i 's|^\(${_IPTHIS}.*\)$|#\1|' ${file}"
+_evalr "sed -i '/^${_IPTHIS}/ s|^|#|' ${file}"
 
 if ! grep -q '^# services' ${file}; then
 	_echot "------------------  hosts S_SERVICE_BITS"
@@ -154,40 +191,56 @@ fi
 str="ovh home"
 if [[ " ${str} " = *" ${S_SERVER_TYPE} "* ]]; then
 
-	if [ "${S_STORAGE_DRIVER}" = zfs ]; then
+	if [ "${_DEV_DRIVER}" = zfs ]; then
+
+		path_zfs=/zfs
+		[ -f "${path_zfs}" ] || mkdir -p ${path_zfs}
 
 		_echot "------------------  zfs install"
-		_eval apt install -y zfsutils-linux
+		_evalr apt install -y zfsutils-linux
 
-		path=/zroot
+		for dev in ${_DEV_ROOT}; do
+			_echot "------------------  zfs clean ${dev}"
+			for i in `parted -s ${dev} print 2>/dev/null|awk '/^ / {print $1}'`; do
+				_evalr parted -s ${dev} rm "${i}"
+			done
+		done
+
+		path=${path_zfs}/${_ZFS_ROOT}
 		_echot "------------------  zfs zpool ${path}"
-		[ -d ${path} ] && rm -fR ${path}
-		_evalq zpool create root ${S_STORAGE_DEVICE} -m ${path}
+		_evalr zpool create ${_ZFS_ROOT} ${_DEV_ROOT} -m ${path}
+
+		if [ "${_DEV_EXT}" ];then
+			path=${path_zfs}/${_ZFS_EXT}
+			_echot "------------------  zfs zpool ${path}"
+			_evalr zpool create ${_ZFS_EXT} ${_DEV_EXT} -m ${path}
+		fi
 
 		path=${S_PATH_SAVE}
 		_echot "------------------  zfs ${path}"
 		[ -d ${path} ] && rm -fR ${path}
-		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_PATH_SAVE}
+		[ "${_DEV_EXT}" ] && zpath=${_ZFS_EXT}${S_PATH_SAVE}|| zpath=${_ZFS_ROOT}${S_PATH_SAVE}
+		_evalr zfs create -o mountpoint=${path} -o compression=lz4 ${zpath}
 
 		path=${S_HOST_PATH}
 		_echot "------------------  zfs ${path}"
 		[ -d ${path} ] && rm -fR ${path}
-		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH}
+		_evalr zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH}
 
 		path=${S_HOST_PATH_SP}
 		_echot "------------------  zfs ${path}"
 		[ -d ${path} ] && rm -fR ${path}
-		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH_SP}
+		_evalr zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH_SP}
 
 		path=${S_HOST_PATH_SHARE}
 		_echot "------------------  zfs ${path}"
 		[ -d ${path} ] && rm -fR ${path}
-		_eval zfs create -o mountpoint=${path} -o compression=lz4 -o  acltype=posixacl ${_ZFS_ROOT}${S_HOST_PATH_SHARE}
+		_evalr zfs create -o mountpoint=${path} -o compression=lz4 -o  acltype=posixacl ${_ZFS_ROOT}${S_HOST_PATH_SHARE}
 
 		path=${S_HOST_PATH_SAVE}
 		_echot "------------------  zfs ${path}"
 		[ -d ${path} ] && rm -fR ${path}
-		_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH_SAVE}
+		_evalr zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}${S_HOST_PATH_SAVE}
 
 		_echot "------------------  zfs zpool list"
 		zpool list -v
@@ -195,7 +248,7 @@ if [[ " ${str} " = *" ${S_SERVER_TYPE} "* ]]; then
 		_echot "------------------  zfs list"
 		zfs list
 
-	elif [ "${S_STORAGE_DRIVER}" = btrfs ]; then
+	elif [ "${_DEV_DRIVER}" = btrfs ]; then
 
 		_echot "------------------  btrfs storage"
 		path=${S_HOST_PATH}
@@ -206,9 +259,9 @@ if [[ " ${str} " = *" ${S_SERVER_TYPE} "* ]]; then
 		btrfs subvolume list .
 
 		_echot "------------------  btrfs paths"
-		paths="${S_HOST_PATH_SP} ${S_HOST_PATH_SHARE} ${S_HOST_PATH_SAVE} ${S_HOST_PATH_LOG} "
+		paths="${S_HOST_PATH} ${S_HOST_PATH_SP} ${S_HOST_PATH_SHARE} ${S_HOST_PATH_SAVE} ${S_HOST_PATH_LOG} "
 		for path in ${paths}; do
-			[ -d ${path} ] || _eval mkdir /vm/${path}
+			[ -d ${path} ] || _evalr mkdir /vm/${path}
 		done
 
 	else
@@ -217,21 +270,63 @@ if [[ " ${str} " = *" ${S_SERVER_TYPE} "* ]]; then
 
 fi
 
-########################  PATHS
+########################  CRON
 
-str=" ovh home "
-if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
+_echot "------------------  cron conf"
 
-	paths="${S_HOST_PATH} ${S_HOST_PATH_SP} ${S_HOST_PATH_SHARE} ${S_HOST_PATH_LOG} ${S_HOST_PATH_SAVE}"
-	_echot "------------------  create ${paths}"
-	for path in ${paths}; do
-		[ -d "${path}" ] || _evalq mkdir -p "${path}"
-	done
+file=/etc/crontab
+_keepcpts ${file}
+str="MAILTO=${S_EMAIL_TECH}"
+grep -q '^MAILTO' "${file}" || _evalr "sed -i '/^PATH=.*/ a ${str}' ${file}"
+
+########################  RSYSLOG
+
+_echot "------------------  rsyslog conf"
+
+file="/etc/rsyslog.conf"
+_keepcpts "${file}"
+
+# udp
+if [ "${S_RSYSLOG_PTC}" = udp ]; then
+	_evalr "sed -i 's|^#\?\(module(load=\"imudp.*\)$|\1|' ${file}"
+	_evalr "sed -i 's|^#\?\(input(type=\"imudp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
+# tcp
+elif [ "${S_RSYSLOG_PTC}" = tcp ]; then
+	_evalr "sed -i 's|^#\?\(module(load=\"imtcp.*\)$|\1|' ${file}"
+	_evalr "sed -i 's|^#\?\(input(type=\"imtcp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
 fi
+
+_echot "------------------  rsyslog restart"
+_service restart rsyslog
+
+_echot "------------------  rsyslog conf"
+sed -i '/^auth.*/ s|^|#|' /etc/rsyslog.d/50-default.conf
+sed -i '/^cron.*/ s|^|#|' /etc/rsyslog.d/50-default.conf
+
+_echot "------------------  rsyslog cron"
+file=/etc/rsyslog.d/70-${file_rsyslog_cron##*/}
+_evalq cp -a ${file_rsyslog_cron} ${file}
+_var_replace ${file} rsyslog
+
+_echot "------------------  rsyslog client-auth"
+file=/etc/rsyslog.d/72-${file_rsyslog_client_auth##*/}
+_evalq cp -a ${file_rsyslog_client_auth} ${file}
+_var_replace ${file} rsyslog
+
+########################  LOGROTATE
+
+_echot "------------------  logrotate global"
+file=/etc/logrotate.conf
+_evalr  "sed -i '/^#dateext/ s|^#||' ${file}"
+
+_echot "------------------  logrotate server"
+file=/etc/logrotate.d/${file_logrotate_server##*/}
+_evalr cp -a ${file_logrotate_server} ${file}
+_var_replace ${file} logrotate
+_evalr chmod g-w /etc/logrotate.d/*
+_service restart logrotate
 
 ########################  END
 
 _echoT "===================== ${_PART} end"
 _partadd ${_PART} ${S_FILE_INSTALL_DONE}
-
-

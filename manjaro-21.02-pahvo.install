@@ -25,12 +25,12 @@ _PATH_SOFT_BACKUP=${_PATH_SOFT}/backup
 
 # after btrfs1
 if ! grep -q '^S_RELEASE_NAME=' "${S_FILE_INSTALL_CONF}"; then
-	sed -i "1i _SCRIPT=\"${_INSTALL/%.install}\"\nS_RELEASE_NAME=\"$S_RELEASE_NAME\"\n" "${S_FILE_INSTALL_CONF}"
+	sed -i "1i #_SCRIPT=\"${_INSTALL/%.install}\"\n#S_RELEASE_NAME=\"$S_RELEASE_NAME\"\n" "${S_FILE_INSTALL_CONF}"
 fi
 
 ########################  CONF
 
-[ -f "${S_FILE_INSTALL_CONF}" ] && . "${S_FILE_INSTALL_CONF}"
+. "${S_FILE_INSTALL_CONF}"
 
 ########################  RIGHTS
 
@@ -109,7 +109,7 @@ fi
 
 ########################  COMMON-
 
-_PART=common
+_PART=init
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
 	. ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install
 	[ "${_STEP}" ] && _askno "Valid to continue"
