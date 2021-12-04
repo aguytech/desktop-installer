@@ -141,7 +141,7 @@ _echot "------------------  hosts S_CLUSTER"
 file=/etc/hosts
 _keepcpts "${file}"
 
-! sudo grep -q "# ${S_DOMAIN_NAME} cluster" ${file} && sudo sh -c "echo '\n# ${S_DOMAIN_NAME} cluster' >> ${file}"
+! sudo grep -q "# ${S_DOM_NAME} cluster" ${file} && sudo sh -c "echo '\n# ${S_DOM_NAME} cluster' >> ${file}"
 for host in ${servers_list}; do
 	eval ${S_CLUSTER[${host}]}
 	[ "${s_ip}" ] && sudo sed -i "/${s_ip}/d" ${file}
