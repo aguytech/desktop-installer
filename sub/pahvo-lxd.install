@@ -19,25 +19,32 @@ _require ${file_rsyslog_client_lxd} ${file_logrotate_client_lxd}
 
 _echot "------------------  data"
 
-[ -z ${_LXD_DHCP_MIN+x} ] && anstmp="20" && _askno "Give minimal range IP for DHCP container (${anstmp})" && _LXD_DHCP_MIN="${_ANSWER:-$anstmp}" && _confset _LXD_DHCP_MIN "${_LXD_DHCP_MIN}"
-[ -z ${_LXD_DHCP_MAX+x} ] && anstmp="254" && _askno "Give maximal range IP for DHCP container (${anstmp})" && _LXD_DHCP_MAX="${_ANSWER:-$anstmp}" && _confset _LXD_DHCP_MAX "${_LXD_DHCP_MAX}"
+lxd_version_now=$(snap list|awk '/^lxd/ {print $2}')
+
+[ -z ${_LXD_DHCP_MIN+x} ] && { anstmp="20"; _askno "Give minimal range IP for DHCP container (${anstmp})"; _LXD_DHCP_MIN="${_ANSWER:-$anstmp}"; }
+_confset _LXD_DHCP_MIN "${_LXD_DHCP_MIN}"
+
+[ -z ${_LXD_DHCP_MAX+x} ] && { anstmp="254"; _askno "Give maximal range IP for DHCP container (${anstmp})"; _LXD_DHCP_MAX="${_ANSWER:-$anstmp}"; }
+_confset _LXD_DHCP_MAX "${_LXD_DHCP_MAX}"
 
 # root path of lxd
-_LXD_PATH_ROOT=/var/snap/lxd && _confset _LXD_PATH_ROOT "${_LXD_PATH_ROOT}"
+_LXD_PATH_ROOT=/var/snap/lxd; _confset _LXD_PATH_ROOT "${_LXD_PATH_ROOT}"
 # root path of storage pools for
-_LXD_PATH_SP=storage-pools && _confset _LXD_PATH_SP "${_LXD_PATH_SP}"
+_LXD_PATH_SP=storage-pools; _confset _LXD_PATH_SP "${_LXD_PATH_SP}"
 # path for containers
-_LXD_PATH_CT=containers && _confset _LXD_PATH_CT "${_LXD_PATH_CT}"
+_LXD_PATH_CT=containers; _confset _LXD_PATH_CT "${_LXD_PATH_CT}"
 # path for containers images
-_LXD_PATH_IMAGE=images && _confset _LXD_PATH_IMAGE "${_LXD_PATH_IMAGE}"
+_LXD_PATH_IMAGE=images; _confset _LXD_PATH_IMAGE "${_LXD_PATH_IMAGE}"
 # path for containers snapshots
-_LXD_PATH_SNAPSHOT=snapshots && _confset _LXD_PATH_SNAPSHOT "${_LXD_PATH_SNAPSHOT}"
+_LXD_PATH_SNAPSHOT=snapshots; _confset _LXD_PATH_SNAPSHOT "${_LXD_PATH_SNAPSHOT}"
 # path for export
-_LXD_PATH_EXPORT=export && _confset _LXD_PATH_EXPORT "${_LXD_PATH_EXPORT}"
+_LXD_PATH_EXPORT=export; _confset _LXD_PATH_EXPORT "${_LXD_PATH_EXPORT}"
 # port for remote connection
-_LXD_PORT=8443 && _confset _LXD_PORT "${_LXD_PORT}"
-# uid for shared path
-_LXD_UID=1000000 && _confset _LXD_UID "${_LXD_UID}"
+_LXD_PORT=8443; _confset _LXD_PORT "${_LXD_PORT}"
+# container uid for shared path
+_LXD_UID=1000000; _confset _LXD_UID "${_LXD_UID}"
+# acl uid for shared path
+_LXD_ACL=1000; _confset _LXD_ACL "${_LXD_ACL}"
 
 ########################  IPTABLES
 
@@ -61,7 +68,10 @@ fi
 
 ########################  STORAGE
 
-if [ "${_DEV_DRIVER}" = zfs ]; then
+if [ "${_DEV_DRIVER}" = zfs ] && ! zfs list -r ${_ZFS_ROOT}|grep -q ${_ZFS_ROOT}/lxd; then
+
+	_echot "------------------  snap lxd version"
+	_echo ${lxd_version_now}
 
 	if snap list|grep -q ^lxd; then
 		_echot "------------------  snap remove lxd"
@@ -95,19 +105,19 @@ _echot "------------------  link ${path} to /lxd"
 
 path=${S_HOST_PATH_SHARE}
 _echot "------------------  rights ${path}"
-_evalr setfacl -Rm u:${_LXD_UID}:rwx ${path}
-_evalr setfacl -Rm d:u:${_LXD_UID}:rwx ${path}
 _evalr chown -R ${_LXD_UID}:${_LXD_UID} ${path}
+_evalr setfacl -Rm u:${_LXD_ACL}:rwx ${path}
+_evalr setfacl -Rm d:u:${_LXD_ACL}:rwx ${path}
 
 ########################  CLEAN STORAGE
 
 if [ "${_DEV_DRIVER}" = zfs ]; then
-	for path in `_evalr zfs list -d 1 -o name -H ${_ZFS_ROOT}${S_HOST_PATH_SP}|grep -v ^${_ZFS_ROOT}${S_HOST_PATH_SP}$`; do
+	for path in $(_evalr zfs list -d 1 -o name -H ${_ZFS_ROOT}${S_HOST_PATH_SP}|grep -v ^${_ZFS_ROOT}${S_HOST_PATH_SP}$); do
 		_echot "------------------  backup ${path} to ${path}.${_SDATE}"
 		_evalr zfs rename ${path} ${path}.${_SDATE}
 	done
 elif [ "${_DEV_DRIVER}" = btrfs ]; then
-	for path in `ls ${S_HOST_PATH_SP}`; do
+	for path in $(ls ${S_HOST_PATH_SP}); do
 		_echot "------------------  backup ${path} to ${path}.${_SDATE}"
 		_evalr mv ${S_HOST_PATH_SP}/${path} ${S_HOST_PATH_SP}/${path}.${_SDATE}
 	done
@@ -179,7 +189,7 @@ WantedBy=sys-subsystem-net-devices-${s_inet}.device
 ' > ${file}"
 
 	_evalr systemctl daemon-reload
-	_evalr systemctl enable --now ${service}
+	_evalr systemctl -q enable --now ${service}
 	_evalr resolvectl status ${s_inet}
 
 	_echot "------------------  nsswitch"
@@ -201,7 +211,7 @@ fi
 name="stock"
 _echot "------------------  storage ${name}"
 
-if ! [ "`sudo lxc storage list -f json|jq -r '.[] | select(.name == "'${name}'").name'`" ]; then
+if ! [ "$(sudo lxc storage list -f json|jq -r '.[] | select(.name == "'${name}'").name')" ]; then
 	if [ "${_DEV_DRIVER}" = zfs ]; then
 		_evalr lxc storage create ${name} zfs source=${_ZFS_ROOT}${S_HOST_PATH_SP}/${name}
 	elif [ "${_DEV_DRIVER}" = btrfs ]; then
@@ -220,7 +230,7 @@ eval ${S_HOST_VM_ETH[default]}
 
 _echot "------------------  network ${s_inet}"
 
-if ! [ "`sudo lxc network list -f json|jq -r '.[] | select(.name == "'${s_inet}'").name'`" ]; then
+if ! [ "$(sudo lxc network list -f json|jq -r '.[] | select(.name == "'${s_inet}'").name')" ]; then
 	_evalr lxc network create ${s_inet}
 fi
 _evalr lxc network set ${s_inet} ipv4.address=${s_cidr} ipv4.dhcp.ranges=${s_cidr%.*}.${_LXD_DHCP_MIN}-${s_cidr%.*}.${_LXD_DHCP_MAX} ipv4.nat=true dns.mode=managed dns.domain=lxd dns.mode=managed
@@ -231,7 +241,7 @@ _echot "------------------  network 'stock'"
 eval ${S_HOST_VM_ETH[stock]}
 
 _echot "------------------  network ${s_inet}"
-if ! [ "`sudo lxc network list -f json|jq -r '.[] | select(.name == "'${s_inet}'").name'`" ]; then
+if ! [ "$(sudo lxc network list -f json|jq -r '.[] | select(.name == "'${s_inet}'").name')" ]; then
 	_evalr lxc network create "${s_inet}"
 fi
 _evalr lxc network set ${s_inet} ipv4.address=${s_cidr} ipv4.dhcp.ranges=${s_cidr%.*}.${_LXD_DHCP_MIN}-${s_cidr%.*}.${_LXD_DHCP_MAX} ipv4.nat=true dns.mode=managed dns.domain=lxd1 dns.mode=managed
@@ -273,7 +283,7 @@ _service restart logrotate
 
 _echot "------------------ lxd containers"
 _echoA "You need to launch following command to build containers:"
-_echoa `ls ${_PATH_BASE}/lxd-*`
+_echoa $(ls ${_PATH_BASE}/lxd-*)
 
 ########################  REBOOT
 
@@ -284,4 +294,3 @@ _echoW "You have to reboot before continuing"
 
 _echoT "===================== ${_PART} end"
 _partadd ${_PART} ${S_FILE_INSTALL_DONE}
-
