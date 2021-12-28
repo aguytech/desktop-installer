@@ -56,9 +56,13 @@ _service restart systemd-sysctl
 
 ########################  FIREWALL
 
+_echot "------------------  iptables enable"
+_service enable iptables
+
 _echot "------------------  ${_IPT_SERVICE} conf"
 _keepcpts ${file}
 _evalr cp ${file_conf_iptables} ${_IPT_FILE_CONF}
+_evalr "chown root:1000 ${file} && chmod 660 ${file}"
 
 _echot "------------------  ${_IPT_SERVICE} bin"
 file=/usr/sbin/${_IPT_SERVICE}
@@ -90,10 +94,14 @@ _service enable ${_IPT_SERVICE}
 
 ########################  RSYSLOG
 
-_echot "------------------  path log iptables"
+_echot "------------------  rsyslog enable"
+_service install -y rsyslog
+_service enable rsyslog
+
+_echot "------------------  rsyslog path"
 path=${S_PATH_LOG}/iptables
 [ -d ${path} ] || _evalr mkdir -p ${path}
-grep -q syslog /etc/passwd && _evalr chown syslog ${path}
+grep -q syslog /etc/passwd && _evalr chown syslog:adm ${path}
 
 _echot "------------------  rsyslog client-iptables"
 file=/etc/rsyslog.d/74-${file_rsyslog_client_iptables##*/}
