@@ -1,0 +1,18 @@
+## ubuntu
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_2t1-btrfs_970a.exc /media/${USER}/2t1-btrfs/ext/ /ext/ -av --delete -n
+
+## manjaro
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_2t1-btrfs_970a.exc /run/media/${USER}/2t1-btrfs/ext/ /ext/ -av --delete -n
+
+.Trash-*
+.tmp*
+lost+found
+.sync_*
+.owncloudsync*
+
+/backup
+/ovh
+/shared/_back
+/shared/_new
+/shared/Podcasts
+

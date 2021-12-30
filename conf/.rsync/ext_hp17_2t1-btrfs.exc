@@ -12,8 +12,8 @@
 .Trash-*
 .tmp*
 lost+found
-._sync_*
-.sync-*
+.sync_*
+.owncloudsync*
 
 /backup
 /ovh

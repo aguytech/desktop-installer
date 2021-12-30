@@ -9,25 +9,24 @@
 #  sudo rsync /home/shared/virt/ /run/media/${USER}/1T/home/shared/virt/ -av -n
 
 .snapshots
-._sync*
-.sync*
 .Trash-*
 .tmp*
 lost+found
 .cache
+.sync_*
+.owncloudsync*
 
 /nikita
 /cluster
 /cd
 
+/shared/dev
 /shared/torrent
-/shared/.aMule/Temp
 /shared/virtualbox
 /shared/vmware
 /shared/virt/images
 #/shared/vm
 /shared/.config/mpv/watch_later
-/shared/dev
 /shared/.mozilla*
 /shared/.thunderbird*
 

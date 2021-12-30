@@ -12,11 +12,11 @@
 # sudo rsync /ext/backup/debian8/ /run/media/${USER}/1T/ext/backup/debian8/ -av -n
 
 .snapshots
-._sync*
-.sync*
 .Trash-*
 .tmp*
 lost+found
+.sync_*
+.owncloudsync*
 
 /backup
 /ovh

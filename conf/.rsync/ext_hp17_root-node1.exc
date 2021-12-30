@@ -3,11 +3,11 @@
 # rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_hp17_root@node1.exc /ext/backup/${HOSTNAME}/ root@node1:/save/vm/nextcloud/data/aguy/files/ext/backup/${HOSTNAME}/ -rlptDv --delete -n
 
 .snapshots
-.sync*
-._sync*
 .Trash-*
 .tmp*
 lost+found
+.sync_*
+.owncloudsync*
 
 /ovh
 /shared

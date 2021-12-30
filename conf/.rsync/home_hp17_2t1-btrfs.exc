@@ -11,16 +11,16 @@
 .Trash-*
 .tmp*
 lost+found
-._sync_*
-.sync-*
+.cache
+.sync_*
+.owncloudsync*
 
 /nikita
 /cluster
 /cd
 
-/shared/dev/eclipse-workspaces
+/shared/dev
 /shared/torrent
-/shared/.aMule/Temp
 /shared/virtualbox
 /shared/vmware
 /shared/virt

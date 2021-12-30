@@ -5,25 +5,24 @@
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_1t-2.5_hp17.exc /run/media/${USER}/1t-2.5/home/ /home/ -av --delete -n
 
 .snapshots
-._sync*
-.sync*
 .Trash-*
 .tmp*
 lost+found
 .cache
+.sync_*
+.owncloudsync*
 
 /nikita
 /cluster
 /cd
 
+/shared/dev
 /shared/torrent
-/shared/.aMule/Temp
 /shared/virtualbox
 /shared/vmware
 /shared/virt
 /shared/vm
 /shared/.config/mpv/watch_later
-/shared/dev
 /shared/.mozilla*
 /shared/.thunderbird*
 

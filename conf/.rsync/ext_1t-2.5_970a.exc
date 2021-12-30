@@ -1,0 +1,15 @@
+## ubuntu
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_970a_1t-2.5.exc /media/${USER}/1t-2.5/ext/ /ext/ -av --delete -n
+
+## manjaro
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_970a_1t-2.5.exc /run/media/${USER}/1t-2.5/ext/ /ext/ -av --delete -n
+
+.Trash-*
+.tmp*
+lost+found
+.sync_*
+.owncloudsync*
+
+/backup
+/ovh
+/shared/Podcasts
