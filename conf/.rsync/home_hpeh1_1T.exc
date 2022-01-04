@@ -8,11 +8,10 @@
 #
 #  sudo rsync /home/shared/virt/ /run/media/${USER}/1T/home/shared/virt/ -av -n
 
-.snapshots
+lost+found
 .Trash-*
 .tmp*
-lost+found
-.cache
+.keep*
 .sync_*
 .owncloudsync*
 
@@ -20,15 +19,12 @@ lost+found
 /cluster
 /cd
 
+/shared/.config/mpv/watch_later
+/shared/.tmux/resurrect
+/shared/.mozilla*
+/shared/.thunderbird*
 /shared/dev
 /shared/torrent
 /shared/virtualbox
 /shared/vmware
 /shared/virt/images
-#/shared/vm
-/shared/.config/mpv/watch_later
-/shared/.mozilla*
-/shared/.thunderbird*
-
-#/shared/.tmux
-/shared/.tmux/resurrect

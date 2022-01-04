@@ -1,0 +1,26 @@
+## ubuntu
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_970a_1T.exc /home/ /media/${USER}/1T/home/ -av --delete -n
+
+## manjaro
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_970a_1T.exc /home/ /run/media/${USER}/1T/home/ -av --delete -n
+
+lost+found
+.Trash-*
+.tmp*
+.keep*
+.sync_*
+.owncloudsync*
+
+/nikita
+/cluster
+/cd
+
+/shared/.config/mpv/watch_later
+/shared/.tmux/resurrect
+/shared/.mozilla*
+/shared/.thunderbird*
+/shared/dev
+/shared/torrent
+/shared/virt
+/shared/virtualbox
+/shared/vmware

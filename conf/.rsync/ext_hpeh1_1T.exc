@@ -11,30 +11,17 @@
 # sudo rsync /ext/backup/${HOSTNAME}/ /run/media/${USER}/1T/ext/backup/${HOSTNAME}/ -av -n
 # sudo rsync /ext/backup/debian8/ /run/media/${USER}/1T/ext/backup/debian8/ -av -n
 
-.snapshots
+lost+found
 .Trash-*
 .tmp*
-lost+found
+.keep*
 .sync_*
 .owncloudsync*
 
 /backup
 /ovh
-#/shared/android
 /shared/Music
 /shared/Podcasts
 /shared/Soft/diag
 /shared/Soft/diag_tools
 /shared/Soft/windows
-/shared/Videos
-
-/shared/_watched
-#/shared/_new
-#/shared/_back
-#/shared/tmp
-
-#/shared/Soft/diag
-#/shared/Soft/diag tools
-#/shared/Soft/windows/driver
-#/shared/Soft/windows/Sid Meiers Civilization IV.iso
-#/shared/Soft/windows/Windows*

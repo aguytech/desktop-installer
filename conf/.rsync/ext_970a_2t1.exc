@@ -1,0 +1,20 @@
+## ubuntu
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_970a_2t1.exc /ext/ /media/${USER}/2t1/ext/ -av --delete -n
+#
+# sudo rsync /ext/backup/${HOSTNAME}/ /media/${USER}/2t1/ext/backup/${HOSTNAME}/ -av -n
+# sudo rsync /ext/backup/debian8/ /media/${USER}/2t1/ext/backup/debian8/ -av -n
+
+## manjaro
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_970a_2t1.exc /ext/ /run/media/${USER}/2t1/ext/ -av --delete -n
+#
+# sudo rsync /ext/backup/${HOSTNAME}/ /run/media/${USER}/2t1/ext/backup/${HOSTNAME}/ -av -n
+# sudo rsync /ext/backup/debian8/ /run/media/${USER}/2t1/ext/backup/debian8/ -av -n
+
+lost+found
+.Trash-*
+.tmp*
+.keep*
+.sync_*
+.owncloudsync*
+
+/backup
