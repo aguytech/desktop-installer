@@ -20,7 +20,6 @@ lost+found
 /shared/.thunderbird*
 /shared/.tmux/resurrect
 /shared/dev
-/shared/torrent
 /shared/virt
 /shared/virtualbox
 /shared/vmware
