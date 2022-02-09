@@ -176,9 +176,9 @@ for i in dev dev/pts sys proc run; do mount --bind /$i mnt/$i; done
 
 _echot "------------------ Grub install"
 _echoA "after you are 'chrooted' please enter this line :"
-echoa "grub-install --recheck ${_DEVICE_GRUB}"
-echoa "update-grub"
-echoa "exit"
+_echoa "grub-install --recheck ${_DEVICE_GRUB}"
+_echoa "update-grub"
+_echoa "exit"
 chroot mnt
 
 # uefi

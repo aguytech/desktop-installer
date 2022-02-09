@@ -2,7 +2,7 @@
 #
 # write by Aguy
 
-_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE}-${_PART}"
 
 grep -q "^# ${_PART}" ${S_FILE_INSTALL_CONF} || echo "# ${_PART}" >> ${S_FILE_INSTALL_CONF}
 
@@ -50,7 +50,7 @@ _LXD_ACL=1000; _confset _LXD_ACL "${_LXD_ACL}"
 
 _PART_LXD=lxd-iptables
 if ! _parthave ${_PART_LXD} ${S_FILE_INSTALL_DONE}; then
-	. "${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART_LXD}.install" || _exite "Wrong part: ${_PART_LXD}"
+	. "${_PATH_BASE_SUB}/${S_RELEASE}-${_PART_LXD}.install" || _exite "Wrong part: ${_PART_LXD}"
 	[ "$_STEP" ] && _askno "Valid to continue" 
 else
 	_echO "performed *** ${_PART_LXD}"
@@ -60,7 +60,7 @@ fi
 
 _PART_LXD=lxd-fail2ban
 if ! _parthave ${_PART_LXD} ${S_FILE_INSTALL_DONE}; then
-	. "${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART_LXD}.install" || _exite "Wrong part: ${_PART_LXD}"
+	. "${_PATH_BASE_SUB}/${S_RELEASE}-${_PART_LXD}.install" || _exite "Wrong part: ${_PART_LXD}"
 	[ "$_STEP" ] && _askno "Valid to continue" 
 else
 	_echO "performed *** ${_PART_LXD}"

@@ -8,7 +8,7 @@ lost+found
 .Trash-*
 .tmp*
 .keep*
-.sync_*
+.sync*
 .owncloudsync*
 
 /backup

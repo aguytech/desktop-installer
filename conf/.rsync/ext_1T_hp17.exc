@@ -1,0 +1,22 @@
+## ubuntu
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_1T_hp17.exc /media/${USER}/1T/ext/ /ext/ -av --delete -n
+
+## manjaro
+# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_1T_hp17.exc /run/media/${USER}/1T/ext/ /ext/ -av --delete -n
+
+lost+found
+.Trash-*
+.tmp*
+.keep*
+.sync_*
+.owncloudsync*
+
+/backup
+/ovh
+/shared/android
+/shared/Music
+/shared/Videos
+/shared/Podcasts
+/shared/Soft/diag
+/shared/Soft/diag_tools
+/shared/Soft/linux/system

@@ -8,7 +8,7 @@
 .tmp*
 .keep*
 lost+found
-.sync_*
+.sync*
 .owncloudsync*
 
 /backup
