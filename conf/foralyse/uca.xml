@@ -82,4 +82,18 @@
 	<text-files/>
 	<video-files/>
 </action>
+<action>
+	<icon>edit-copy</icon>
+	<name>Duplicate root</name>
+	<unique-id>1635257948652123-2</unique-id>
+	<command>pkexec cp -a %f %f.copy</command>
+	<description>Duplicate root</description>
+	<patterns>*</patterns>
+	<directories/>
+	<audio-files/>
+	<image-files/>
+	<other-files/>
+	<text-files/>
+	<video-files/>
+</action>
 </actions>

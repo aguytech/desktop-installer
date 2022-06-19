@@ -112,36 +112,21 @@
 	<video-files/>
 </action>
 <action>
-	<icon>go-bottom</icon>
-	<name>gmount sda1 &gt; vms-data</name>
-	<unique-id>1653055065395840-9</unique-id>
-	<command>guestmount --add %f --mount /dev/sda1 /vms/data</command>
-	<description>guestmount /dev/sda1 in /vms/data</description>
-	<patterns>*.qcow2;*.img;*.raw</patterns>
-	<other-files/>
-</action>
-<action>
-	<icon>go-bottom</icon>
-	<name>gmount sda2 &gt; vms-data</name>
-	<unique-id>1654697301154446-1</unique-id>
-	<command>guestmount --add %f --mount /dev/sda2 /vms/data</command>
-	<description>guestmount /dev/sda2  in /vms/data</description>
+	<icon>go-down</icon>
+	<name>nbd mount</name>
+	<unique-id>1655620394868230-1</unique-id>
+	<command>pkexec nbd.sh mount %f</command>
+	<description>mount file to /vms/ndbX with nbd</description>
 	<patterns>*.qcow2;*.img;*.raw</patterns>
 	<other-files/>
 </action>
 <action>
 	<icon>go-up</icon>
-	<name>unmount data</name>
-	<unique-id>1653055105839871-11</unique-id>
-	<command>guestunmount /vms/data</command>
-	<description>guest unmount /vms/data</description>
-	<patterns>*</patterns>
-	<startup-notify/>
-	<directories/>
-	<audio-files/>
-	<image-files/>
+	<name>nbd umount</name>
+	<unique-id>1655622384229194-2</unique-id>
+	<command>pkexec nbd.sh umount %f</command>
+	<description>unmount file from /vms/ndbX with nbd</description>
+	<patterns>*.qcow2;*.img;*.raw</patterns>
 	<other-files/>
-	<text-files/>
-	<video-files/>
 </action>
 </actions>
