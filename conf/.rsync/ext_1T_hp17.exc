@@ -3,12 +3,14 @@
 
 ## manjaro
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_1T_hp17.exc /run/media/${USER}/1T/ext/ /ext/ -av --delete -n
+# vms
+# sudo rsync /run/media/${USER}/1T/ext/vms/ /ext/vms/ -av -n
 
 lost+found
 .Trash-*
 .tmp*
 .keep*
-.sync_*
+.sync*
 .owncloudsync*
 
 /backup
@@ -20,3 +22,4 @@ lost+found
 /shared/Soft/diag
 /shared/Soft/diag_tools
 /shared/Soft/linux/system
+/vms

@@ -21,6 +21,3 @@ lost+found
 /shared/.tmux/resurrect
 /shared/dev
 /shared/torrent
-/shared/virt
-/shared/virtualbox
-/shared/vmware

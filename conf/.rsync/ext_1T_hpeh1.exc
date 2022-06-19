@@ -3,6 +3,12 @@
 
 ## manjaro
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_1T_hpeh1.exc /run/media/${USER}/1T/ext/ /ext/ -av --delete -n
+#
+# backup vms
+# sudo rsync /run/media/${USER}/1T/ext/backup/vms/ /ext/backup/vms/ -av --delete-before -n
+#
+# vms/share
+# sudo rsync /run/media/${USER}/1T/vms/share/  /vms/share/ -av --delete-before -n
 
 lost+found
 .Trash-*
@@ -17,3 +23,5 @@ lost+found
 /shared/Podcasts
 /shared/Soft/diag
 /shared/Soft/diag_tools
+/shared/Videos
+/vms

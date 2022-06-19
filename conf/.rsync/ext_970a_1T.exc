@@ -5,8 +5,12 @@
 
 ## manjaro
 # sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_970a_1T.exc /ext/ /run/media/${USER}/1T/ext/ -av --delete -n
+# 
+# backup vms
+# sudo rsync /ext/backup/vms/ /run/media/${USER}/1T/ext/backup/vms/ -av --delete-before -n
 #
-# sudo rsync /ext/backup/ /run/media/${USER}/1T/ext/backup/ -av -n
+# vms/share
+# sudo rsync /vms/share/ /run/media/${USER}/1T/vms/share/ -av --delete-before -n
 
 lost+found
 .Trash-*
@@ -16,3 +20,4 @@ lost+found
 .owncloudsync*
 
 /backup
+/vms

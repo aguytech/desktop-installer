@@ -25,6 +25,4 @@ lost+found
 /shared/.thunderbird*
 /shared/dev
 /shared/torrent
-/shared/virtualbox
-/shared/vmware
-/shared/virt/images
+/shared/virt
