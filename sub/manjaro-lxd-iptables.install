@@ -8,7 +8,6 @@ grep -q "^# ${_PART_LXD}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART_LXD}" >
 
 ########################  REQUIRED
 
-path_install_conf=${S_PATH_INSTALL_CONF/-desktop/}
 file_script_iptables=${path_install_conf}/iptables/iptables-firewall
 file_conf_iptables=${path_install_conf}/iptables/iptables-firewall.conf
 file_service_iptables=${path_install_conf}/iptables/iptables-firewall.service
@@ -41,7 +40,7 @@ _IPT_PRE_HTTPS="${_ANSWER:-$anstmp}" && _confset _IPT_PRE_HTTPS "${_IPT_PRE_HTTP
 
 _echot "------------------  sysctl conf"
 file=/etc/sysctl.conf
-echo "
+sudo sh -c "echo '
 # iptables
 net.core.netdev_max_backlog = ${_MAX_BACKLOG}
 net.ipv4.tcp_max_syn_backlog = ${_MAX_SYN_BACKLOG}
@@ -49,7 +48,7 @@ net.ipv4.tcp_max_tw_buckets = ${_MAX_TW_BUCKETS}
 net.ipv4.tcp_fin_timeout= ${_FIN_TIMEOUT}
 net.ipv4.tcp_keepalive_time= ${_KEEPALIVE_TIME}
 net.ipv4.tcp_keepalive_intvl= ${_KEEPALIVE_INTVL}
-net.ipv4.tcp_keepalive_probes = ${_KEEPALIVE_PROBES}" >> ${file}
+net.ipv4.tcp_keepalive_probes = ${_KEEPALIVE_PROBES}' >> ${file}"
 
 _echot "------------------  sysctl restart"
 _service restart systemd-sysctl

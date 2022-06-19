@@ -5,7 +5,7 @@
 
 ########################  MAIN
 
-_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_ID}-${_PART}"
 
 _echot "------------------ apt repository"
 
@@ -13,12 +13,14 @@ file=/etc/apt/sources.list
 sudo cp -a $file $file.keep$(date +%s)
 
 sudo apt-add-repository -yn ppa:stebbins/handbrake-releases # handbrake
-sudo apt-add-repository -yn ppa:ubuntu-mozilla-security/ppa # mozilla
+sudo add-apt-repository -yn ppa:mozillateam/ppa # mozilla
+#sudo apt-add-repository -yn ppa:ubuntu-mozilla-security/ppa # mozilla
 sudo apt-add-repository -yn ppa:vincent-vandevyvre/vvv # qarte
 sudo apt-add-repository -yn ppa:inkscape.dev/stable # inkscape
 sudo apt-add-repository -yn ppa:lightzone-team/lightzone # lightzone
 sudo apt-add-repository -yn ppa:boamaod/nautilus-compare # nautilus_compare
 sudo add-apt-repository -yn ppa:ubuntuhandbook1/audacity # audacity
+sudo add-apt-repository -yn ppa:tomtomtom/gmusicbrowser # gmusicbrowser
 #sudo apt-add-repository -yn ppa:yannubuntu/boot-repair # boot-repair
 #sudo apt-add-repository -yn ppa:nilarimogard/webupd8 # youtube-dl, pulseaudio-equalizer & more
 #sudo apt-add-repository -yn ppa:webupd8team/y-ppa-manager # y-ppa-manager
@@ -42,6 +44,13 @@ ppa:nilarimogard/webupd8 # pulseaudio-equalizer
 [ "$_LAPTOP" ] && sudo apt-add-repository -yn ppa:linrunner/tlp
 KEEP
 
+_echot "------------------ firefox"
+echo '                                        
+Package: *
+Pin: release o=LP-PPA-mozillateam
+Pin-Priority: 1001
+' | sudo tee /etc/apt/preferences.d/mozilla-firefox
+
 _echot "------------------ getdeb"
 #sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu bionic-getdeb apps" >> /etc/apt/sources.list.d/getdeb.list'
 #wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
@@ -50,21 +59,9 @@ _echot "------------------ mkv"
 #echo -e "deb http://mkvtoolnix.download/ubuntu/ bionic main\ndeb-src http://mkvtoolnix.download/ubuntu/ bionic main"  | sudo tee /etc/apt/sources.list.d/mkvtoolnix.list/etc/apt/sources.list.d/multisystem.list
 #wget -q -O - https://mkvtoolnix.download/gpg-pub-moritzbunkus.txt | sudo apt-key add -
 
-_echot "------------------ gmusibrowser"
-echo 'deb http://gmusicbrowser.org/deb ./' | sudo tee /etc/apt/sources.list.d/gmusicbrowser.list
-wget http://gmusicbrowser.org/squentin.key.asc -O - | sudo apt-key add -
-
-
 _echot "------------------ multisystem"
-echo 'deb http://liveusb.info/multisystem/depot all main' | sudo tee /etc/apt/sources.list.d/multisystem.list
-wget -q http://liveusb.info/multisystem/depot/multisystem.asc -O- | sudo apt-key add -
-
-_echot "------------------ mariadb"
-echo "# MariaDB 10.4 repository list - created 2019-10-28 08:34 UTC
-# http://downloads.mariadb.org/mariadb/repositories/
-deb [arch=amd64,arm64,ppc64el] http://ftp.hosteurope.de/mirror/mariadb.org/repo/10.4/ubuntu bionic main
-deb-src http://ftp.hosteurope.de/mirror/mariadb.org/repo/10.4/ubuntu bionic main" | sudo tee /etc/apt/sources.list.d/mariadb.list
-sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
+#echo 'deb http://liveusb.info/multisystem/depot all main' | sudo tee /etc/apt/sources.list.d/multisystem.list
+#wget -q http://liveusb.info/multisystem/depot/multisystem.asc -O- | sudo apt-key add -
 
 #_echot "------------------ postgresql"
 #echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
@@ -101,3 +98,11 @@ _echoT "===================== ${_PART} end"
 _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
 
 
+<<KEEP
+
+_echot "------------------ gmusibrowser"
+echo 'deb http://gmusicbrowser.org/deb ./' | sudo tee /etc/apt/sources.list.d/gmusicbrowser.list
+wget http://gmusicbrowser.org/squentin.key.asc -O - | sudo apt-key add -
+
+
+KEEP

@@ -3,7 +3,7 @@
 # write by Aguy
 
 
-_echoT "\n==========================================  ${S_RELEASE}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_ID}-${_PART}"
 
 _FILE_DEV_DONE=${S_PATH_CONF}/dev.done
 _RELEASE_NAME_DEV=dev_${S_RELEASE}

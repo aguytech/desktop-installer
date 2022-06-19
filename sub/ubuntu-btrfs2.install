@@ -101,14 +101,14 @@ UUID=${uuidsys}   /save             btrfs   defaults,noatime,space_cache=v2,auto
 [ "${_LXD}" ] && sudo sh -c "echo 'UUID=${uuidsys}   ${path_lxd}               btrfs   defaults,noatime,space_cache=v2,autodefrag,compress=zstd,subvol=/lxd-${_SYSNAME}      0    2' >> ${file}"
 
 [ "${_DEVICE_EXT}" ] || sudo sh -c "echo 'UUID=${uuidsys}   /ext              btrfs   defaults,noatime,space_cache=v2,autodefrag,compress=zstd,subvol=/ext        0    2' >> ${file}"
-sudo sh -c "echo -e '\nUUID=${uuidsys}   /btrfs/sys        btrfs   defaults,noauto,noatime,space_cache=v2,autodefrag,compress=zstd            0    2' >> ${file}"
+sudo sh -c "echo '\nUUID=${uuidsys}   /btrfs/sys        btrfs   defaults,noauto,noatime,space_cache=v2,autodefrag,compress=zstd            0    2' >> ${file}"
 
 [ "${_SSD}" ] && sudo sed -i '/btrfs/ s|noatime,|noatime,ssd,|' ${file}
 
 if grep -q '^tmp.*\/tmp' /etc/fstab; then
 	[ "${_MEM:0:1}" != 0 ] && sudo sed -i "/tmpfs/ s|mode=1777|mode=1777,size=${_MEM}|" ${file}
 else
-	sudo sh -c "echo -e '\ntmpfs                                       /tmp              tmpfs   defaults,noatime,mode=1777,size=${_MEM}     0 0' >> ${file}"
+	sudo sh -c "echo '\ntmpfs                                       /tmp              tmpfs   defaults,noatime,mode=1777,size=${_MEM}     0 0' >> ${file}"
 fi
 
 [ "${_DEVICE_EXT}" ] && sudo sh -c "echo '
@@ -149,3 +149,73 @@ _echoa "The computer now will reboot"
 _askno "Valid to continue"
 reboot
 exit
+
+<<KEEP
+_LXD=y
+_SSD=
+_MEM=2G
+KEEP
+
+
+<<KEEP
+
+_echot "------------------ btrfs tools install"
+
+sudo apt install -y apt-btrfs-snapshot snapper # system-storage-manage btrbk
+# see https://github.com/agronick/apt-btrfs-snapper
+
+
+########################  SNAPPER
+
+file=/etc/snapper/config-templates/default
+_keepcpts ${file}
+str=${_USERNAME}; sed -i "s|^\(ALLOW_USERS=\).*|\1\"${str}\"|" $file
+str=${_USERNAME}; sed -i "s|^\(ALLOW_GROUPS=\).*|\1\"${str}\"|" $file
+str=no; sed -i "s|^\(TIMELINE_CREATE=\).*|\1\"${str}\"|" $file
+str=no; sed -i "s|^\(TIMELINE_CLEANUP=\).*|\1\"${str}\"|" $file
+
+file=/etc/updatedb.conf
+cp -a $file $file.$(date +%s)
+sed -i 's|^\(# PRUNENAMES.*\)|\1\nPRUNENAMES = ".snapshots"|' $file
+
+
+cd /
+# mandatory
+snapper -c home.${_USERNAME} create-config /home/${_USERNAME}
+snapper -c lxd create-config /var/lib/lxd
+# full
+snapper -c home create-config /home
+snapper -c home.shared create-config /home/shared
+snapper -c save create-config /savemkdir
+snapper -c ext create-config /ext
+snapper -c ext.backups create-config /ext/backups
+snapper -c ext.ovh create-config /ext/ovh
+snapper -c ext.shared create-config /ext/shared
+
+snapper list-configs
+
+
+########################  SNAPPER_GUI
+
+# see https://github.com/ricardomv/snapper-gui
+apt install -y python3 libgtksourceview-3.0-1 python3-dbus python3-setuptools
+
+cd /tmp
+wget https://github.com/ricardomv/snapper-gui/archive/master.zip
+unzip master.zip
+cd snapper-gui-master
+python3 setup.py install
+
+# shortcut
+echo "[Desktop Entry]
+Name=Snapper GUI
+GenericName=Snapper GUI
+Comment=Gui for snapper
+Exec=gksudo snapper-gui
+Terminal=false
+Type=Application
+Icon=/home/shared/Soft/multi/snapper.png
+Categories=Application;GTK;Development;IDE;BTRFS;" > /home/${_USERNAME}/.local/share/applications/snapper-gui.desktop
+
+KEEP
+

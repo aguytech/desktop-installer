@@ -3,7 +3,7 @@
 # write by Aguy
 
 
-_echoT "\n==========================================  ${S_RELEASE}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_ID}-${_PART}"
 
 file_bash_aliases="${S_PATH_SCRIPT_CONF}/.bash_aliases"
 file_bash_functions="${S_PATH_SCRIPT_CONF}/.bash_functions"

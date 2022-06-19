@@ -2,20 +2,22 @@
 #
 # write by Aguy
 
-_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_ID}-${_PART}"
 
 grep -q "^# ${_PART}" ${S_FILE_INSTALL_CONF} || echo "# ${_PART}" >> ${S_FILE_INSTALL_CONF}
 
 ########################  REQUIRED
 
+path_install_conf=${S_PATH_INSTALL_CONF/install-desktop/install}
+path_install_bash_completion=${S_PATH_INSTALL_CONF}/bash-completion
+
 file_env=${S_PATH_SCRIPT_CONF}/env
 file_bash_aliases=${S_PATH_SCRIPT_CONF}/.bash_aliases
 file_bash_functions=${S_PATH_SCRIPT_CONF}/.bash_functions
-path_install_bash_completion=${S_PATH_INSTALL_CONF}/bash-completion
 
-file_rsyslog_cron=${S_PATH_INSTALL_CONF}/rsyslog/cron.conf
-file_rsyslog_client_auth=${S_PATH_INSTALL_CONF}/rsyslog/client-auth.conf
-file_logrotate_server=${S_PATH_INSTALL_CONF}/logrotate/server
+file_rsyslog_cron=${path_install_conf}/rsyslog/cron.conf
+file_rsyslog_client_auth=${path_install_conf}/rsyslog/client-auth.conf
+file_logrotate_server=${path_install_conf}/logrotate/server
 
 _echot "------------------  required files"
 _require ${file_env} ${file_bash_aliases} ${file_bash_functions}
@@ -89,7 +91,7 @@ _SYS_FILE=/etc/sysctl.d/20-server.conf && _confset _SYS_FILE "${_SYS_FILE}"
 
 _echot "------------------  sysctl conf"
 _keepcpts ${_SYS_FILE}
-echo "# server configuration
+sudo sh -c "echo '# server configuration
 net.ipv4.ip_forward = 1
 net.core.somaxconn = ${_SOMAXCONN}
 net.core.netdev_max_backlog = ${_MAX_BACKLOG}
@@ -98,7 +100,7 @@ net.ipv4.tcp_max_tw_buckets = ${_MAX_TW_BUCKETS}
 net.ipv4.tcp_fin_timeout = ${_FIN_TIMEOUT}
 net.ipv4.tcp_keepalive_time = ${_KEEPALIVE_TIME}
 net.ipv4.tcp_keepalive_intvl = ${_KEEPALIVE_INTVL}
-net.ipv4.tcp_keepalive_probes = ${_KEEPALIVE_PROBES}" > ${_SYS_FILE}
+net.ipv4.tcp_keepalive_probes = ${_KEEPALIVE_PROBES}' > ${_SYS_FILE}"
 
 _echot "------------------  sysctl restart"
 _service restart systemd-sysctl
@@ -169,20 +171,20 @@ _echot "------------------  hosts S_CLUSTER"
 file=/etc/hosts
 _keepcpts "${file}"
 
-! sudo grep -q "# ${S_DOM_NAME} cluster" ${file} && sudo sh -c "echo '\n# ${S_DOM_NAME} cluster' >> ${file}"
+! sudo grep -q "# ${S_DOM_NAME} cluster" ${file} && sudo sh -c "echo \"\n# ${S_DOM_NAME} cluster\" >> ${file}"
 for host in ${servers_list}; do
 	eval ${S_CLUSTER[${host}]}
 	[ "${s_ip}" ] && sudo sed -i "/${s_ip}/d" ${file}
-	[ "${s_ip}" ] && sudo sh -c "echo '${s_ip}\t${host}\t${s_name}' >> ${file}"
+	[ "${s_ip}" ] && sudo sh -c "echo \"${s_ip}\t${host}\t${s_name}\" >> ${file}"
 done
 _evalr "sed -i '/^${_IPTHIS}/ s|^|#|' ${file}"
 
 if ! grep -q '^# services' ${file}; then
 	_echot "------------------  hosts S_SERVICE_BITS"
 	_keepcpts $file
-	echo -e "\n# services" >> ${file}
+	sudo sh -c "echo -e \"\n# services\" >> ${file}"
 	for str in ${!S_SERVICE_BITS[*]}; do
-		echo -e "#${_CIDR_VM%.*}.${S_SERVICE_BITS[$str]}\t${S_SERVICE[$str]}" >> ${file}
+		sudo sh -c "echo -e \"#${_CIDR_VM%.*}.${S_SERVICE_BITS[$str]}\t${S_SERVICE[$str]}\" >> ${file}"
 	done
 fi
 
@@ -253,15 +255,15 @@ if [[ " ${str} " = *" ${S_SERVER_TYPE} "* ]]; then
 		_echot "------------------  btrfs storage"
 		path=${S_HOST_PATH}
 		_echoA "Create a btrfs subvolume: /lxd-${S_RELEASE_NAME} and mount it in ${path}"
-		_askno "Continue after that:"
+		_askno "Continue after that"
 		[ -d ${path} ] || _exite "Unable to find path: ${path}"
 
-		btrfs subvolume list .
+		sudo btrfs subvolume list .
 
 		_echot "------------------  btrfs paths"
 		paths="${S_HOST_PATH} ${S_HOST_PATH_SP} ${S_HOST_PATH_SHARE} ${S_HOST_PATH_SAVE} ${S_HOST_PATH_LOG} "
 		for path in ${paths}; do
-			[ -d ${path} ] || _evalr mkdir /vm/${path}
+			[ -d ${path} ] || _evalr mkdir ${path}
 		done
 
 	else
@@ -273,45 +275,10 @@ fi
 ########################  CRON
 
 _echot "------------------  cron conf"
-
 file=/etc/crontab
 _keepcpts ${file}
 str="MAILTO=${S_EMAIL_TECH}"
 grep -q '^MAILTO' "${file}" || _evalr "sed -i '/^PATH=.*/ a ${str}' ${file}"
-
-########################  RSYSLOG
-
-_echot "------------------  rsyslog conf"
-
-file="/etc/rsyslog.conf"
-_keepcpts "${file}"
-
-# udp
-if [ "${S_RSYSLOG_PTC}" = udp ]; then
-	_evalr "sed -i 's|^#\?\(module(load=\"imudp.*\)$|\1|' ${file}"
-	_evalr "sed -i 's|^#\?\(input(type=\"imudp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
-# tcp
-elif [ "${S_RSYSLOG_PTC}" = tcp ]; then
-	_evalr "sed -i 's|^#\?\(module(load=\"imtcp.*\)$|\1|' ${file}"
-	_evalr "sed -i 's|^#\?\(input(type=\"imtcp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
-fi
-
-_echot "------------------  rsyslog restart"
-_service restart rsyslog
-
-_echot "------------------  rsyslog conf"
-sed -i '/^auth.*/ s|^|#|' /etc/rsyslog.d/50-default.conf
-sed -i '/^cron.*/ s|^|#|' /etc/rsyslog.d/50-default.conf
-
-_echot "------------------  rsyslog cron"
-file=/etc/rsyslog.d/70-${file_rsyslog_cron##*/}
-_evalq cp -a ${file_rsyslog_cron} ${file}
-_var_replace ${file} rsyslog
-
-_echot "------------------  rsyslog client-auth"
-file=/etc/rsyslog.d/72-${file_rsyslog_client_auth##*/}
-_evalq cp -a ${file_rsyslog_client_auth} ${file}
-_var_replace ${file} rsyslog
 
 ########################  LOGROTATE
 

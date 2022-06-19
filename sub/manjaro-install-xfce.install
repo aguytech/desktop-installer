@@ -10,7 +10,7 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 cmd="sudo pacman -S --noconfirm"
 
 _echot "------------------ remove ${S_RELEASE_DESKTOP} pre-installed"
-packages="vlc gcolor2"
+packages="gcolor2" # vlc 
 for package in $packages; do
 	sudo pacman -Rs --noconfirm $package
 done

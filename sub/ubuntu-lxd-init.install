@@ -2,13 +2,12 @@
 #
 # write by Aguy
 
-_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE}-${_PART_LXD}"
 
-grep -q "^# ${_PART}" ${S_FILE_INSTALL_CONF} || echo "# ${_PART}" >> ${S_FILE_INSTALL_CONF}
+grep -q "^# ${_PART_LXD}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART_LXD}" >> "${S_FILE_INSTALL_CONF}"
 
 ########################  REQUIRED
 
-path_install_conf=${S_PATH_INSTALL_CONF/-desktop/}
 file_rsyslog_client_lxd=${path_install_conf}/rsyslog/client-lxd.conf
 file_logrotate_client_lxd=${path_install_conf}/logrotate/client-lxd
 
@@ -46,26 +45,6 @@ _LXD_UID=1000000; _confset _LXD_UID "${_LXD_UID}"
 # acl uid for shared path
 _LXD_ACL=1000; _confset _LXD_ACL "${_LXD_ACL}"
 
-########################  IPTABLES
-
-_PART_LXD=lxd-iptables
-if ! _parthave ${_PART_LXD} ${S_FILE_INSTALL_DONE}; then
-	. "${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART_LXD}.install" || _exite "Wrong part: ${_PART_LXD}"
-	[ "$_STEP" ] && _askno "Valid to continue" 
-else
-	_echO "performed *** ${_PART_LXD}"
-fi
-
-########################  FAIL2BAN
-
-_PART_LXD=lxd-fail2ban
-if ! _parthave ${_PART_LXD} ${S_FILE_INSTALL_DONE}; then
-	. "${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART_LXD}.install" || _exite "Wrong part: ${_PART_LXD}"
-	[ "$_STEP" ] && _askno "Valid to continue" 
-else
-	_echO "performed *** ${_PART_LXD}"
-fi
-
 ########################  STORAGE
 
 if [ "${_DEV_DRIVER}" = zfs ] && ! zfs list -r ${_ZFS_ROOT}|grep -q ${_ZFS_ROOT}/lxd; then
@@ -86,7 +65,7 @@ fi
 ########################  INSTALL
 
 _echot "------------------  install"
-_evalr apt install -y jq acl # criu lxd-tools
+_evalr apt install -y jq acl rsyslog # criu lxd-tools
 
 # core20
 if ! snap list|grep -q ^core20; then
@@ -173,7 +152,7 @@ if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
 	_keepcpts ${file}
 	if ! grep -q ${s_inet} ${file}; then
 		_evalr "sed -i 's|^|#|' ${file}"
-		sudo sh -c "echo 'nameserver 127.0.0.53\noptions edns0 trust-ad\nsearch lxd' > ${file}"
+		sudo sh -c "echo 'nameserver 127.0.0.53\noptions edns0 trust-ad\nsearch lxd' >> ${file}"
 	 fi
 
 	_echot "------------------  dns home"
@@ -250,6 +229,40 @@ _eval lxc network attach-profile lxdbr1 ${profile} eth0
 
 ########################  RSYSLOG
 
+<<TOUBUNTU
+_echot "------------------  rsyslog conf"
+
+file="/etc/rsyslog.conf"
+_keepcpts "${file}"
+
+# udp
+if [ "${S_RSYSLOG_PTC}" = udp ]; then
+	_evalr "sed -i 's|^#\?\(module(load=\"imudp.*\)$|\1|' ${file}"
+	_evalr "sed -i 's|^#\?\(input(type=\"imudp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
+# tcp
+elif [ "${S_RSYSLOG_PTC}" = tcp ]; then
+	_evalr "sed -i 's|^#\?\(module(load=\"imtcp.*\)$|\1|' ${file}"
+	_evalr "sed -i 's|^#\?\(input(type=\"imtcp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
+fi
+
+_echot "------------------  rsyslog restart"
+_service restart rsyslog
+
+_echot "------------------  rsyslog conf"
+_evalr "sed -i '/^auth.*/ s|^|#|' /etc/rsyslog.d/50-default.conf"
+_evalr "sed -i '/^cron.*/ s|^|#|' /etc/rsyslog.d/50-default.conf"
+
+_echot "------------------  rsyslog cron"
+file=/etc/rsyslog.d/70-${file_rsyslog_cron##*/}
+_evalr cp -a ${file_rsyslog_cron} ${file}
+_var_replace ${file} rsyslog
+
+_echot "------------------  rsyslog client-auth"
+file=/etc/rsyslog.d/72-${file_rsyslog_client_auth##*/}
+_evalr cp -a ${file_rsyslog_client_auth} ${file}
+_var_replace ${file} rsyslog
+TOUBUNTU
+
 _echot "------------------  path log lxd"
 path=${S_PATH_LOG}/lxd
 [ -d ${path} ] || _evalr mkdir -p ${path}
@@ -278,12 +291,8 @@ _echot "------------------ lxd containers"
 _echoA "You need to launch following command to build containers:"
 _echoa $(ls ${_PATH_BASE}/lxd-*)
 
-########################  REBOOT
-
-_echot "------------------ reboot"
-_echoW "You have to reboot before continuing"
-
 ########################  END
 
-_echoT "===================== ${_PART} end"
-_partadd ${_PART} ${S_FILE_INSTALL_DONE}
+_echoT "===================== ${_PART_LXD} end"
+_partadd ${_PART_LXD} ${S_FILE_INSTALL_DONE}
+

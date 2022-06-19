@@ -61,7 +61,7 @@ sudo chmod +x /usr/bin/architect
 
 _echot "------------------ logo"
 
-FILE=/home/shared/keep/.icons/architect.png
+FILE=/ext/shared/Soft/linux/icons/SQL-Power-Architect.png
 [ -f $FILE ] && cp -a $FILE $DIR_OPT || _echoE "logo skipped, unable to copy file '$FILE'"
 
 

@@ -20,7 +20,7 @@ fi
 ########################  DATA
 
 _PATH_SSH_KEEP="/home/shared/.perso/.ssh"
-[ -d ~/Soft/multi ] && _PATH_SOFT=~/Soft/multi || _PATH_SOFT=/ext/shared/Soft/multi
+[ -d ~/Soft/multi ] && _PATH_SOFT=~/Soft/linux || _PATH_SOFT=/ext/shared/Soft/linux
 _PATH_SOFT_BACKUP=${_PATH_SOFT}/backup
 
 # after btrfs1
@@ -49,7 +49,7 @@ sudo [ ! -e "$file" ] && sudo sh -c "echo 'export PATH=${PATH}:/usr/local/bs' >>
 
 _PART=btrfs2
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-	. ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install;
+	. ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install;
 	[ "${_STEP}" ] && _askno "Valid to continue"
 else
 	_echO "performed *** ${_PART}"
@@ -121,7 +121,7 @@ fi
 
 _PART=repositories
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-	. ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install
+	. ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install
 	[ "${_STEP}" ] && _askno "Valid to continue"
 else
 	_echO "performed *** ${_PART}"
@@ -131,7 +131,7 @@ fi
 
 _PART=upgrade
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-	. ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install
+	. ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install
 	[ "${_STEP}" ] && _askno "Valid to continue"
 else
 	_echO "performed *** ${_PART}"
@@ -141,7 +141,7 @@ fi
 
 _PART=install
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "${_STEP}" ] && _askno "Valid to continue"
 else
 	_echO "performed *** ${_PART}"
@@ -150,11 +150,11 @@ fi
 ########################  LXD-
 
 if [ "${_LXD}" ]; then
-    _PART=lxd
-    if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-		! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	_PART=lxd
+	if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
+		! . ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install && echo "wrong '${_PART}'" && exit
 		[ "${_STEP}" ] && _askno "Valid to continue"
-    else
+	else
 		_echO "performed *** ${_PART}"
 	fi
 fi
@@ -164,7 +164,7 @@ fi
 if [ "${_DEV}" ]; then
 	_PART=dev
 	if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-		! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+		! . ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install && echo "wrong '${_PART}'" && exit
 		[ "${_STEP}" ] && _askno "Valid to continue"
 	else
 		_echO "performed *** ${_PART}"
@@ -175,7 +175,7 @@ fi
 
 _PART=configuration
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "${_STEP}" ] && _askno "Valid to continue"
 else
 	_echO "performed *** ${_PART}"
@@ -185,7 +185,7 @@ fi
 
 _PART=launcher
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "${_STEP}" ] && _askno "Valid to continue"
 else
 	_echO "performed *** ${_PART}"
@@ -195,7 +195,7 @@ fi
 
 _PART=autostart
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "${_STEP}" ] && _askno "Valid to continue"
 else
 	_echO "performed *** ${_PART}"
@@ -205,7 +205,7 @@ fi
 
 _PART=ssh
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "${_STEP}" ] && _askno "Valid to continue"
 else
 	_echO "performed *** ${_PART}"
@@ -216,7 +216,7 @@ fi
 
 _PART=root
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "${_STEP}" ] && _askno "Valid to continue"
 else
 	_echO "performed *** ${_PART}"
@@ -226,7 +226,7 @@ fi
 
 _PART=end
 if ! _parthave ${_PART} ${S_FILE_INSTALL_DONE}; then
-	! . ${_PATH_BASE_SUB}/${S_RELEASE_NAME}-${_PART}.install && echo "wrong '${_PART}'" && exit
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}.install && echo "wrong '${_PART}'" && exit
 	[ "${_STEP}" ] && _askno "Valid to continue"
 else
 	_echO "performed *** ${_PART}"

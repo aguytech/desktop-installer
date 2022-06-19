@@ -2,7 +2,7 @@
 #
 # write by Aguy
 
-_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_ID}-${_PART}"
 
 ########################  MAIN
 
@@ -94,14 +94,14 @@ sudo sed -i '/^UUID=.* btrfs .*/ s|^|#|' ${file}
 
 sudo sh -c "echo '
 # btrfs sys
-UUID=${uuidsys}   /                 btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/${_SYSNAME}      0    1
-UUID=${uuidsys}   /home             btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/home       0    2
-UUID=${uuidsys}   /home/${_USERNAME}      btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/user-${_SYSNAME} 0    2
-UUID=${uuidsys}   /save             btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/save       0    2' >> ${file}"
-[ "${_LXD}" ] && sudo sh -c "echo 'UUID=${uuidsys}   ${path_lxd}               btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/lxd-${_SYSNAME}      0    2' >> ${file}"
+UUID=${uuidsys}   /                 btrfs   defaults,noatime,space_cache=v2,autodefrag,compress=zstd,subvol=/${_SYSNAME}      0    1
+UUID=${uuidsys}   /home             btrfs   defaults,noatime,space_cache=v2,autodefrag,compress=zstd,subvol=/home       0    2
+UUID=${uuidsys}   /home/${_USERNAME}      btrfs   defaults,noatime,space_cache=v2,autodefrag,compress=zstd,subvol=/user-${_SYSNAME} 0    2
+UUID=${uuidsys}   /save             btrfs   defaults,noatime,space_cache=v2,autodefrag,compress=zstd,subvol=/save       0    2' >> ${file}"
+[ "${_LXD}" ] && sudo sh -c "echo 'UUID=${uuidsys}   ${path_lxd}               btrfs   defaults,noatime,space_cache=v2,autodefrag,compress=zstd,subvol=/lxd-${_SYSNAME}      0    2' >> ${file}"
 
-[ "${_DEVICE_EXT}" ] || sudo sh -c "echo 'UUID=${uuidsys}   /ext              btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd,subvol=/ext        0    2' >> ${file}"
-sudo sh -c "echo '\nUUID=${uuidsys}   /btrfs/sys        btrfs   defaults,noauto,noatime,space_cache,autodefrag,compress=zstd            0    2' >> ${file}"
+[ "${_DEVICE_EXT}" ] || sudo sh -c "echo 'UUID=${uuidsys}   /ext              btrfs   defaults,noatime,space_cache=v2,autodefrag,compress=zstd,subvol=/ext        0    2' >> ${file}"
+sudo sh -c "echo '\nUUID=${uuidsys}   /btrfs/sys        btrfs   defaults,noauto,noatime,space_cache=v2,autodefrag,compress=zstd            0    2' >> ${file}"
 
 [ "${_SSD}" ] && sudo sed -i '/btrfs/ s|noatime,|noatime,ssd,|' ${file}
 
@@ -113,8 +113,8 @@ fi
 
 [ "${_DEVICE_EXT}" ] && sudo sh -c "echo '
 # btrfs ext
-UUID=${uuidext}      /ext              btrfs   defaults,noatime,space_cache,autodefrag,compress=zstd           0    2
-UUID=${uuidext}      /btrfs/ext        btrfs   defaults,noauto,noatime,space_cache,autodefrag,compress=zstd               0    2' >> ${file}"
+UUID=${uuidext}      /ext              btrfs   defaults,noatime,space_cache=v2,autodefrag,compress=zstd           0    2
+UUID=${uuidext}      /btrfs/ext        btrfs   defaults,noauto,noatime,space_cache=v2,autodefrag,compress=zstd               0    2' >> ${file}"
 
 _echO "$(cat "${file}")"
 

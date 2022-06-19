@@ -10,6 +10,7 @@ _echoT "#################### START ${_PART}/${S_RELEASE_DESKTOP}"
 _echot "------------------ wallpapers"
 path=${S_PATH_INSTALL_CONF}/wp
 [ -d "${path}" ] && _evalr cp ${path}/* /usr/share/backgrounds/xfce/
+_evalr chmod 644 /usr/share/backgrounds/xfce/*
 
 _echot "------------------ acpi enable"
 systemctl is-enabled acpid|grep -q ^disabled && _service enable acpid

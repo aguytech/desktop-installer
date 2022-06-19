@@ -2,7 +2,7 @@
 #
 # write by Aguy
 
-_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_ID}-${_PART}"
 
 ########################  MAIN
 
@@ -10,7 +10,6 @@ _echot "------------------ ssh keep"
 
 path=~/.ssh
 [ -d "$path" ] && _keepmvts "$path"
-
 
 if [ "$_SSH_BACK" ]; then
 
@@ -24,7 +23,6 @@ else
 	ssh-keygen -t rsa
 	#ssh-copy-id <username>@<host>
 fi
-
 
 _echot "------------------ client conf"
 
@@ -41,10 +39,8 @@ sudo [ -f "${file}" ] && sudo cp -a "${file}" "${file}.keep$(date +%s)"
 ! grep -q "UseDNS" ${file} && echo "UseDNS no" | sudo tee -a $file
 sudo systemctl restart sshd.service
 
-
 ########################  END
 
 _echoT "===================== ${_PART} end"
 _partadd "${_PART}" "${S_FILE_INSTALL_DONE}"
-
 

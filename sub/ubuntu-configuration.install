@@ -2,7 +2,7 @@
 #
 # write by Aguy
 
-_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_ID}-${_PART}"
 
 grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_FILE_INSTALL_CONF}"
 
@@ -23,6 +23,7 @@ _echot "------------------ grub"
 file=/etc/default/grub
 _keepcpts ${file}
 sudo sed -i "/^GRUB_TIMEOUT=/ s|=.*|=2|" ${file}
+sudo sed -i "/^GRUB_TIMEOUT_STYLE=hidden/ s|^|#|" ${file}
 sudo sed -i "/^GRUB_HIDDEN_TIMEOUT_QUIET=/ s|=.*|=false|" ${file}
 sudo sed -i "/^GRUB_HIDDEN_TIMEOUT_QUIET=/ s/^/#/" ${file}
 
@@ -58,9 +59,13 @@ _echot "------------------  /usr/local/bs/conf links"
 for file in .nanorc .tmux.conf .vimrc; do
 	path_from="${S_PATH_SCRIPT_CONF}/${file}"
 	path=~/${file}
-	[ -e "${path}" ] && sudo rm -fR ${path}
+	[[ -e "${path}" || -h  "${path}" ]] && rm -fR ${path}
 	ln -s "${path_from}" "${path}"
 done
+
+_echot "------------------ path"
+path=~/.local/share/applications
+! [ -d "$path" ] && mkdir -p "$path"
 
 _echot "------------------ gstreamer preset"
 path=~/.local/share/gstreamer-1.0/presets
@@ -170,11 +175,10 @@ tmux source-file ${file} 2>/dev/null
 
 _echot "------------------ gtk styles"
 file="$HOME/.local/share/gtksourceview-4"
-! [ -e ${file} ] && ln -sv /home/shared/.local/share/gtksourceview-3.0 ${file}
+[ -e ${file} ] || ln -sv /home/shared/.local/share/gtksourceview-3.0 ${file}
 
 _echot "------------------ _LAPTOP"
 [ "$_LAPTOP" ] && _service enable tlp
-
 
 if [ -n "${_VIRTUALBOX}" ]; then
     _echot "------------------ virtualbox"

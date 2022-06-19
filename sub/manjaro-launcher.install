@@ -2,15 +2,15 @@
 #
 # write by Aguy
 
-_echoT "\n==========================================  ${S_RELEASE}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_ID}-${_PART}"
 
 
 ######################## required ${S_RELEASE_DESKTOP}
 
-file="${_PATH_BASE_SUB}/${S_RELEASE}-${_PART}-${S_RELEASE_DESKTOP}.install"
+file="${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}-${S_RELEASE_DESKTOP}.install"
 if [ -f "$file" ]; then
 	_echot "------------------ ${S_RELEASE_DESKTOP} required"
-	! . ${_PATH_BASE_SUB}/${S_RELEASE}-${_PART}-${S_RELEASE_DESKTOP}.install && echo "wrong '${_PART}'" && exit
+	! . ${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}-${S_RELEASE_DESKTOP}.install && echo "wrong '${_PART}'" && exit
 fi
 
 

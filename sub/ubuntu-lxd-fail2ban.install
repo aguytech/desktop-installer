@@ -2,13 +2,12 @@
 #
 # write by Aguy
 
-_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART_LXD}"
+_echoT "\n==========================================  ${S_RELEASE}-${_PART_LXD}"
 
 grep -q "^# ${_PART_LXD}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART_LXD}" >> "${S_FILE_INSTALL_CONF}"
 
 ########################  REQUIRED
 
-path_install_conf=${S_PATH_INSTALL_CONF/-desktop/}
 file_conf_global=${path_install_conf}/fail2ban/global.conf
 file_conf_jail_local=${path_install_conf}/fail2ban/jail.local
 file_conf_jail_ssh=${path_install_conf}/fail2ban/jail-ssh.conf

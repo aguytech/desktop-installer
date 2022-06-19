@@ -1,0 +1,303 @@
+#!/bin/bash
+#
+# write by Aguy
+
+_echoT "\n==========================================  ${S_RELEASE}-${_PART_LXD}"
+
+grep -q "^# ${_PART_LXD}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART_LXD}" >> "${S_FILE_INSTALL_CONF}"
+
+########################  REQUIRED
+
+file_rsyslog_client_lxd=${path_install_conf}/rsyslog/client-lxd.conf
+file_logrotate_client_lxd=${path_install_conf}/logrotate/client-lxd
+
+_echot "------------------ required files"
+_require ${file_rsyslog_client_lxd} ${file_logrotate_client_lxd}
+
+########################  DATA
+
+_echot "------------------  data"
+
+lxd_version_now=$(snap list|awk '/^lxd/ {print $2}')
+
+[ -z ${_LXD_DHCP_MIN+x} ] && { anstmp="20"; _askno "Give minimal range IP for DHCP container (${anstmp})"; _LXD_DHCP_MIN="${_ANSWER:-$anstmp}"; }
+_confset _LXD_DHCP_MIN "${_LXD_DHCP_MIN}"
+
+[ -z ${_LXD_DHCP_MAX+x} ] && { anstmp="254"; _askno "Give maximal range IP for DHCP container (${anstmp})"; _LXD_DHCP_MAX="${_ANSWER:-$anstmp}"; }
+_confset _LXD_DHCP_MAX "${_LXD_DHCP_MAX}"
+
+# root path of lxd
+_LXD_PATH_ROOT=/var/snap/lxd; _confset _LXD_PATH_ROOT "${_LXD_PATH_ROOT}"
+# root path of storage pools for
+_LXD_PATH_SP=storage-pools; _confset _LXD_PATH_SP "${_LXD_PATH_SP}"
+# path for containers
+_LXD_PATH_CT=containers; _confset _LXD_PATH_CT "${_LXD_PATH_CT}"
+# path for containers images
+_LXD_PATH_IMAGE=images; _confset _LXD_PATH_IMAGE "${_LXD_PATH_IMAGE}"
+# path for containers snapshots
+_LXD_PATH_SNAPSHOT=snapshots; _confset _LXD_PATH_SNAPSHOT "${_LXD_PATH_SNAPSHOT}"
+# path for export
+_LXD_PATH_EXPORT=export; _confset _LXD_PATH_EXPORT "${_LXD_PATH_EXPORT}"
+# port for remote connection
+_LXD_PORT=8443; _confset _LXD_PORT "${_LXD_PORT}"
+# container uid for shared path
+_LXD_UID=1000000; _confset _LXD_UID "${_LXD_UID}"
+# acl uid for shared path
+_LXD_ACL=1000; _confset _LXD_ACL "${_LXD_ACL}"
+
+########################  STORAGE
+
+if [ "${_DEV_DRIVER}" = zfs ] && ! zfs list -r ${_ZFS_ROOT}|grep -q ${_ZFS_ROOT}/lxd; then
+
+	_echot "------------------  snap lxd version"
+	_echo ${lxd_version_now}
+
+	if snap list|grep -q ^lxd; then
+		_echot "------------------  snap remove lxd"
+		snap remove --purge lxd
+	fi
+	path=${_LXD_PATH_ROOT}
+	_echot "------------------  zfs ${path}"
+	[ -d ${path} ] && mv ${path} ${path}.${_SDATE}
+	_eval zfs create -o mountpoint=${path} -o compression=lz4 ${_ZFS_ROOT}/lxd
+fi
+
+########################  INSTALL
+
+_echot "------------------  install"
+_eval yay --noconfirm -S jq snapd rsyslog
+_evalr systemctl enable --now snapd
+export PATH="${PATH}:/var/lib/snapd/snap/bin"
+
+_echot "------------------  snap lxd"
+_evalr snap install --channel=latest lxd
+_evalr snap start lxd --enable
+
+_echot "------------------  add user"
+_evalr usermod -a -G lxd ${USER}
+
+########################  RIGHTS
+
+path=${_LXD_PATH_ROOT}/common/lxd
+_echot "------------------  link ${path} to /lxd"
+[ -h /lxd ] || _evalr ln -s ${path} /lxd
+
+path=${S_HOST_PATH_SHARE}
+_echot "------------------  rights ${path}"
+_evalr chown -R ${_LXD_UID}:${_LXD_UID} ${path}
+_evalr setfacl -Rm u:${_LXD_ACL}:rwx ${path}
+_evalr setfacl -Rm d:u:${_LXD_ACL}:rwx ${path}
+
+########################  CLEAN STORAGE
+
+if [ "${_DEV_DRIVER}" = zfs ]; then
+	for path in $(_evalr zfs list -d 1 -o name -H ${_ZFS_ROOT}${S_HOST_PATH_SP}|grep -v ^${_ZFS_ROOT}${S_HOST_PATH_SP}$); do
+		_echot "------------------  backup ${path} to ${path}.${_SDATE}"
+		_evalr zfs rename ${path} ${path}.${_SDATE}
+	done
+elif [ "${_DEV_DRIVER}" = btrfs ]; then
+	for path in $(ls ${S_HOST_PATH_SP}); do
+		_echot "------------------  backup ${path} to ${path}.${_SDATE}"
+		_evalr mv ${S_HOST_PATH_SP}/${path} ${S_HOST_PATH_SP}/${path}.${_SDATE}
+	done
+else
+	_exite "This part have to be implemented"
+fi
+
+########################  INIT
+
+_echot "------------------  lxd init"
+
+if [ "${_DEV_DRIVER}" = zfs ]; then
+	_echoA "Use this settings:"
+	_echoa "- Create a new ZFS pool ?: no"
+	_echoa "- Name of the existing ZFS pool or dataset: ${_ZFS_ROOT}${S_HOST_PATH_SP}/default"
+elif [ "${_DEV_DRIVER}" = btrfs ]; then
+	_echoA "Use this settings:"
+	_echoa "- Would you like to create a new btrfs subvolume under /var/snap/lxd/common/lxd?: no"
+	_echoa "- Create a new BTRFS pool?: no"
+	_echoa "- Name of the existing BTRFS pool or dataset: ${S_HOST_PATH_SP}/default"
+else
+	_exite "This part have to be implemented"
+fi
+
+_evalr lxd init || _exite "unable to initalize lxd"
+
+########################  DNS
+
+str=" ovh home "
+if [ "${str/ ${S_SERVER_TYPE} /}" != "${str}" ]; then
+
+	# get : s_inet s_cidr s_base
+	eval ${S_HOST_VM_ETH[default]}
+
+	_echot "------------------ network-manager"
+	file=/etc/NetworkManager/NetworkManager.conf
+	grep -q 'dns=none' ${file} || sudo sh -c "echo -e '\n[main]\ndns=none' >> ${file}"
+	systemctl is-active NetworkManager.service && _service restart NetworkManager
+
+	_echot "------------------  dns ovh"
+	file=/etc/resolvconf.conf
+	_keepcpts ${file}
+	if ! grep -q 127.0.0.53 ${file}; then
+		sudo sh -c "echo -e 'name_servers=127.0.0.53\nresolv_conf_options=\"edns0 trust-ad\"\n#search_domains=lxd\nsearch_domains_append=lxd' >> ${file}"
+	 fi
+	 _evalr resolvconf -u
+
+	_echot "------------------  systemd resolved"
+
+	systemctl is-enabled systemd-resolved|grep -q ^disabled && _service enable --now systemd-resolved
+	systemctl is-active systemd-resolved|grep -q ^inactive && _service start systemd-resolved
+
+	_echot "------------------  dns home"
+
+	service=lxd-dns-${s_inet}
+	file=/etc/systemd/system/${service}.service
+	sudo sh -c "echo '[Unit]
+Description=LXD per-link DNS configuration for ${s_inet}
+BindsTo=sys-subsystem-net-devices-${s_inet}.device
+After=sys-subsystem-net-devices-${s_inet}.device
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/resolvectl dns ${s_inet} ${s_cidr%/*}
+ExecStart=/usr/bin/resolvectl domain ${s_inet} '~lxd'
+
+[Install]
+WantedBy=sys-subsystem-net-devices-${s_inet}.device
+' > ${file}"
+
+	_evalr systemctl daemon-reload
+	_evalr systemctl -q enable --now ${service}
+	_evalr resolvectl status ${s_inet}
+
+	_echot "------------------  nsswitch"
+
+	file=/etc/nsswitch.conf
+	line="hosts: files mymachines mdns4_minimal [NOTFOUND=return] dns resolve [!UNAVAIL=return] mdns4 myhostname"
+	grep -q ^#hosts ${file} || sudo sed -i "s|^\(hosts:.*\)$|#\1\n${line}|" ${file}
+
+	_echot "------------------  20-rc-manager"
+
+	# load resolvconf.conf
+	#file=/etc/NetworkManager/conf.d/20-rc-manager.conf
+	#sudo sh -c "echo -e '[main]\nrc-manager=resolvconf' > ${file}"
+
+fi
+
+########################  STORAGE
+
+name="stock"
+_echot "------------------  storage ${name}"
+
+if ! [ "$(sudo lxc storage list -f json|jq -r '.[] | select(.name == "'${name}'").name')" ]; then
+	if [ "${_DEV_DRIVER}" = zfs ]; then
+		_evalr lxc storage create ${name} zfs source=${_ZFS_ROOT}${S_HOST_PATH_SP}/${name}
+	elif [ "${_DEV_DRIVER}" = btrfs ]; then
+		_evalr lxc storage create ${name} btrfs source=${S_HOST_PATH_SP}/${name}
+	else
+		_exite "This part have to be implemented"
+	fi
+fi
+
+########################  NETWORK
+
+_echot "------------------  network 'default'"
+
+# get : s_inet s_cidr s_base
+eval ${S_HOST_VM_ETH[default]}
+
+_echot "------------------  network ${s_inet}"
+
+if ! [ "$(sudo lxc network list -f json|jq -r '.[] | select(.name == "'${s_inet}'").name')" ]; then
+	_evalr lxc network create ${s_inet}
+fi
+_evalr lxc network set ${s_inet} ipv4.address=${s_cidr} ipv4.dhcp.ranges=${s_cidr%.*}.${_LXD_DHCP_MIN}-${s_cidr%.*}.${_LXD_DHCP_MAX} ipv4.nat=true dns.mode=managed dns.domain=lxd dns.mode=managed
+
+
+_echot "------------------  network 'stock'"
+# get : s_inet s_cidr s_base
+eval ${S_HOST_VM_ETH[stock]}
+
+_echot "------------------  network ${s_inet}"
+if ! [ "$(sudo lxc network list -f json|jq -r '.[] | select(.name == "'${s_inet}'").name')" ]; then
+	_evalr lxc network create "${s_inet}"
+fi
+_evalr lxc network set ${s_inet} ipv4.address=${s_cidr} ipv4.dhcp.ranges=${s_cidr%.*}.${_LXD_DHCP_MIN}-${s_cidr%.*}.${_LXD_DHCP_MAX} ipv4.nat=true dns.mode=managed dns.domain=lxd1 dns.mode=managed
+
+########################  PROFILE
+
+profile="stock"
+_echot "------------------  profiles ${profile}"
+_evalr lxc profile list -f csv|grep -q "^${profile}," && _evalr lxc profile rename ${profile} ${profile}.${_SDATE}
+_evalr lxc profile create ${profile}
+_evalr lxc profile device add ${profile} root disk pool=stock path=/
+_evalr lxc network attach-profile lxdbr1 ${profile} eth0
+
+########################  RSYSLOG
+
+_echot "------------------  rsyslog conf"
+
+file="/etc/rsyslog.conf"
+_keepcpts "${file}"
+
+# udp
+if [ "${S_RSYSLOG_PTC}" = udp ]; then
+	_evalr "sed -i 's|^#\?\(module(load=\"imudp.*\)$|\1|' ${file}"
+	_evalr "sed -i 's|^#\?\(input(type=\"imudp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
+# tcp
+elif [ "${S_RSYSLOG_PTC}" = tcp ]; then
+	_evalr "sed -i 's|^#\?\(module(load=\"imtcp.*\)$|\1|' ${file}"
+	_evalr "sed -i 's|^#\?\(input(type=\"imtcp\"\).*$|\1 port=\"${S_RSYSLOG_PORT}\")|' ${file}"
+fi
+
+_echot "------------------  rsyslog restart"
+_service restart rsyslog
+
+_echot "------------------  rsyslog conf"
+_evalr "sed -i '/^auth.*/ s|^|#|' /etc/rsyslog.d/50-default.conf"
+_evalr "sed -i '/^cron.*/ s|^|#|' /etc/rsyslog.d/50-default.conf"
+
+_echot "------------------  rsyslog cron"
+file=/etc/rsyslog.d/70-${file_rsyslog_cron##*/}
+_evalr cp -a ${file_rsyslog_cron} ${file}
+_var_replace ${file} rsyslog
+
+_echot "------------------  rsyslog client-auth"
+file=/etc/rsyslog.d/72-${file_rsyslog_client_auth##*/}
+_evalr cp -a ${file_rsyslog_client_auth} ${file}
+_var_replace ${file} rsyslog
+
+_echot "------------------  path log lxd"
+path=${S_PATH_LOG}/lxd
+[ -d ${path} ] || _evalr mkdir -p ${path}
+grep -q syslog /etc/passwd && _evalr chown syslog ${path}
+
+_echot "------------------  rsyslog client-lxd"
+file=/etc/rsyslog.d/76-${file_rsyslog_client_lxd##*/}
+_evalr cp -a ${file_rsyslog_client_lxd} ${file}
+_var_replace ${file} rsyslog
+
+########################  LOGROTATE
+
+_echot "------------------  logrotate client-lxd"
+file=/etc/logrotate.d/${file_logrotate_client_lxd##*/}
+_evalr cp -a ${file_logrotate_client_lxd} ${file}
+_var_replace ${file} logrotate
+_evalr chmod g-w /etc/logrotate.d/*
+_service restart logrotate
+
+_echot "------------------  logrotate restart"
+_service restart logrotate
+
+########################  CONTAINERS
+
+_echot "------------------ lxd containers"
+_echoA "You need to launch following command to build containers:"
+_echoa $(ls ${_PATH_BASE}/lxd-*)
+
+########################  END
+
+_echoT "===================== ${_PART_LXD} end"
+_partadd ${_PART_LXD} ${S_FILE_INSTALL_DONE}
+

@@ -2,7 +2,7 @@
 #
 # write by Aguy
 
-_echoT "\n==========================================  ${S_RELEASE_NAME}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_ID}-${_PART}"
 
 file_install_done=${_PATH_LOG}/install.done
 file_install_pck=${S_PATH_CONF}/install.pck
@@ -16,22 +16,23 @@ _echoT "================== ${_PART} / global install"
 _echo "------------------"
 sed -n '/# install/,$ p' ${S_FILE_INSTALL_CONF}|grep -v '^# install'
 _echo "------------------"
-_askyn "PLease confirm this installation options" && [ "${_ANSWER}" == n ] && return 1
+_askyn "Confirm this installation options" && [ "${_ANSWER}" == n ] && return 1
 
-
-_echot "------------------ system"
 part_install=system
-
-packages="debconf-utils gdebi gnupg2 gparted hfsprogs htop kpartx meld openjdk-17-jre openssh-server p7zip-full p7zip-rar pv rar xsysinfo sysstat testdisk tmux tree unrar" # oracle-java7-installer ntfsprogs grsync gtk2-engines-pixbuf libnss-myhostname atop fslint dstat icedtea-8-plugin
+_echot "------------------  ${part_install}"
+packages="debconf-utils gdebi gnupg2 gparted hfsprogs htop kpartx meld openjdk-17-jre openssh-server p7zip-full p7zip-rar pv rar xsysinfo sysstat testdisk tmux tree unrar mkisofs" # oracle-java7-installer ntfsprogs grsync gtk2-engines-pixbuf libnss-myhostname atop fslint dstat icedtea-8-plugin
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 
 part_install=tools
 _echot "------------------ ${part_install}"
-packages="qt5ct net-tools lnav gnome-tweak-tool gnome-system-monitor dconf-editor multisystem gnome-sushi gnome-system-tools font-manager baobab curl" # gnome-activity-journal boot-repair backintime-gnome y-ppa-manager numlockx
-packages+=" easytag-nautilus nautilus-actions nautilus-compare nautilus-extension-fma nautilus-admin nautilus-gtkhash nautilus-hide nautilus-ideviceinfo nautilus-image-converter nautilus-script-audio-convert nautilus-script-debug nautilus-scripts-manager nautilus-sendto nautilus-wipe seahorse-nautilus" # nautilus-columns nautilus-image-manipulator filemanager-actions nautilus-emblems
+packages="qt5ct net-tools lnav gnome-tweak-tool gnome-system-monitor dconf-editor gnome-sushi gnome-system-tools font-manager baobab curl"
+# gnome-activity-journal boot-repair backintime-gnome y-ppa-manager numlockx multisystem
+packages+=" easytag-nautilus nautilus-actions nautilus-compare nautilus-extension-fma nautilus-admin nautilus-gtkhash nautilus-hide nautilus-ideviceinfo nautilus-image-converter nautilus-script-audio-convert nautilus-script-debug nautilus-scripts-manager nautilus-sendto nautilus-wipe seahorse-nautilus"
+# nautilus-columns nautilus-image-manipulator filemanager-actions nautilus-emblems
 packages+=" gedit-plugins gedit-source-code-browser-plugin" # gedit-developer-plugins
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
-# uget-chrome-wrapper nautilus-dropbox nautilus-filename-repairer nautilus-image-converter nautilus-terminal # compiz-fusion-plugins-extra compizconfig-settings-manager exfat-utils exfat-fuse freefilesync qshutdown solaar unetbootin
+# uget-chrome-wrapper nautilus-dropbox nautilus-filename-repairer nautilus-image-converter nautilus-terminal
+# compiz-fusion-plugins-extra compizconfig-settings-manager exfat-utils exfat-fuse freefilesync qshutdown solaar unetbootin
 
 
 if [ "$_OWNCLOUD" ]; then
@@ -41,20 +42,23 @@ if [ "$_OWNCLOUD" ]; then
 	if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 fi
 
-
 part_install=libreoffice
 _echot "------------------ ${part_install}"
-packages="libreoffice libreoffice-calc libreoffice-draw libreoffice-gnome libreoffice-impress libreoffice-math libreoffice-mysql-connector  libreoffice-pdfimport libreoffice-templates libreoffice-wiki-publisher libreoffice-writer scribus scribus-template" # libreoffice-avmedia-backend-gstreamer libreoffice-base libreoffice-base-drivers libreoffice-gtk3 libreoffice-ogltrans libreoffice-report-builder libreoffice-sdbc-postgresql libreoffice-style-galaxy libreoffice-style-human libreoffice-style-oxygen libreoffice-style-tango libreoffice-voikko libreoffice-writer2xhtml
+packages="libreoffice libreoffice-calc libreoffice-draw libreoffice-gnome libreoffice-impress libreoffice-math libreoffice-mysql-connector libreoffice-pdfimport libreoffice-templates libreoffice-wiki-publisher libreoffice-writer"
+# scribus scribus-template
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 # libreoffice-dmaths libreoffice-librelogo libreoffice-style-breeze libreoffice-style-elementary libreoffice-style-sifr
 
-
 part_install=media
 _echot "------------------ ${part_install}"
-packages="gmusicbrowser simplescreenrecorder cheese chromium-browser qarte gnome-subtitles audacity ubuntu-restricted-extras easytag soundconverter sound-juicer stopwatch flashplugin-installer chrome-gnome-shell" # mozplugger isomaster mixxx tesseract-ocr-fra lightzone darktable vlc tangerine amule amule-gnome-support gnome-xcf-thumbnailer
-packages+=" gstreamer1.0-plugins-bad pulseaudio-equalizer ubuntu-restricted-extras" # gmusicbrowser gmusicbrowser-art gstreamer1.0-plugins-bad-faad gpodder goobox kid3-cli cdrdao cue2toc bchunk ccd2iso mdf2iso nrg2iso clipgrab lollypop
-packages+=" gimp gimp-gap gimp-cbmplugs gimp-gluas gimp-data gimp-gmic gimp-texturize gimp-data-extras gimp-gutenprint gimp-dds gimp-lensfun gtkam-gimp create-resources inkscape ink-generator xsane" # ijsgutenprint gimp-save-for-web gimp-normal-map gimp-plugin-registry gimp-dbg gimp-ufraw sozi pandora
-packages+=" mpv totem totem-plugins gnome-video-effects-extra mkvtoolnix-gui handbrake libdvdread7 libdvdnav4 libavcodec-extra libdvd-pkg" # gnome-do gnome-do-plugins totem-plugins-extra dpluzz
+packages="gmusicbrowser simplescreenrecorder cheese qarte gnome-subtitles audacity ubuntu-restricted-extras easytag soundconverter sound-juicer stopwatch flashplugin-installer chrome-gnome-shell"
+# mozplugger isomaster mixxx tesseract-ocr-fra lightzone darktable vlc tangerine amule amule-gnome-support gnome-xcf-thumbnailer chromium-browser
+packages+=" gstreamer1.0-plugins-bad pulseaudio-equalizer ubuntu-restricted-extras"
+# gmusicbrowser gmusicbrowser-art gstreamer1.0-plugins-bad-faad gpodder goobox kid3-cli cdrdao cue2toc bchunk ccd2iso mdf2iso nrg2iso clipgrab lollypop
+packages+=" gimp gimp-gap gimp-cbmplugs gimp-gluas gimp-data gimp-gmic gimp-texturize gimp-data-extras gimp-gutenprint gimp-dds gimp-lensfun gtkam-gimp create-resources inkscape ink-generator"
+# ijsgutenprint gimp-save-for-web gimp-normal-map gimp-plugin-registry gimp-dbg gimp-ufraw sozi pandora xsane
+packages+=" mpv totem totem-plugins gnome-video-effects-extra mkvtoolnix-gui handbrake libdvdread7 libdvdnav4 libavcodec-extra libdvd-pkg"
+# gnome-do gnome-do-plugins totem-plugins-extra dpluzz
 #packages+=" pidgin pidgin-awayonlock pidgin-bot-sentry pidgin-encryption pidgin-gnome-keyring pidgin-hotkeys pidgin-libnotify pidgin-openpgp pidgin-plugin-pack pidgin-skype pidgin-themes" # pidgin-microblog
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 sudo dpkg-reconfigure libdvd-pkg
@@ -63,19 +67,16 @@ sudo dpkg-reconfigure libdvd-pkg
 # ogmrip
 #${cmd} ogmrip ogmrip-ac3 ogmrip-plugins ogmrip-video-copy ogmtools ogmrip-dirac ogmrip-oggz
 
-
 part_install=languages
 _echot "------------------ ${part_install}"
 packages="language-pack-fr language-pack-fr-base language-pack-gnome-fr language-pack-gnome-fr-base hunspell-fr hunspell-fr-classical hyphen-fr mythes-fr firefox-locale-fr thunderbird-locale-fr libreoffice-help-fr libreoffice-l10n-fr tesseract-ocr-fra gimp-help-fr"
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
-
 
 part_install=msttcorefonts
 _echot "------------------ ${part_install}"
 packages="ttf-mscorefonts-installer"
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 sudo dpkg-reconfigure ttf-mscorefonts-installer
-
 
 if [ "${_FREECAD}" ]; then
 	part_install=freecad
@@ -84,14 +85,12 @@ if [ "${_FREECAD}" ]; then
 	if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 fi
 
-
 if [ "$_LAPTOP" ]; then
 	part_install=laptop
 	_echot "------------------ ${part_install}"
 	packages="tlp tlp-rdw" # acpi
 	if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 fi
-
 
 if [ "$_VIDEO" ]; then
 	part_install=videos
@@ -103,7 +102,6 @@ if [ "$_VIDEO" ]; then
 	packages="kdenlive cin" # flowblade lightworks Natron shotcut DaVinci Resolve
 	if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 fi
-
 
 if [ "$_DEV" ]; then
 	part_install=dev
@@ -125,7 +123,6 @@ if [ "$_DEV" ]; then
 	if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 fi
 
-
 if [ "${_NETWORK}" ]; then
 	part_install=network
 	_echot "------------------ ${part_install}"
@@ -133,14 +130,12 @@ if [ "${_NETWORK}" ]; then
 	if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 fi
 
-
 if [ "${_VIRTUALBOX}" ]; then
 	part_install=virtualbox
 	_echot "------------------ ${part_install}"
 	packages="virtualbox"
 	if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 fi
-
 
 ########################  END
 

@@ -2,7 +2,7 @@
 #
 # write by Aguy
 
-_echoT "\n==========================================  ${S_RELEASE}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_ID}-${_PART}"
 
 grep -q "^# ${_PART}" "${S_FILE_INSTALL_CONF}" || echo -e "# ${_PART}" >> "${S_FILE_INSTALL_CONF}"
 
@@ -44,7 +44,7 @@ _echot "------------------ grub os-prober"
 # add identifier to menuentry
 file=/etc/grub.d/30_os-prober
 if ! grep -q 'LONGNAME="${LONGNAME} ${BTRFSsubvol/#subvol=/}"' ${file}; then
-	_keepcpts ${file} && sudo chmod -x ${file}.${_SDATE}
+	sudo cp -a ${file} ${file}.${_SDATE} && sudo chmod -x ${file}.${_SDATE}
 	sudo sed -i "/LONGNAME=\"\${LABEL}\"/ a\  else\n    LONGNAME=\"\${LONGNAME} \${BTRFSsubvol/#subvol=/}\"" ${file}
 fi
 
@@ -59,6 +59,9 @@ fi
 
 sudo update-grub
 
+_echot "------------------ path"
+path=~/.local/share/applications
+! [ -d "$path" ] && mkdir -p "$path"
 
 _echot "------------------ numlock tty service"
 
@@ -84,7 +87,6 @@ WantedBy=multi-user.target' > ${file_service}"
 
 _service enable numlock
 
-
 if type vim >/dev/null 2>&1 ; then
 	_echot "------------------  vim links edit"
 
@@ -106,7 +108,6 @@ if type vim >/dev/null 2>&1 ; then
 		sudo sed -i "s|^\"\(set $opt.*\)$|\1|" ${file}
 	done
 fi
-
 
 _echot "------------------  /usr/local/bs/conf links"
 
@@ -210,8 +211,22 @@ grep -q resurrect.tmux ${file} || echo -e "# resurect plugin\nrun-shell ${path}/
 # set conf file
 tmux source-file ${file} 2>/dev/null
 
+_echot "------------------ gtk styles"
+path="$HOME/.local/share/gtksourceview-4"
+[ -e ${path} ] || ln -sv /home/shared/.local/share/gtksourceview-3.0 ${path}
+
 _echot "------------------ launcher clean"
 sudo sed -i 's|;;|;|' /usr/share/applications/*.desktop
+
+######################## required ${S_RELEASE_DESKTOP}
+
+file="${_PATH_BASE_SUB}/${S_RELEASE_ID}-${_PART}-${S_RELEASE_DESKTOP}.install"
+if [ -f "${file}" ]; then
+	_echot "------------------ ${S_RELEASE_DESKTOP} required"
+	! . "${file}" && echo "wrong '${_PART}-${S_RELEASE_DESKTOP}'" && exit
+else
+	_echoE "unable to find '${file}'"
+fi
 
 ########################  END
 

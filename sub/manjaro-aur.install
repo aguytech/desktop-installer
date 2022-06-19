@@ -3,7 +3,7 @@
 # write by Aguy
 
 
-_echoT "\n==========================================  ${S_RELEASE}-${_PART}"
+_echoT "\n==========================================  ${S_RELEASE_ID}-${_PART}"
 
 ########################  MAIN
 
@@ -19,7 +19,7 @@ packages+=" gmusicbrowser cheese qarte" # webcamoid
 
 [ "$_DEV" ] && packages+=" lnav" && _echot "------------------ dev"
 [ "$_VMWARE" ] && packages+=" linux-headers fuse2 gtkmm pcsclite libcanberra ncurses5-compat-libs vmware-workstation" && _echot "------------------ vmware"
-[ "${S_RELEASE_DESKTOP}" = xfce  ] && packages+=" radiotray-ng zuki-themes audacity-wxgtk2" && _echot "------------------ xfce"
+[ "${S_RELEASE_DESKTOP}" = xfce  ] && packages+=" radiotray-ng zuki-themes" && _echot "------------------ xfce"
 [ "${S_RELEASE_DESKTOP}" = gnome  ] && packages+=" nautilus-compare" && _echot "------------------ gnome"
 
 
