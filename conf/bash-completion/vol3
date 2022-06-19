@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+#
+# Bash completion function for the 'vol3'.
+# vol3 is a symbolic link to volatility.py, the 3.x version of the forensic program 'volatility' (memory dump file analyser)
+# To create it use the following command by replacing "/usr/local/bin/volatility.py" by the path of vol in your system:
+# sudo ln -s ${USER}/.local/bin/vol ${USER}/.local/bin/vol3
+#
+# You can choose on of 2 methods for completion:
+# _vol3_v1 (default) give you a hierarchical view (lighter for reading)
+# _vol3_v2 give you a full chain for completion (a little bit heavy to read)
+
+# Hierachical view for completion
+_vol3_v1() {
+	if [[ "${prev}" =~ -(c|f|o|p|s|-cache-path|-config|-file|-output-dir|-plugin-dirs|-symbol-dirs) ]]; then
+		compopt -o plusdirs
+		COMPREPLY=( $(compgen -f -- "${cur}") )
+	elif [[ "${prev}" =~ -(r|-renderer) ]]; then
+		local opts="csv json jsonl quick pretty"
+		COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+	elif [[ "${cur}" =~ --.* ]]; then
+		local opts=$(echo "$BC_VOL3_HELP" | sed -n 's|^ *\(-\)[^-]*\(-[a-z-]\+\).*$|\1\2|p' | sed s/---/--/ | sort -u)
+		COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+	else
+		if echo "${plugins_all}" | grep -q "^${prev%%.*}\."; then
+			COMPREPLY=()
+		else
+			compopt -o nospace
+			if echo "${plugins_all}" | grep -q "^${cur%%.*}\." ; then
+				plugins=$(echo "${plugins_all}" | grep ^${cur%.*}.*$ | sed "s|^${cur%\.*}\.||" | cut -d. -f1 | sort -u | xargs)
+				COMPREPLY=( ${cur%.*}.$(compgen -W "${plugins}" -- "${cur##*.}") )
+			else
+				plugins=$(echo "${plugins_all}" | sed 's|^\([^\.]\+\)\..*$|\1.|')
+				COMPREPLY=( $(compgen -W "${plugins}" -- "${cur}") )
+			fi
+		fi
+	fi
+}
+
+# Complete chain for completion
+_vol3_v2() {
+	if [[ "${prev}" =~ -(c|f|o|p|s|-cache-path|-config|-file|-output-dir|-plugin-dirs|-symbol-dirs) ]]; then
+		compopt -o plusdirs
+		COMPREPLY=( $(compgen -f -- "${cur}") )
+	elif [[ "${prev}" =~ -(r|-renderer) ]]; then
+		local opts="csv json jsonl quick pretty"
+		COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+	elif [[ "${cur}" =~ --.* ]]; then
+		local opts=$(echo "$BC_VOL3_HELP" | sed -n 's|^ *\(-\)[^-]*\(-[a-z-]\+\).*$|\1\2|p' | sed s/---/--/ | sort -u)
+		COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+	else
+		if echo "${plugins_all}" | grep -q "^${prev%%.*}\."; then
+			COMPREPLY=()
+		else
+			if echo "${plugins_all}" | grep -q "^${cur%%.*}\."; then
+				plugins=$(echo "${plugins_all}" | grep ^${cur} | xargs)
+			else
+				plugins=${plugins_base}
+			fi
+			compopt -o nospace
+			COMPREPLY=( $(compgen -W "${plugins_all}" -- "${cur}") )
+		fi
+	fi
+}
+
+_vol3()
+{
+	COMPREPLY=()
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	# for debugging
+	#echo -e "COMP_CWORD=${COMP_CWORD} \nCOMP_WORDS=${COMP_WORDS[*]} \nprev=${prev} \ncur=${cur} " >> /tmp/vol3
+
+	[ -z "${BC_VOL3_HELP}" ] && BC_VOL3_HELP=$(vol3 --help)
+	# all
+	plugins_all=$(echo "${BC_VOL3_HELP}" | sed -n '/^ *plugin$/,/^$/p' | sed 1d | grep -v '^      ' | awk '{print $1}')
+	# first rank
+	local plugins_base=$(echo "${plugins_all}" | sed 's|^\([^\.]\+\)\..*$|\1.|' | sort -u | xargs)
+
+	_vol3_v1 # _vol3_v1 or _vol3_v2
+
+} &&
+complete -F _vol3 vol3

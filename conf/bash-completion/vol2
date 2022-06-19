@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+#
+# Bash completion function for the 'vol2'.
+# vol2 is a symbolic link to vol2.py, the 2.x version of the forensic program 'volatility' (memory dump file analyser)
+# To create it use the following command by replacing "/usr/local/bin/vol.py" by the path of vol.py in your system:
+# sudo ln -s /usr/local/bin/vol.py /usr/local/bin/vol2
+
+_vol2()
+{
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	# for debugging
+	#echo -e "COMP_CWORD=${COMP_CWORD} \nCOMP_WORDS=${COMP_WORDS[*]} \nprev=${prev} \ncur=${cur} " >> /tmp/vol2
+
+	# global session variable
+	[ -z "${BC_VOL2_INFO}" ] && BC_VOL2_INFO=$(vol2 --info 2>/dev/null)
+	# plugins
+	local plugins=$(echo "${BC_VOL2_INFO}" | sed -n '/^Plugins/,/^$/ p' | tail -n+3 | cut -f1 -d' ' | xargs)
+	# profiles
+	local profiles=$(echo "${BC_VOL2_INFO}" | sed -n '/^Profiles$/,/^$/p' | awk '{print $1}' | sed '1,2d' | xargs)
+
+	if [ "${cur}" = - ]; then
+		local opts='-g -h -k -d -f -l -v -w'
+		COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+	elif [[ "${cur}" =~ --.* ]]; then
+		local opts='--cache --cache-directory --conf-file --cookie --debug --dtb --filename --force --help --info --info --kdbg --kpcr --location --output --output-file --physical_shift --plugins --profile --shift --tz --verbose --virtual_shift --write'
+		COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+	elif [[ "${prev}" = --profile ]]; then
+		COMPREPLY=( $(compgen -W "${profiles}" -- "${cur}") )
+	elif [[ "${prev}" =~ -(f|-cache-directory|-conf-file|-output-file|-plugins) ]]; then
+		compopt -o plusdirs
+		COMPREPLY=( $(compgen -f -- "${cur}") )
+	else
+		COMPREPLY=( $(compgen -W "${plugins}" -- "${cur}") )
+	fi
+
+} && complete -F _vol2 vol2

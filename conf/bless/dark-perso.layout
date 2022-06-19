@@ -1,0 +1,97 @@
+<layout>
+	<area type="offset">
+		<display>
+			<font>Courier 11</font>
+			<evenrow>
+				<evencolumn>
+					<foreground>#ffb872</foreground>
+					<background>#2b2926</background>
+				</evencolumn>
+			</evenrow>
+			<oddrow>
+				<evencolumn>
+					<foreground>#efefef</foreground>
+					<background>#2b2926</background>
+				</evencolumn>
+			</oddrow>
+		</display>
+	</area>
+
+	<area type="separator">
+		<display>
+			<font>Courier 11</font>
+			<evenrow>
+				<evencolumn>
+					<foreground>#d5d5d5</foreground>
+					<background>#2b2926</background>
+				</evencolumn>
+			</evenrow>
+		</display>
+	</area>
+
+	<area type="hexadecimal">
+		<bpr>16</bpr>
+		<case>upper</case>
+		<display>
+			<font>Courier 11</font>
+			<evenrow>
+				<evencolumn>
+					<foreground>#ffb872</foreground>
+					<background>#2b2926</background>
+				</evencolumn>
+				<oddcolumn>
+					<foreground>#ffffff</foreground>
+					<background>#363330</background>
+				</oddcolumn>
+				<selectedcolumn>
+					<foreground>white</foreground>
+					<background>#267bea</background>
+				</selectedcolumn>
+			</evenrow>
+			<oddrow>
+				<evencolumn>
+					<foreground>#efefef</foreground>
+					<background>#2b2926</background>
+				</evencolumn>
+				<oddcolumn>
+					<foreground>#ffffff</foreground>
+					<background>#363330</background>
+				</oddcolumn>
+			</oddrow>
+		</display>
+	</area>
+
+	<area type="separator">
+		<display>
+			<font>Courier 11</font>
+			<evenrow>
+				<evencolumn>
+					<foreground>#d5d5d5</foreground>
+					<background>#2b2926</background>
+				</evencolumn>
+			</evenrow>
+		</display>
+	</area>
+
+	<area type="ascii">
+		<display>
+			<font>Courier 11</font>
+			<evenrow>
+				<evencolumn>
+					<foreground>#ffb872</foreground>
+					<background>#2b2926</background>
+				</evencolumn>
+				<selectedcolumn>
+					<foreground>white</foreground>
+					<background>#267bea</background>
+				</selectedcolumn>
+			</evenrow>
+			<oddrow>
+				<evencolumn>
+					<foreground>#efefef</foreground>
+					<background>#2b2926</background>
+				</evencolumn>
+			</oddrow>
+		</display>
+	</area>
+</layout>

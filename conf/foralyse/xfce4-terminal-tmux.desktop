@@ -1,0 +1,45 @@
+[Desktop Entry]
+Version=1.0
+Name=Xfce Terminal Tmux
+Comment=Terminal Emulator Tmux
+GenericName=Terminal Emulator Tmux
+Exec=xfce4-terminal -e "tmux a"
+Icon= $HOME/.local/share/icons/tmux.svg
+Terminal=false
+Type=Application
+Categories=GTK;System;TerminalEmulator;
+StartupNotify=true
+Actions=preferences;Separator;SshDev;SshS;SshNode1;SshLxd;Separator;Thunar;ThunarNode1;
+
+[Desktop Action preferences]
+Name=Terminal Preferences
+Exec=xfce4-terminal --preferences
+
+[Desktop Action Separator]
+Name=−−−−−−−−−−
+Exec=
+
+[Desktop Action SshDev]
+Name=ssh dev
+Exec=xfce4-terminal --tab --tab --title=node1 -x ssh-server node1
+
+[Desktop Action SshS]
+Name=ssh server
+Exec=xfce4-terminal --title=server -x ssh-server
+
+[Desktop Action SshNode1]
+Name=ssh node1
+Exec=xfce4-terminal --tab --title=node1 -x ssh-server node1
+
+[Desktop Action SshLxd]
+Name=ssh lxd
+Exec=xfce4-terminal --tab --title=LXD -x ssh-server ssh-lxd
+
+[Desktop Action Thunar]
+Name=Thunar
+Exec=thunar
+
+[Desktop Action ThunarNode1]
+Name=Thunar node1
+Exec=thunar_newtabs /usr/local/bs sftp://root@node1/
+

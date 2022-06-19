@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+#
+# Bash completion function for the 'gh' command.
+# gh is a github bash command available from https://cli.github.com
+
+_gh()
+{
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	# for debugging
+	#echo -e "COMP_CWORD=${COMP_CWORD} \nCOMP_WORDS=${COMP_WORDS[*]} \nprev=${prev} \ncur=${cur}" >> /tmp/gh
+
+	if [ "${prev}" = gh ]; then
+		local opts=$(gh -h 2>/dev/null | sed -n 's|^ *\([a-z]\+\): .*$|\1|p')
+	elif [[ "${cur}" =~ --.* ]]; then
+		local opts=$(${COMP_LINE%%--*} -h 2>&1 | sed -n 's|^.*\(--[a-z_-]\+\).*$|\1|p')
+	else
+		local opts=$(gh ${prev} -h 2>/dev/null | sed -n 's|^ *\([a-z]\+\): .*$|\1|p')
+	fi
+	COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+}
+command -v gh >/dev/null && complete -F _gh gh

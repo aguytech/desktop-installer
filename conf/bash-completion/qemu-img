@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+_qemuimg_comp()
+{
+	COMPREPLY=()
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	local prev="${COMP_WORDS[COMP_CWORD-1]}"
+	local opts='amend bench bitmap check commit compare convert create dd info map measure snapshot rebase resize'
+	local formats='blkdebug blklogwrites blkverify bochs cloop compress copy-before-write copy-on-read dmg file ftp ftps gluster host_cdrom host_device http https iscsi iser luks nbd nfs null-aio null
+-co nvme parallels preallocate qcow qcow2 qed quorum raw rbd replication snapshot-access ssh throttle vdi vhdx vmdk vpc vvfat'
+
+	#echo "COMP_LINE=$COMP_LINE" >> /tmp/qemu
+	#echo "COMP_WORDS=$COMP_WORDS[@] | COMP_CWORD=$COMP_CWORD" >> /tmp/qemu
+	#echo "cur=$cur | prev=$prev" >> /tmp/qemu
+	if [ ${COMP_CWORD} -eq 1 ]; then
+		COMPREPLY=( $(compgen -W "${opts}" -- "${cur}" ) )
+		return 0
+	elif [[ $prev =~ -[oOf] ]]; then
+		COMPREPLY=( $(compgen -W "${formats}" -- "${cur}" ) )
+	else
+		compopt -o plusdirs
+		COMPREPLY=( $(compgen -f -- "${cur}") )
+	fi
+} && 
+complete -F _qemuimg_comp qemu-img
