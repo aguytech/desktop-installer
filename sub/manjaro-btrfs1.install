@@ -149,7 +149,7 @@ path=/usr/local/bs
 ! [ -d "${path}" ] && mkdir "${path}"
 echo "
 # bind
-/home/shared/dev/bs   /usr/local/bs    none    bind                    0    0" >> ${file}
+/home/shared/repo/bs   /usr/local/bs    none    bind                    0    0" >> ${file}
 
 _echot "------------------ ${file}"
 echo "$(cat ${file})"

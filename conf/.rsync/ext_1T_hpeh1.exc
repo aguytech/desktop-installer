@@ -1,8 +1,8 @@
 ## ubuntu
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_1T_hpeh1.exc /media/${USER}/1T/ext/ /ext/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/ext_1T_hpeh1.exc /media/${USER}/1T/ext/ /ext/ -av --delete -n
 
 ## manjaro
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_1T_hpeh1.exc /run/media/${USER}/1T/ext/ /ext/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/ext_1T_hpeh1.exc /run/media/${USER}/1T/ext/ /ext/ -av --delete -n
 #
 # backup vms
 # sudo rsync /run/media/${USER}/1T/ext/backup/vms/ /ext/backup/vms/ -av --delete-before -n

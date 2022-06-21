@@ -1,8 +1,8 @@
 ## ubuntu
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_970a_2t1.exc /home/ /media/${USER}/2t1/home/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/home_970a_2t1.exc /home/ /media/${USER}/2t1/home/ -av --delete -n
 
 ## manjaro
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_970a_2t1.exc /home/ /run/media/${USER}/2t1/home/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/home_970a_2t1.exc /home/ /run/media/${USER}/2t1/home/ -av --delete -n
 
 lost+found
 .Trash-*
@@ -19,5 +19,5 @@ lost+found
 /shared/.tmux/resurrect
 /shared/.mozilla*
 /shared/.thunderbird*
-/shared/dev
+/shared/repo
 /shared/torrent

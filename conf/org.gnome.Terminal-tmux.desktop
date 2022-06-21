@@ -4,7 +4,7 @@ Comment=Use the command line
 Keywords=shell;prompt;command;commandline;cmd;
 TryExec=ttmux
 Exec=ttmux
-Icon=/home/shared/dev/install-desktop/conf/icons/tmux.svg
+Icon=/home/shared/repo/install-desktop/conf/icons/tmux.svg
 Type=Application
 Categories=GNOME;GTK;System;TerminalEmulator;
 StartupNotify=true
@@ -39,7 +39,7 @@ Exec=gnome-terminal --tab --tab-with-profile node1
 
 [Desktop Action SshcLxd]
 Name=sshca
-Exec=gnome-terminal -e /home/shared/dev/bs/ssh-lxd
+Exec=gnome-terminal -e /home/shared/repo/bs/ssh-lxd
 
 [Desktop Action Nautilus]
 Name=Nautilus

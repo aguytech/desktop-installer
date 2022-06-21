@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Icon=/opt/autopsy/icon.ico
+Name=Autopsy
+Exec=autopsy

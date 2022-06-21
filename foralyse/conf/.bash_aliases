@@ -34,7 +34,7 @@ alias st='sublime-text'
 alias watch='watch --color'
 alias nanoc='nano -wY conf'
 alias grep='grep --color'
-alias ced='clean-files trash'
+alias ced='clean-files.sh trash'
 alias histg='history|grep'
 alias histgs="history|sed 's|^ \+[0-9]\+ \+||'|grep"
 alias du0="du -hd0"
@@ -42,4 +42,3 @@ alias du1="du -hd1"
 alias du2="du -hd2"
 alias dfs="df -x tmpfs -x devtmpfs|grep -v /dev/.*loop"
 alias s2s="sha256sum"
-

@@ -45,7 +45,7 @@ Exec=gnome-terminal -e ssh-server
 
 [Desktop Action SshcLxd]
 Name=sshca
-Exec=gnome-terminal -e /home/shared/dev/bs/ssh-lxd
+Exec=gnome-terminal -e /home/shared/repo/bs/ssh-lxd
 " >> ${path}/${name}.desktop
 	sed -i 's|^\(DBusActivatable.*\)|#\1|' ${path}/${name}.desktop
 	chmod +x ${path}/${name}.desktop
@@ -118,7 +118,7 @@ Exec=gnome-terminal --tab --tab-with-profile node1
 
 [Desktop Action SshcLxd]
 Name=sshca
-Exec=gnome-terminal -e /home/shared/dev/bs/ssh-lxd
+Exec=gnome-terminal -e /home/shared/repo/bs/ssh-lxd
 
 [Desktop Action Nautilus]
 Name=Nautilus
@@ -494,7 +494,7 @@ Exec=gnome-terminal --tab --tab-with-profile node1
 
 [Desktop Action SshcLxd]
 Name=sshca
-Exec=gnome-terminal -e /home/shared/dev/bs/ssh-lxd
+Exec=gnome-terminal -e /home/shared/repo/bs/ssh-lxd
 
 [Desktop Action Nautilus]
 Name=Nautilus

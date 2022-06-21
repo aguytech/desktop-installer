@@ -1,8 +1,8 @@
 ## ubuntu
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_1T_hpeh1.exc /media/${USER}/1T/home/ /home/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/home_1T_hpeh1.exc /media/${USER}/1T/home/ /home/ -av --delete -n
 
 ## manjaro
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/home_1T_hpeh1.exc /run/media/${USER}/1T/home/ /home/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/home_1T_hpeh1.exc /run/media/${USER}/1T/home/ /home/ -av --delete -n
 
 lost+found
 .Trash-*
@@ -19,4 +19,4 @@ lost+found
 /shared/.mozilla*
 /shared/.thunderbird*
 /shared/.tmux/resurrect
-/shared/dev
+/shared/repo

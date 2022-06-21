@@ -1,10 +1,10 @@
 ## ubuntu
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_970a_1T.exc /ext/ /media/${USER}/1T/ext/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/ext_970a_1T.exc /ext/ /media/${USER}/1T/ext/ -av --delete -n
 #
 # sudo rsync /ext/backup/debian8/ /media/${USER}/1T/ext/backup/debian8/ -av -n
 
 ## manjaro
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_970a_1T.exc /ext/ /run/media/${USER}/1T/ext/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/ext_970a_1T.exc /ext/ /run/media/${USER}/1T/ext/ -av --delete -n
 # 
 # backup vms
 # sudo rsync /ext/backup/vms/ /run/media/${USER}/1T/ext/backup/vms/ -av --delete-before -n

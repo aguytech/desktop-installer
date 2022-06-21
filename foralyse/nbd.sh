@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 
 __usage() {
 	echo "
@@ -15,12 +14,12 @@ __mod_nbd() {
 
 __mount_nbd() {
 	# already mounted
-	grep -q "${file}$" ${filelist} && echo "${file} already mounted in $(grep "${file}$" ${filelist} | cut -f1)" && return
+	grep -q "${file}$" ${nbd_file} && echo "${file} already mounted in $(grep "${file}$" ${nbd_file} | cut -f1)" && return
 
 	for block in $(ls -d /sys/class/block/nbd[0-9] | sort) ; do 
 		if [ $(cat ${block}/size) = 0 ]; then
 			if qemu-nbd -c /dev/${block##*/} "${file}" -f qcow2; then
-				echo -e "/dev/${block##*/}\t${file}" >> ${filelist}
+				echo -e "/dev/${block##*/}\t${file}" >> ${nbd_file}
 			else
 				echo "Unable to mount ${file} in /dev/${block##*/}"
 				exit 1
@@ -31,17 +30,17 @@ __mount_nbd() {
 }
 
 __umount_nbd() {
-	nbd=$(grep "$1$" ${filelist} | cut -f1)
+	nbd=$(grep "$1$" ${nbd_file} | cut -f1)
 
 	if [ "${nbd}" ] && [ $(cat /sys/class/block/${nbd#/dev/}/size) -gt 0 ]; then
 		if qemu-nbd -d ${nbd}; then
-			sed -i "\|$1$|d" ${filelist}
+			sed -i "\|$1$|d" ${nbd_file}
 		fi
 	fi
 }
 
 __mount_dev() {
-	nbd_base=$(grep "$1$" ${filelist} | cut -f1)
+	nbd_base=$(grep "$1$" ${nbd_file} | cut -f1)
 	[ -z "${nbd_base}" ] && return
 
 	for nbd in $(ls -d1 ${nbd_base}* | grep -v "^${nbd_base}$" ); do
@@ -53,7 +52,7 @@ __mount_dev() {
 }
 
 __umount_dev() {
-	nbd_base=$(grep "$1$" ${filelist} | cut -f1)
+	nbd_base=$(grep "$1$" ${nbd_file} | cut -f1)
 	[ -z "${nbd_base}" ] && return
 
 	for nbd in $(ls -d1 ${nbd_base}* | grep -v "^${nbd_base}$" ); do
@@ -74,11 +73,11 @@ __file() {
 __init() {
 	# variables
 	script=${0##*/}
-	filelist=/tmp/${script}
+	nbd_file=/tmp/${script}
 	path_base_nbd=/vms/nbd
 
-	# filelist
-	[ -f ${filelist} ] || touch ${filelist}
+	# nbd_file
+	[ -f ${nbd_file} ] || touch ${nbd_file}
 	# root privileges
 	[ "${USER}" != root  ] && echo "Root privileges are needed" && __usage
 	# Wrong parameters numbers

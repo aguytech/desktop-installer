@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=0.9.4
+Name=IDA Freeware 7.7
+Comment=Interactive Disassembler Freeware 7.7
+Icon=ida.png
+Exec=idafree
+Terminal=false
+Name[en_US]=IDA Freeware

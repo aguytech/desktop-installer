@@ -1,12 +1,12 @@
 ## ubuntu
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_hpeh1_1T.exc /ext/ /media/${USER}/1T/ext/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/ext_hpeh1_1T.exc /ext/ /media/${USER}/1T/ext/ -av --delete -n
 # rsync /ext/shared/Soft/diag_repport/ /media/${USER}/1T/ext/shared/Soft/diag_repport/ -av -n
 #
 # sudo rsync /ext/backup/${HOSTNAME}/ /media/${USER}/1T/ext/backup/${HOSTNAME}/ -av -n
 # sudo rsync /ext/backup/debian8/ /media/${USER}/1T/ext/backup/debian8/ -av -n
 
 ## manjaro
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_hpeh1_1T.exc /ext/ /run/media/${USER}/1T/ext/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/ext_hpeh1_1T.exc /ext/ /run/media/${USER}/1T/ext/ -av --delete -n
 #
 # sudo rsync /ext/backup/${HOSTNAME}/ /run/media/${USER}/1T/ext/backup/${HOSTNAME}/ -av -n
 # sudo rsync /ext/backup/debian8/ /run/media/${USER}/1T/ext/backup/debian8/ -av -n

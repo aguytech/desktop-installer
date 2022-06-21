@@ -1,8 +1,8 @@
 ## ubuntu
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_2t1_hpeh1.exc /media/${USER}/2t1/ext/ /ext/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/ext_2t1_hpeh1.exc /media/${USER}/2t1/ext/ /ext/ -av --delete -n
 
 ## manjaro
-# sudo rsync --exclude-from=/home/shared/dev/install-desktop/conf/.rsync/ext_2t1_hpeh1.exc /run/media/${USER}/2t1/ext/ /ext/ -av --delete -n
+# sudo rsync --exclude-from=/home/shared/repo/install-desktop/conf/.rsync/ext_2t1_hpeh1.exc /run/media/${USER}/2t1/ext/ /ext/ -av --delete -n
 # vms
 # sudo rsync /run/media/${USER}/2t1/ext/vms/ /ext/vms/ -av -n
 
