@@ -7,8 +7,8 @@ After=systemd-remount-fs.service
 Type=oneshot
 RemainAfterExit=yes
  
-ExecStart=/usr/local/bin/mount.sh start cases
-ExecStop=/usr/local/bin/mount.sh stop cases  
+ExecStart=/usr/local/bin/mount.sh start /cases
+ExecStop=/usr/local/bin/mount.sh stop /cases  
  
 [Install]
 WantedBy=multi-user.target
