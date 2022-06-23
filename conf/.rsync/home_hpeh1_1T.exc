@@ -23,6 +23,5 @@ lost+found
 /shared/.tmux/resurrect
 /shared/.mozilla*
 /shared/.thunderbird*
+/shared/dev
 /shared/repo
-/shared/torrent
-/shared/virt
