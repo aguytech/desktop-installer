@@ -42,8 +42,7 @@ done
 
 ########################  BS
 
-file="/etc/profile.d/bs_path.sh"
-sudo [ ! -e "$file" ] && sudo sh -c "echo 'export PATH=${PATH}:/usr/local/bs' >> ${file}"
+#sudo sh -c "echo 'export PATH=\${PATH}:/usr/local/bs' >> /etc/profile.d/bs.sh"
 
 ######################## BTRFS2
 
