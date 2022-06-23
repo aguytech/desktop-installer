@@ -111,9 +111,13 @@ fi
 
 _echot "------------------  ~/.local/share/icons"
 
-path= ~/.local/share/icons
+path=~/.local/share/icons
 [ -d ${path} ] || mkdir -p ${path}
 cp ${S_PATH_INSTALL_CONF}/icons/* ${path}/
+
+path=/usr/share/icons/Foralyse
+[ -d ${path} ] || sudo mkdir -p ${path}
+sudo cp ${S_PATH_INSTALL_CONF}/icons/* ${path}/
 
 _echot "------------------  /usr/local/bs/conf links"
 
