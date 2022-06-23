@@ -53,6 +53,11 @@ if type vim >/dev/null 2>&1 ; then
 	done
 fi
 
+_echot "------------------  ~/.local/share/icons"
+
+path= ~/.local/share/icons
+[ -d ${path} ] || mkdir -p ${path}
+cp ${S_PATH_INSTALL_CONF}/icons/* ${path}/
 
 _echot "------------------  /usr/local/bs/conf links"
 
