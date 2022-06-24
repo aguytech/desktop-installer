@@ -119,7 +119,7 @@ _echot "------------------ git config"
 
 git config --global user.name "aguy tech"
 git config --global user.email aguytech@free.fr
-git config --global core.editor nano
+git config --global core.editor vim
 git config --global merge.tool meld
 
 echo -e "[alias]
