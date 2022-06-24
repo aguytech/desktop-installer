@@ -31,28 +31,28 @@
   <style name="css:at-rules" foreground="#c92a64"/>
   <style name="css:color" foreground="#9a6dcc"/>
   <style name="css:keyword" foreground="#58bdd0"/>
-  <style name="current-line"  background="#4D4A3F"/>
+  <style name="current-line"  background="#484539"/>
   <style name="cursor" foreground="#f8f8f0"/>
   <style name="def:base-n-integer" foreground="#9a6dcc"/>
   <style name="def:boolean" foreground="#9a6dcc"/>
   <style name="def:builtin" foreground="#9a6dcc"/>
   <style name="def:character" foreground="#9a6dcc"/>
-  <style name="def:comment" foreground="#75715e"/>
+  <style name="def:comment" foreground="#848069"/>
   <style name="def:complex" foreground="#9a6dcc"/>
   <style name="def:decimal" foreground="#9a6dcc"/>
-  <style name="def:doc-comment" foreground="#75715e"/>
-  <style name="def:doc-comment-element" foreground="#75715e"/>
+  <style name="def:doc-comment" foreground="#848069"/>
+  <style name="def:doc-comment-element" foreground="#848069"/>
   <style name="def:error" foreground="#f8f8f0" background="#c92a64"/>
   <style name="def:floating-point" foreground="#9a6dcc"/>
   <style name="def:function" foreground="#94c82c"/>
   <style name="def:identifier" foreground="#ffffff"/>
   <style name="def:keyword" foreground="#c92a64"/>
-  <style name="def:note" foreground="#75715e"/>
+  <style name="def:note" foreground="#848069"/>
   <style name="def:number" foreground="#9a6dcc"/>
   <style name="def:operator" foreground="#c92a64"/>
   <style name="def:preprocessor" foreground="#58bdd0"/>
   <style name="def:reserved" foreground="#c92a64"/>
-  <style name="def:shebang" foreground="#75715e"/>
+  <style name="def:shebang" foreground="#848069"/>
   <style name="def:special-char" foreground="#58bdd0"/>
   <style name="def:special-constant" foreground="#9a6dcc"/>
   <style name="def:statement" foreground="#c92a64"/>
@@ -60,7 +60,7 @@
   <style name="def:type" foreground="#58bdd0" italic="true"/>
   <style name="diff:added-line" foreground="#94c82c"/>
   <style name="diff:changed-line" foreground="#e6db74"/>
-  <style name="diff:location" foreground="#75715e"/>
+  <style name="diff:location" foreground="#848069"/>
   <style name="diff:removed-line" foreground="#c92a64"/>
   <style name="draw-spaces" foreground="#3b3a32"/>
   <style name="html:dtd" foreground="#e6db74"/>
@@ -105,9 +105,9 @@
   <style name="rubyonrails:simple-interpolation" foreground="#9a6dcc"/>
   <style name="rubyonrails:special-variable" foreground="#c92a64"/>
   <style name="rubyonrails:symbol" foreground="#9a6dcc"/>
-  <style name="search-match"  background="#333333" bold="true" underline="true"/>
-  <style name="selection" foreground="#EFEFEF" background="#82774A"/>
-  <style name="text" foreground="#f8f8f2" background="#272822"/>
+  <style name="search-match"  background="#c69331" bold="true" underline="true"/>
+  <style name="selection" foreground="#ffffff" background="#82774A"/>
+  <style name="text" foreground="#f8f8f2" background="#1a1916"/>
   <style name="xml:attribute-name" foreground="#94c82c"/>
   <style name="xml:element-name" foreground="#c92a64"/>
   <style name="xml:entity" foreground="#c8cecc"/>
