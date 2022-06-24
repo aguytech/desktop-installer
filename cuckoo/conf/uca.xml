@@ -28,7 +28,7 @@
 	<directories/>
 </action>
 <action>
-	<icon>/home/shared/repo/install-desktop/conf/icons/meld-add.svg</icon>
+	<icon>/usr/share/icons/Foralyse/meld-add.svg</icon>
 	<name>meld add</name>
 	<unique-id>1635239071232089-1</unique-id>
 	<command>thunar_ca meld add %f</command>
@@ -39,7 +39,7 @@
 	<text-files/>
 </action>
 <action>
-	<icon>/home/shared/repo/install-desktop/conf/icons/meld-with.svg</icon>
+	<icon>/usr/share/icons/Foralyse/meld-with.svg</icon>
 	<name>meld with</name>
 	<unique-id>1635239155815307-2</unique-id>
 	<command>thunar_ca meld with %f</command>
@@ -50,7 +50,7 @@
 	<text-files/>
 </action>
 <action>
-	<icon>/home/shared/repo/install-desktop/conf/icons/meld.svg</icon>
+	<icon>/usr/share/icons/Foralyse/meld.svg</icon>
 	<name>meld</name>
 	<unique-id>1635239251803666-3</unique-id>
 	<command>meld %F</command>
@@ -62,11 +62,17 @@
 </action>
 <action>
 	<icon>go-next</icon>
-	<name>create symlinks</name>
+	<name>create symlink</name>
 	<unique-id>1635239757729076-4</unique-id>
 	<command>ln -s %f %n.lnk</command>
 	<description>create symlinks</description>
 	<patterns>*</patterns>
+	<directories/>
+	<audio-files/>
+	<image-files/>
+	<other-files/>
+	<text-files/>
+	<video-files/>
 </action>
 <action>
 	<icon>edit-copy</icon>
@@ -100,7 +106,7 @@
 	<icon>media-import-audio-cd</icon>
 	<name>iso</name>
 	<unique-id>1653055089123473-10</unique-id>
-	<command>test -d /vms/iso/tmp.iso &amp;&amp; rm /vms/iso/tmp.iso; mkisofs -J -r -o /vms/iso/tmp.iso %F</command>
+	<command>rm /vms/iso/tmp.iso; mkisofs -file-mode 644 -J -r -o /vms/iso/tmp.iso %F</command>
 	<description>make iso in vms/iso/tmp.iso</description>
 	<patterns>*</patterns>
 	<startup-notify/>
