@@ -49,6 +49,14 @@ packages="libreoffice libreoffice-calc libreoffice-draw libreoffice-gnome libreo
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 # libreoffice-dmaths libreoffice-librelogo libreoffice-style-breeze libreoffice-style-elementary libreoffice-style-sifr
 
+part_install=python
+_echot "------------------ ${part_install}"
+packages="python3 python3-pip"
+if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
+
+packages="pip yt-dlp grip"
+python3 -m pip install -U ${packages} || _exite "Unable to install: ${packages}"
+
 part_install=media
 _echot "------------------ ${part_install}"
 packages="gmusicbrowser simplescreenrecorder cheese qarte gnome-subtitles audacity ubuntu-restricted-extras easytag soundconverter sound-juicer stopwatch flashplugin-installer chrome-gnome-shell"
