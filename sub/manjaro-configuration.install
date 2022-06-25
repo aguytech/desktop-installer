@@ -87,6 +87,11 @@ WantedBy=multi-user.target' > ${file_service}"
 
 _service enable numlock
 
+_echot "------------------  QT5"
+sudo sh -c "echo '
+# QT
+export QT_QPA_PLATFORMTHEME=qt5ct' >> /etc/profile"
+
 if type vim >/dev/null 2>&1 ; then
 	_echot "------------------  vim links edit"
 
