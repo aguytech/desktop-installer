@@ -18,62 +18,54 @@ file_license=${S_PATH_INSTALL_CONF}/soft/sublime-text.license
 
 _require ${file_desk_conf} ${file_license}
 
-
 ########################  MAIN
 
 _echot "------------------ backup"
-
 paths=
 if [ -d ${path_opt} ] || [ -d ~/${path_conf} ] || [ -d ${path_proj} ]; then
-  for path in ${path_opt} ~/${path_conf} ~/${path_proj} ${file_desk} ${file_bin}; do
-    [ -e ${path} ] && paths+=" ${path}"
-  done
-    tar czf ${_PATH_SOFT_BACKUP}/eclipse_${_ECLIPSE_THEME}_backup_${_DATE}-$(date +%s).tar.gz ${path_opt} ${paths}
+	for path in ${path_opt} ~/${path_conf} ~/${path_proj} ${file_desk} ${file_bin}; do
+		[ -e ${path} ] && paths+=" ${path}"
+	done
+	tar czf ${_PATH_SOFT_BACKUP}/eclipse_${_ECLIPSE_THEME}_backup_${_DATE}-$(date +%s).tar.gz ${path_opt} ${paths}
 fi
 
-
 _echot "------------------ clean instance"
-
 # delete existing folder
 for path in ${path_opt} ~/${path_conf} ~/${path_proj} ${file_desk} ${file_bin}; do
 	[ -e ${path} ] && rm -fR ${path}
 done
 
-
 ####################  RESTORE
 
 if [ "${_SUBLIMETEXT_DATE}" ]; then
-
-    ${S_PATH_SCRIPT}/backup-soft --restore ${_SUBLIMETEXT_DATE} sublime_text --force
-
+	${S_PATH_SCRIPT}/backup-soft --restore ${_SUBLIMETEXT_DATE} sublime_text --force
 
 ####################  FRESH INSTALL
 
 elif [ "${_SUBLIMETEXT_VER}" ]; then
 
-    cd /tmp
+	cd /tmp
 
-    _echot "------------------ get"
-    file=sublime_text_${_SUBLIMETEXT_VER}_x64.tar.gz
-    url="http://download.sublimetext.com/${file}"
+	_echot "------------------ get"
+	file=sublime_text_${_SUBLIMETEXT_VER}_x64.tar.gz
+	url="http://download.sublimetext.com/${file}"
 
-    if [ -f "${_PATH_SOFT}/${file}" ]; then
-        cp ${_PATH_SOFT}/${file} ${file}
-    else
-        _ANSWER=${file}
-        while ! curl -o "$_ANSWER" "$url"; do
-            _ask "Unable to donwload:\n$url\nGive a good url to download ${file}\nConfirm"
-        done
-        cp ${file} ${_PATH_SOFT}/
-    fi
+	if [ -f "${_PATH_SOFT}/${file}" ]; then
+		cp ${_PATH_SOFT}/${file} ${file}
+	else
+		_ANSWER=${file}
+		while ! curl -o "$_ANSWER" "$url"; do
+			_ask "Unable to donwload:\n$url\nGive a good url to download ${file}\nConfirm"
+		done
+		cp ${file} ${_PATH_SOFT}/
+	fi
 
-
-    _echot "------------------ install"
-    path=sublime_text_3
-    [ -d ${path} ] && rm -fR ${path}
-    tar xzf ${file}
-    mv ${path} ${path_opt}
-    rm ${file}
+	_echot "------------------ install"
+	path=sublime_text_3
+	[ -d ${path} ] && rm -fR ${path}
+	tar xzf ${file}
+	mv ${path} ${path_opt}
+	rm ${file}
 
 	_echot "------------------ ${file_bin} bind"
 	sudo [ -e ${file_bin} ] || [ -h ${file_bin} ] && sudo rm ${file_bin}
@@ -85,29 +77,33 @@ elif [ "${_SUBLIMETEXT_VER}" ]; then
 
 fi
 
-
 ####################  COMMON
 
+txt='
+# sublime-text hack
+127.0.0.1 sublimetext.com
+127.0.0.1 sublimemerge.com
+127.0.0.1 sublimehq.com
+127.0.0.1 telemetry.sublimehq.com
+127.0.0.1 license.sublimehq.com
+127.0.0.1 45.55.255.55
+127.0.0.1 45.55.41.223'
 
 _echot "------------------ /etc/hosts hack"
 file="/etc/hosts"
-if grep -q sublimetext.com ${file}; then
+if grep -q 'sublime-text hack' ${file}; then
 	sudo sed -i 's|^#\(.*sublimetext\.com.*\)$|\1|' ${file}
 else
-    sudo sh -c "echo -e '\n# sublime-text hack\n127.0.0.1\tsublimetext.com\n127.0.0.1\twww.sublimetext.com\n127.0.0.1\tlicense.sublimehq.com' >> ${file}"
+	sudo sh -c "echo -e '${txt}' >> ${file}"
 fi
 
-
-_echot "------------------ iptables add rules"
-ips="45.55.255.55"
-for ip in ${ips}; do sudo iptables -A OUTPUT -d ${ip} -j DROP; done
-
-
-_echot "------------------ iptables-persistent install"
-path="/etc/iptables"
-[ -d "${path}" ] || sudo mkdir "${path}"
-sudo iptables-save -f /etc/iptables/iptables.rules
-
+#_echot "------------------ iptables add rules"
+#ips="45.55.255.55"
+#for ip in ${ips}; do sudo iptables -A OUTPUT -d ${ip} -j DROP; done
+#_echot "------------------ iptables-persistent install"
+#path="/etc/iptables"
+#[ -d "${path}" ] || sudo mkdir "${path}"
+#sudo iptables-save -f /etc/iptables/iptables.rules
 
 _echot "------------------ autostart"
 path=~/.config/autostart
@@ -131,10 +127,8 @@ X-GNOME-Autostart-Delay=6
 X-GNOME-Autostart-enabled=false
 Hidden=true" > ${file}
 
-
 _echot "------------------ license"
 cat ${file_license}
-
 
 ########################  END
 
@@ -142,7 +136,6 @@ _echot "------------------ write ${_PARTDEV}"
 _partadd "${_PARTDEV}" "$_FILE_DEV_DONE"
 
 _echoT "#################### END ${_PARTDEV}"
-
 
 <<KEEP
 https://packagecontrol.io # packages info + shortcuts
@@ -171,5 +164,4 @@ https://packagecontrol.io/packages/SublimeGit
 
 # Sublimerge 3
 https://packagecontrol.io/packages/Sublimerge%203
-
 KEEP
