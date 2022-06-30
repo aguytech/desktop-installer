@@ -123,7 +123,7 @@
 	<unique-id>1655620394868230-1</unique-id>
 	<command>pkexec nbd.sh mount %f</command>
 	<description>mount file to /vms/ndbX with nbd</description>
-	<patterns>*.qcow2;*.img;*.raw</patterns>
+	<patterns>*.raw;*.qcow;*.qcow2;*.qed;*.parallels;*.vhdx;*.vmdk;*.vdi</patterns>
 	<other-files/>
 </action>
 <action>
@@ -132,7 +132,7 @@
 	<unique-id>1655622384229194-2</unique-id>
 	<command>pkexec nbd.sh umount %f</command>
 	<description>unmount file from /vms/ndbX with nbd</description>
-	<patterns>*.qcow2;*.img;*.raw</patterns>
+	<patterns>*.raw;*.qcow;*.qcow2;*.qed;*.parallels;*.vhdx;*.vmdk;*.vdi</patterns>
 	<other-files/>
 </action>
 </actions>

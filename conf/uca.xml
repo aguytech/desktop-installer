@@ -102,4 +102,37 @@
 	<text-files/>
 	<video-files/>
 </action>
+<action>
+	<icon>media-import-audio-cd</icon>
+	<name>iso</name>
+	<unique-id>1653055089123473-10</unique-id>
+	<command>rm /vms/iso/tmp.iso; mkisofs -file-mode 644 -J -r -o /vms/iso/tmp.iso %F</command>
+	<description>make iso in vms/iso/tmp.iso</description>
+	<patterns>*</patterns>
+	<startup-notify/>
+	<directories/>
+	<audio-files/>
+	<image-files/>
+	<other-files/>
+	<text-files/>
+	<video-files/>
+</action>
+<action>
+	<icon>go-down</icon>
+	<name>nbd mount</name>
+	<unique-id>1655620394868230-1</unique-id>
+	<command>pkexec nbd.sh mount %f</command>
+	<description>mount file to /vms/ndbX with nbd</description>
+	<patterns>*.raw;*.qcow;*.qcow2;*.qed;*.parallels;*.vhdx;*.vmdk;*.vdi</patterns>
+	<other-files/>
+</action>
+<action>
+	<icon>go-up</icon>
+	<name>nbd umount</name>
+	<unique-id>1655622384229194-2</unique-id>
+	<command>pkexec nbd.sh umount %f</command>
+	<description>unmount file from /vms/ndbX with nbd</description>
+	<patterns>*.raw;*.qcow;*.qcow2;*.qed;*.parallels;*.vhdx;*.vmdk;*.vdi</patterns>
+	<other-files/>
+</action>
 </actions>
