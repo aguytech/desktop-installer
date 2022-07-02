@@ -33,6 +33,7 @@ _echot "------------------ ${part_install}"
 packages=" easytag soundconverter sound-juicer pulseaudio-equalizer simplescreenrecorder yt-dlp audacity" # easymp3gain-gtk2 mp3splt-gtk lollypop
 packages+=" gimp gimp-nufraw gimp-plugin-gmic inkscape" # gimp-plugin-registry gimp-plugin-satequalizer gimp-plugin-duplicate-to-another-image gimp-plugin-saveforweb gimp-plugin-fblur gimp-plugin-lqr gimp-refocus gimp-plugin-wavelet-denoise xsane
 packages+=" mpv mkvtoolnix-gui handbrake libdvdcss libdvdnav libdvdread"
+packages+=" aegisub boost-libs" # xfce4-hardware-monitor-plugin
 #packages+=" chromium amule" # tesseract tesseract-ocr-fra gnome-music isomaster mixxx lightzone darktable tangerine gnome-clocks
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 

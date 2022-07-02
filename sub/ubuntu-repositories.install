@@ -21,6 +21,7 @@ sudo apt-add-repository -yn ppa:lightzone-team/lightzone # lightzone
 sudo apt-add-repository -yn ppa:boamaod/nautilus-compare # nautilus_compare
 sudo add-apt-repository -yn ppa:ubuntuhandbook1/audacity # audacity
 sudo add-apt-repository -yn ppa:tomtomtom/gmusicbrowser # gmusicbrowser
+sudo add-apt-repository -yn ppa:alex-p/aegisub # aegisub
 #sudo apt-add-repository -yn ppa:yannubuntu/boot-repair # boot-repair
 #sudo apt-add-repository -yn ppa:nilarimogard/webupd8 # youtube-dl, pulseaudio-equalizer & more
 #sudo apt-add-repository -yn ppa:webupd8team/y-ppa-manager # y-ppa-manager

@@ -30,6 +30,7 @@ packages="qt5ct net-tools lnav gnome-tweak-tool gnome-system-monitor dconf-edito
 packages+=" easytag-nautilus nautilus-actions nautilus-compare nautilus-extension-fma nautilus-admin nautilus-gtkhash nautilus-hide nautilus-ideviceinfo nautilus-image-converter nautilus-script-audio-convert nautilus-script-debug nautilus-scripts-manager nautilus-sendto nautilus-wipe seahorse-nautilus"
 # nautilus-columns nautilus-image-manipulator filemanager-actions nautilus-emblems
 packages+=" gedit-plugins gedit-source-code-browser-plugin" # gedit-developer-plugins
+packages+=" aegisub"
 if ${cmd} ${packages}; then _partadd ${part_install} ${file_install_done} && _partadd "${packages}" ${file_install_pck}; else _echoE "Unable to install: ${packages}"; return 1; fi
 # uget-chrome-wrapper nautilus-dropbox nautilus-filename-repairer nautilus-image-converter nautilus-terminal
 # compiz-fusion-plugins-extra compizconfig-settings-manager exfat-utils exfat-fuse freefilesync qshutdown solaar unetbootin
